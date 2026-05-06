@@ -1172,6 +1172,15 @@
   }
   body.mz-on .mz-revive-btn { display: inline-block; }
 
+  /* When MZ is on, allow vertical scrolling so all the ad clutter doesn't
+     hide the actual game UI (mode buttons, board, etc.). */
+  html.mz-scroll, body.mz-on {
+    height: auto !important;
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+  }
+  body.mz-on { min-height: 100dvh; }
+
   /* ============================================ */
   /* === SUPER MONETIZATION MODE ================== */
   /* ============================================ */
@@ -2423,22 +2432,22 @@ document.addEventListener('visibilitychange', () => {
   ];
 
   // === STORAGE ===
+  // Only coins persist across reloads. MZ.enabled & MZ.super always default
+  // to OFF on page load, so users always spawn into the clean game.
   function loadMZ() {
     try {
       const raw = localStorage.getItem(MZ_KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        if (typeof p.enabled === 'boolean') MZ.enabled = p.enabled;
-        if (typeof p.super === 'boolean') MZ.super = p.super;
         if (typeof p.coins === 'number') MZ.coins = p.coins;
       }
     } catch(e) {}
+    MZ.enabled = false;
+    MZ.super = false;
   }
   function saveMZ() {
     try {
-      localStorage.setItem(MZ_KEY, JSON.stringify({
-        enabled: MZ.enabled, super: MZ.super, coins: MZ.coins,
-      }));
+      localStorage.setItem(MZ_KEY, JSON.stringify({ coins: MZ.coins }));
     } catch(e) {}
   }
 
@@ -2498,6 +2507,9 @@ document.addEventListener('visibilitychange', () => {
   function applyState() {
     document.body.classList.toggle('mz-on', MZ.enabled);
     document.body.classList.toggle('mz-super', MZ.enabled && MZ.super);
+    // Allow html element to scroll when MZ is on (mode buttons reachable
+    // even with all the ad clutter)
+    document.documentElement.classList.toggle('mz-scroll', MZ.enabled);
     const lbl = $('#mz-toggle-label');
     if (lbl) {
       if (!MZ.enabled) lbl.textContent = 'MONETIZATION';
