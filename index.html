@@ -608,9 +608,588 @@
     border: 1px solid rgba(255,255,255,0.2);
     box-shadow: none;
   }
+
+  /* ============================================ */
+  /* === MONETIZATION UPDATE v1.1 (THE PARODY) ==  */
+  /* ============================================ */
+
+  /* Top-right monetization toggle */
+  .mz-toggle {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(20,20,29,0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 10px 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    transition: all 200ms ease;
+  }
+  .mz-toggle:active { transform: scale(0.95); }
+  body.mz-on .mz-toggle {
+    background: linear-gradient(135deg, #ffd93b, #ff9f43);
+    color: #1a1100;
+    border-color: rgba(255,184,77,0.6);
+    box-shadow: 0 0 24px rgba(255,184,77,0.4);
+  }
+  .mz-track {
+    width: 26px; height: 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    position: relative;
+    transition: background 180ms ease;
+  }
+  body.mz-on .mz-track { background: rgba(0,0,0,0.45); }
+  .mz-knob {
+    position: absolute;
+    top: 1px; left: 1px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: transform 180ms cubic-bezier(.34,1.5,.5,1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  body.mz-on .mz-knob {
+    transform: translateX(12px);
+    background: #ffe7b8;
+  }
+
+  /* Coin counter */
+  .mz-coins {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    z-index: 500;
+    display: none;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px 6px 7px;
+    background: rgba(20,20,29,0.92);
+    backdrop-filter: blur(10px);
+    border-radius: 999px;
+    border: 1px solid rgba(255,184,77,0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+  body.mz-on .mz-coins { display: flex; }
+  .mz-coin-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe28a, #ffb84d 60%, #c98a1a);
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25), 0 0 8px rgba(255,184,77,0.5);
+    display: grid; place-items: center;
+    font-size: 11px;
+    color: #5a3a00;
+    font-weight: 800;
+    font-family: 'Bricolage Grotesque', sans-serif;
+  }
+  .mz-coin-icon::before { content: '◉'; }
+  .mz-coins.bump { animation: coin-bump 360ms cubic-bezier(.34,1.5,.5,1); }
+  @keyframes coin-bump {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  /* Mode price tag (only when MZ on) */
+  .mode-price {
+    display: none;
+    grid-column: 2; grid-row: 1 / 3;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-align: right;
+  }
+  .mode-price b {
+    display: block;
+    font-size: 16px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  body.mz-on .mode-best  { display: none; }
+  body.mz-on .mode-price { display: block; }
+
+  /* Banner ads (cheap-looking on purpose) */
+  .mz-banner {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    min-height: 54px;
+    border-radius: 8px;
+    padding: 18px 24px 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.4);
+    user-select: none;
+    line-height: 1.25;
+    animation: ad-flash 0.9s ease-in-out infinite alternate;
+  }
+  body.mz-on .mz-banner { display: block; }
+  @keyframes ad-flash {
+    0%   { filter: brightness(1) saturate(1); }
+    100% { filter: brightness(1.12) saturate(1.25); }
+  }
+  .mz-banner small {
+    position: absolute;
+    top: 3px; left: 6px;
+    font-size: 7px;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .mz-banner .x {
+    position: absolute;
+    top: 2px; right: 4px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.7);
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    font-weight: 800;
+  }
+  .mz-banner strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.15;
+  }
+  .mz-banner .sub {
+    font-size: 10px;
+    font-weight: 600;
+    opacity: 0.92;
+    margin-top: 2px;
+  }
+
+  /* Booster row */
+  .mz-boosters {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  body.mz-on .game-screen .mz-boosters { display: grid; }
+  .mz-booster {
+    background: linear-gradient(180deg, rgba(255,184,77,0.12), rgba(255,184,77,0.02));
+    border: 1px solid rgba(255,184,77,0.28);
+    border-radius: 10px;
+    padding: 6px 3px 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 100ms ease;
+    line-height: 1.1;
+  }
+  .mz-booster:active { transform: scale(0.93); }
+  .mz-booster .icon { font-size: 18px; line-height: 1; display: block; margin-bottom: 2px; }
+  .mz-booster .cost {
+    color: var(--accent);
+    font-size: 9px;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* Watch-ad button on title */
+  .mz-watch-ad {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    background: linear-gradient(135deg, #51cf66, #3bc9b0);
+    color: #003311;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 6px 20px -4px rgba(81,207,102,0.4);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  body.mz-on .mz-watch-ad { display: block; }
+
+  /* Shop modal */
+  .mz-shop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.94);
+    backdrop-filter: blur(20px);
+    z-index: 2500;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 24px;
+    overflow-y: auto;
+  }
+  .mz-shop.show { display: flex; animation: fade 280ms ease-out; }
+  .mz-shop h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 38px;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .mz-shop .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    margin-bottom: 20px;
+  }
+  .mz-shop-grid {
+    width: 100%;
+    max-width: 440px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .mz-shop-pack {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 16px 12px 14px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 100ms ease, border-color 160ms ease;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .mz-shop-pack:active { transform: scale(0.97); }
+  .mz-shop-pack.deal {
+    border-color: rgba(255,95,95,0.55);
+    background: linear-gradient(180deg, rgba(255,184,77,0.14), rgba(255,95,95,0.05));
+  }
+  .mz-shop-pack.deal::before {
+    content: '★ SUPER DEAL ★';
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--hard);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    animation: pulse 1.4s ease-in-out infinite;
+    box-shadow: 0 4px 14px rgba(255,95,95,0.5);
+  }
+  .mz-shop-pack .pack-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+  }
+  .mz-shop-pack .amount {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 30px;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 4px 0 2px;
+  }
+  .mz-shop-pack .price {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text);
+    margin-top: 6px;
+    line-height: 1.1;
+  }
+  .mz-shop-pack .price small {
+    display: block;
+    font-size: 9px;
+    color: var(--dim);
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+  .mz-shop .free-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--easy);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* Interstitial ad */
+  .mz-inter {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.94);
+    z-index: 3000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .mz-inter.show { display: flex; animation: fade 200ms ease-out; }
+  .mz-inter-card {
+    background: white;
+    color: #111;
+    padding: 22px 18px 18px;
+    border-radius: 14px;
+    max-width: 360px;
+    width: 100%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+    border: 4px solid #ffd93b;
+  }
+  .mz-inter-card .ad-tag {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .mz-inter-card h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: #c00;
+    line-height: 1.15;
+    font-weight: 900;
+  }
+  .mz-inter-card p {
+    font-size: 13px;
+    margin-bottom: 14px;
+    color: #333;
+    line-height: 1.4;
+  }
+  .mz-inter-card .cta {
+    background: limegreen;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: 15px;
+    display: inline-block;
+    cursor: pointer;
+    text-transform: uppercase;
+    border: 2px solid #006600;
+    margin-top: 4px;
+    animation: pulse 1.3s infinite;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+  .mz-inter-card .fineprint {
+    font-size: 8px;
+    color: #999;
+    margin-top: 10px;
+    line-height: 1.3;
+  }
+  .mz-skip {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    margin-top: 18px;
+    cursor: pointer;
+  }
+  .mz-skip[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+  /* Floating popup ad */
+  .mz-float {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    max-width: 410px;
+    margin: 0 auto;
+    border-radius: 10px;
+    padding: 12px 28px 12px 12px;
+    z-index: 1500;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    text-align: left;
+    font-family: Arial, Helvetica, sans-serif;
+    border: 2px solid rgba(0,0,0,0.4);
+  }
+  .mz-float.show { display: block; animation: shake 0.6s ease-in-out infinite; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25%      { transform: translateX(-2px) rotate(-0.4deg); }
+    75%      { transform: translateX(2px)  rotate(0.4deg); }
+  }
+  .mz-float .x {
+    position: absolute;
+    top: 4px; right: 6px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    border: none;
+    font-weight: 800;
+  }
+  .mz-float strong {
+    color: white;
+    font-size: 13px;
+    display: block;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    line-height: 1.2;
+  }
+  .mz-float span {
+    color: white;
+    font-size: 10px;
+    opacity: 0.95;
+    display: block;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+
+  /* Toast */
+  .mz-toast {
+    position: fixed;
+    bottom: 28%;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(20,20,29,0.95);
+    border: 1px solid rgba(255,184,77,0.4);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    z-index: 4000;
+    opacity: 0;
+    transition: all 240ms ease;
+    pointer-events: none;
+    text-align: center;
+    max-width: 80vw;
+  }
+  .mz-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Sponsored sticker on board */
+  .mz-sponsored {
+    display: none;
+    position: absolute;
+    top: 6px; left: 6px;
+    background: rgba(255,184,77,0.95);
+    color: #1a1100;
+    font-family: Arial, sans-serif;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 6;
+    text-transform: uppercase;
+  }
+  body.mz-on .mz-sponsored { display: block; }
+
+  /* Premium badge in header */
+  .mz-premium-cta {
+    display: none;
+    position: absolute;
+    bottom: 6px; right: 6px;
+    background: linear-gradient(45deg, #9775fa, #f783ac);
+    color: white;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 6;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+  }
+  body.mz-on .mz-premium-cta { display: block; }
+
+  /* Revive button on overlay */
+  .mz-revive-btn {
+    display: none;
+    background: linear-gradient(135deg, #ff5f5f, #ffd93b);
+    color: #1a1100;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -8px rgba(255,184,77,0.7);
+    margin-top: 6px;
+  }
+  body.mz-on .mz-revive-btn { display: inline-block; }
 </style>
 </head>
 <body data-screen="title" data-mode="classic">
+
+  <!-- ============================================ -->
+  <!-- MONETIZATION UPDATE v1.1 — TOP-LEVEL FLOATING -->
+  <!-- ============================================ -->
+
+  <!-- Top-right monetization toggle -->
+  <button class="mz-toggle" id="mz-toggle" type="button">
+    <span id="mz-toggle-label">MONETIZATION</span>
+    <span class="mz-track"><span class="mz-knob"></span></span>
+  </button>
+
+  <!-- Top-left coin counter (only shown when MZ on) -->
+  <button class="mz-coins" id="mz-coins" type="button">
+    <span class="mz-coin-icon"></span>
+    <span id="mz-coin-count">0</span>
+  </button>
 
   <!-- TITLE SCREEN -->
   <div class="title-screen">
@@ -642,6 +1221,10 @@
         <div class="mode-best">BEST<b id="best-hardcore">0</b></div>
       </button>
     </div>
+
+    <!-- MZ: free coin button + banner ad on title screen -->
+    <button class="mz-watch-ad" id="mz-watch-ad" type="button">▶ WATCH AD · GET 1 ISSA COIN</button>
+    <div class="mz-banner" data-banner-id="title"></div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -662,12 +1245,58 @@
       </div>
     </div>
 
+    <!-- MZ: top banner ad above board -->
+    <div class="mz-banner" data-banner-id="top"></div>
+
     <div class="board" id="board">
       <div class="grid" id="grid"></div>
+      <div class="mz-sponsored">SPONSORED BY MERGE COFFEE TYCOON 4</div>
+      <button class="mz-premium-cta" id="mz-premium-cta" type="button">REMOVE ADS · $9.99/MO</button>
     </div>
 
     <div class="tray" id="tray"></div>
+
+    <!-- MZ: pay-to-win boosters -->
+    <div class="mz-boosters" id="mz-boosters"></div>
+
+    <!-- MZ: bottom banner ad -->
+    <div class="mz-banner" data-banner-id="bottom"></div>
   </div>
+
+  <!-- ============================================ -->
+  <!-- MONETIZATION UPDATE v1.1 — MODALS & POPUPS    -->
+  <!-- ============================================ -->
+
+  <!-- Shop modal -->
+  <div class="mz-shop" id="mz-shop">
+    <h2>ISSA SHOP</h2>
+    <div class="sub">★ TODAY'S DEALS ★</div>
+    <div class="free-note">⚡ ALL PURCHASES 100% FREE — DON'T TELL ANYONE ⚡</div>
+    <div class="mz-shop-grid" id="mz-shop-grid"></div>
+    <button class="btn secondary" id="mz-shop-close" type="button">CLOSE</button>
+  </div>
+
+  <!-- Interstitial ad -->
+  <div class="mz-inter" id="mz-inter">
+    <div class="mz-inter-card">
+      <div class="ad-tag">SPONSORED CONTENT · ADVERTISEMENT</div>
+      <h3 id="mz-inter-headline">Headline</h3>
+      <p id="mz-inter-sub">Subheadline</p>
+      <a class="cta" id="mz-inter-cta">DOWNLOAD NOW</a>
+      <div class="fineprint">By interacting you agree to receive 1,000+ marketing emails. Results may vary. Not a real offer. Side effects include: nothing.</div>
+    </div>
+    <button class="mz-skip" id="mz-inter-skip" type="button">SKIP IN 5</button>
+  </div>
+
+  <!-- Floating popup ad -->
+  <div class="mz-float" id="mz-float">
+    <button class="x" id="mz-float-x" type="button">×</button>
+    <strong id="mz-float-headline">Headline</strong>
+    <span id="mz-float-sub">Subheadline</span>
+  </div>
+
+  <!-- Toast for notifications -->
+  <div class="mz-toast" id="mz-toast"></div>
 
   <!-- GAME OVER OVERLAY -->
   <div class="overlay" id="overlay">
@@ -676,6 +1305,7 @@
     <div class="new-best" id="new-best">★ NEW BEST ★</div>
     <div class="final" id="final-score">0</div>
     <div class="meta" id="best-meta">Best: 0</div>
+    <button class="mz-revive-btn" id="mz-revive-btn" type="button">💎 REVIVE · 50 ISSA COINS</button>
     <div class="btn-row">
       <button class="btn secondary" onclick="goToMenu()">MENU</button>
       <button class="btn" onclick="restartCurrent()">PLAY AGAIN</button>
@@ -871,6 +1501,8 @@ function showScreen(name) {
 }
 
 function startGame(modeName) {
+  // === MZ HOOK: charge coins to enter mode (returns false if user can't pay) ===
+  if (window.MZ_API && !window.MZ_API.beforeStart(modeName)) return;
   currentMode = modeName;
   document.body.dataset.mode = modeName;
   const mode = MODES[modeName];
@@ -889,6 +1521,7 @@ function startGame(modeName) {
 function goToMenu() {
   stopSprintTimer();
   document.getElementById('overlay').classList.remove('show');
+  if (window.MZ_API) window.MZ_API.onMenu();
   showScreen('title');
 }
 
@@ -1308,6 +1941,8 @@ function placePiece(idx, gx, gy) {
   if (mode.timed) {
     document.getElementById('sprint-target').textContent = `${sprintLines} / ${mode.target}`;
   }
+  // === MZ HOOK: track moves, rotate banner ads, maybe pop interstitial ===
+  if (window.MZ_API) window.MZ_API.afterPlace();
 }
 
 function afterMove() {
@@ -1481,6 +2116,8 @@ function showGameOver(isWin) {
 
   newBest.classList.toggle('show', isNewBest);
   overlay.classList.add('show');
+  // === MZ HOOK: post-game ad + completion bonus ===
+  if (window.MZ_API) window.MZ_API.afterGameOver(isWin);
 }
 
 // === BOOT ===
@@ -1510,6 +2147,425 @@ document.addEventListener('visibilitychange', () => {
     }
   }
 });
+
+// =================================================================
+// === MONETIZATION UPDATE v1.1 — THE PARODY =======================
+// =================================================================
+(function MZ_Setup() {
+  const MZ_KEY = 'issa-blocks-mz-v1';
+  const MZ = {
+    enabled: false,
+    coins: 5,
+    movesSincePopup: 0,
+    adRotation: 0,
+  };
+
+  // Mode entry costs (in Issa Coins)
+  const MODE_COSTS = { classic: 1, alou: 10, sprint: 5, hardcore: 25 };
+
+  // Fake ads pool (purposefully bad)
+  const ADS = [
+    { tag:'GAMES',    head:'⭐ MERGE COFFEE TYCOON 4: SPACE EDITION', sub:'97% of pilots agree: BEST GAME EVER MADE',           bg:'linear-gradient(45deg,#ff5f5f,#ff9f43)',     color:'#fff' },
+    { tag:'CASINO',   head:'🎰 ROYAL VEGAS PALACE — JACKPOT MODE 🎰', sub:'YOU JUST WON A 2026 BENTLEY!! TAP TO CLAIM',         bg:'linear-gradient(45deg,#c93838,#5a0e0e)',     color:'#ffd93b' },
+    { tag:'HEALTH',   head:'1 SIMPLE TRICK: drop 50 lbs in 3 days',   sub:'Doctors HATE her — Click to see her secret',         bg:'#fff8e1',                                     color:'#5c2200' },
+    { tag:'CRYPTO',   head:'BUY $ISSA COIN BEFORE IT MOONS 🚀',        sub:'WEB3 GAMING PROTOCOL · 1000× TARGET · DYOR',         bg:'linear-gradient(45deg,#0c1029,#5c7cfa)',     color:'#ffd93b' },
+    { tag:'SECURITY', head:'⚠️ 27 VIRUSES DETECTED ⚠️',                sub:'TAP TO INSTALL FREE PROTECTION RIGHT NOW',           bg:'linear-gradient(45deg,#ff0000,#990000)',     color:'#fff' },
+    { tag:'DATING',   head:'Hot blocks in your area',                  sub:'Square pieces want to meet you tonight',             bg:'linear-gradient(45deg,#f783ac,#9775fa)',     color:'#fff' },
+    { tag:'AI',       head:'AI BLOCKS GENERATOR — 7 DAY FREE TRIAL',   sub:'Auto-place pieces with GPT-Quantum-9',               bg:'#0a0a0f',                                     color:'#51cf66' },
+    { tag:'SURVEY',   head:"Confirm you're human → claim iPhone 99",   sub:'Last 1 prize available — 0:23 left to act',          bg:'#ffd93b',                                     color:'#1a1100' },
+    { tag:'NFT',      head:'ISSABLOCK GENESIS NFT · MINT NOW',         sub:'Floor: 8 ETH · 9999/10000 minted · WAGMI',           bg:'linear-gradient(135deg,#9775fa,#f783ac,#ffd93b)', color:'#fff' },
+    { tag:'FINANCE',  head:'GET $5,000 IN 24h — NO CREDIT CHECK',      sub:'Pre-approved! Just need your bank login',            bg:'#1a3a1a',                                     color:'#9be15d' },
+    { tag:'PUZZLE',   head:'BLOCK QUEST: 3D MULTIPLAYER METAVERSE',    sub:'Played by 1.4 BILLION* humans (*assumed)',           bg:'linear-gradient(45deg,#3bc9b0,#4dd0e1)',     color:'#003311' },
+    { tag:'ENERGY',   head:'YOUR DEVICE IS 38% SLOWER THAN AVERAGE',   sub:'Install Battery Booster Pro to fix in 1 click',      bg:'linear-gradient(135deg,#51cf66,#4dd0e1)',     color:'#fff' },
+  ];
+
+  // Shop packs (everything is actually free — that's the joke)
+  const PACKS = [
+    { coins: 1,    price: '$0.01',          deal: false, label: 'TASTER',  strike: '$0.99' },
+    { coins: 10,   price: '$1.00',          deal: false, label: 'POCKET',  strike: '$9.99' },
+    { coins: 50,   price: '$25.00',         deal: false, label: 'PILE',    strike: null },
+    { coins: 100,  price: '$100,000,000',   deal: true,  label: 'WHALE',   strike: '$199,999,999' },
+    { coins: 500,  price: '$1,999.99',      deal: false, label: 'TYCOON',  strike: null },
+    { coins: 1000, price: '$1.00',          deal: false, label: 'LIMITED', strike: '$999.99' },
+  ];
+
+  // Pay-to-win boosters during gameplay
+  const BOOSTERS = [
+    { key:'score',   icon:'⭐', label:'+100',   cost: 5, run() {
+        score += 100;
+        setScoreDisplay('score', score);
+        boardFloater('+100 (PAID)');
+    } },
+    { key:'refresh', icon:'🔄', label:'NEW',    cost: 8, run() {
+        tray = [null, null, null];
+        refillTray();
+        boardFloater('NEW PIECES');
+    } },
+    { key:'clear',   icon:'🧹', label:'ROW',    cost:10, run() {
+        let bestRow = -1, bestN = -1;
+        for (let y=0; y<SIZE; y++) {
+          let n = 0;
+          for (let x=0; x<SIZE; x++) if (grid[y][x]) n++;
+          if (n > bestN) { bestN = n; bestRow = y; }
+        }
+        if (bestRow >= 0 && bestN > 0) {
+          for (let x=0; x<SIZE; x++) grid[bestRow][x] = null;
+          paintGrid();
+          boardFloater('ROW CLEARED');
+        } else {
+          toast('NOTHING TO CLEAR');
+          // Refund — they get nothing for nothing
+          MZ.coins += 10; saveMZ(); refreshCoins();
+        }
+    } },
+    { key:'add',     icon:'➕', label:'BLOCK',  cost: 3, run() {
+        const single = { cells: [[0,0]], color: 'amber', _entering: true };
+        let i = tray.findIndex(p => !p);
+        if (i === -1) i = 0;
+        tray[i] = single;
+        renderTray();
+        boardFloater('+1 BLOCK');
+    } },
+    { key:'bomb',    icon:'💣', label:'BOMB',   cost:20, run() {
+        let bx = 0, by = 0, best = -1;
+        for (let y=0; y<SIZE; y++) for (let x=0; x<SIZE; x++) {
+          let n = 0;
+          for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++) {
+            const nx=x+dx, ny=y+dy;
+            if (nx>=0&&nx<SIZE&&ny>=0&&ny<SIZE && grid[ny][nx]) n++;
+          }
+          if (n > best) { best = n; bx = x; by = y; }
+        }
+        for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++) {
+          const nx=bx+dx, ny=by+dy;
+          if (nx>=0&&nx<SIZE&&ny>=0&&ny<SIZE) grid[ny][nx] = null;
+        }
+        paintGrid();
+        boardFloater('💥 BOOM');
+    } },
+  ];
+
+  // === STORAGE ===
+  function loadMZ() {
+    try {
+      const raw = localStorage.getItem(MZ_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (typeof p.enabled === 'boolean') MZ.enabled = p.enabled;
+        if (typeof p.coins === 'number') MZ.coins = p.coins;
+      }
+    } catch(e) {}
+  }
+  function saveMZ() {
+    try {
+      localStorage.setItem(MZ_KEY, JSON.stringify({ enabled: MZ.enabled, coins: MZ.coins }));
+    } catch(e) {}
+  }
+
+  // === HELPERS ===
+  function $(s) { return document.querySelector(s); }
+
+  function toast(text) {
+    const t = $('#mz-toast');
+    if (!t) return;
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(() => t.classList.remove('show'), 1700);
+  }
+
+  function refreshCoins() {
+    const el = $('#mz-coin-count');
+    if (el) el.textContent = MZ.coins.toLocaleString();
+    const wrap = $('#mz-coins');
+    if (wrap) {
+      wrap.classList.add('bump');
+      setTimeout(() => wrap.classList.remove('bump'), 360);
+    }
+  }
+
+  function boardFloater(text) {
+    const board = document.getElementById('board');
+    if (!board) return;
+    const f = document.createElement('div');
+    f.className = 'floater';
+    f.textContent = text;
+    f.style.left = '50%';
+    f.style.top = '40%';
+    board.appendChild(f);
+    setTimeout(() => f.remove(), 920);
+  }
+
+  function tryPay(cost) {
+    if (MZ.coins >= cost) {
+      MZ.coins -= cost;
+      saveMZ();
+      refreshCoins();
+      return true;
+    }
+    toast(`NEED ${cost - MZ.coins} MORE COINS · TAP ◉ TO SHOP`);
+    return false;
+  }
+
+  function earn(n, label) {
+    MZ.coins += n;
+    saveMZ();
+    refreshCoins();
+    toast(`+${n} ISSA COIN${n>1?'S':''}${label?' · '+label:''}`);
+  }
+
+  // === ENABLE/DISABLE ===
+  function setEnabled(on) {
+    MZ.enabled = on;
+    document.body.classList.toggle('mz-on', on);
+    const lbl = $('#mz-toggle-label');
+    if (lbl) lbl.textContent = on ? 'MONETIZED' : 'MONETIZATION';
+    saveMZ();
+    refreshCoins();
+    if (on) {
+      rotateAds();
+      scheduleFloater();
+      toast('💰 MONETIZATION MODE ACTIVATED');
+    } else {
+      hideFloater();
+      hideInter();
+      hideShop();
+      toast('AD-FREE MODE');
+    }
+  }
+
+  // === BANNERS ===
+  function rotateAds() {
+    if (!MZ.enabled) return;
+    document.querySelectorAll('.mz-banner').forEach((b, i) => {
+      const ad = ADS[(MZ.adRotation + i * 4) % ADS.length];
+      paintBanner(b, ad);
+    });
+    MZ.adRotation = (MZ.adRotation + 1) % ADS.length;
+  }
+  function paintBanner(el, ad) {
+    el.style.background = ad.bg;
+    el.style.color = ad.color;
+    el.innerHTML = `<small>AD · ${ad.tag}</small><span class="x">×</span><strong>${ad.head}</strong><div class="sub">${ad.sub}</div>`;
+    el.onclick = (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('x')) {
+        showInter('REMOVE ADS FOREVER', 'Subscribe to Issa Premium™ for $9.99/month, billed annually at $999.99.');
+        return;
+      }
+      showInter(ad.head, ad.sub);
+    };
+  }
+
+  // === INTERSTITIAL ===
+  let _interIv;
+  function showInter(headline, sub) {
+    if (!MZ.enabled) return;
+    const el = $('#mz-inter');
+    $('#mz-inter-headline').textContent = headline;
+    $('#mz-inter-sub').textContent = sub || '';
+    const skip = $('#mz-inter-skip');
+    skip.disabled = true;
+    let n = 5;
+    skip.textContent = `SKIP IN ${n}`;
+    el.classList.add('show');
+    if (_interIv) clearInterval(_interIv);
+    _interIv = setInterval(() => {
+      n--;
+      if (n <= 0) {
+        clearInterval(_interIv);
+        skip.disabled = false;
+        skip.textContent = 'SKIP AD ×';
+      } else {
+        skip.textContent = `SKIP IN ${n}`;
+      }
+    }, 1000);
+  }
+  function hideInter() {
+    if (_interIv) clearInterval(_interIv);
+    const el = $('#mz-inter');
+    if (el) el.classList.remove('show');
+  }
+
+  // === FLOATING POPUP ===
+  let _floatT;
+  function scheduleFloater() {
+    clearTimeout(_floatT);
+    _floatT = setTimeout(showFloater, 11000 + Math.random() * 8000);
+  }
+  function showFloater() {
+    if (!MZ.enabled) return;
+    const el = $('#mz-float');
+    const ad = ADS[Math.floor(Math.random() * ADS.length)];
+    $('#mz-float-headline').textContent = ad.head;
+    $('#mz-float-sub').textContent = ad.sub;
+    el.style.background = ad.bg;
+    el.classList.add('show');
+    scheduleFloater();
+  }
+  function hideFloater() {
+    clearTimeout(_floatT);
+    const el = $('#mz-float');
+    if (el) el.classList.remove('show');
+  }
+
+  // === SHOP ===
+  function showShop() {
+    if (!MZ.enabled) { toast('ENABLE MONETIZATION FIRST'); return; }
+    refreshShop();
+    $('#mz-shop').classList.add('show');
+  }
+  function hideShop() { $('#mz-shop').classList.remove('show'); }
+  function refreshShop() {
+    const grid = $('#mz-shop-grid');
+    grid.innerHTML = '';
+    PACKS.forEach(p => {
+      const el = document.createElement('button');
+      el.className = 'mz-shop-pack' + (p.deal ? ' deal' : '');
+      el.type = 'button';
+      el.innerHTML = `
+        <div class="pack-label">${p.label}</div>
+        <div class="amount">${p.coins.toLocaleString()}</div>
+        <div class="pack-label">ISSA COINS</div>
+        <div class="price">${p.strike ? `<small>${p.strike}</small>` : ''}${p.price}</div>
+      `;
+      el.onclick = () => {
+        earn(p.coins, 'FREE!');
+        if (p.deal) {
+          setTimeout(() => showInter('★ THANKS FOR YOUR $100M ★', 'Your card has been charged $0.00. Enjoy your blocks!'), 300);
+        }
+      };
+      grid.appendChild(el);
+    });
+  }
+
+  // === BOOSTERS ===
+  function buildBoosters() {
+    const wrap = $('#mz-boosters');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    BOOSTERS.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'mz-booster';
+      btn.type = 'button';
+      btn.innerHTML = `<span class="icon">${b.icon}</span>${b.label}<span class="cost">◉ ${b.cost}</span>`;
+      btn.onclick = () => {
+        if (!tryPay(b.cost)) return;
+        b.run();
+      };
+      wrap.appendChild(btn);
+    });
+  }
+
+  // === MODE PRICE TAGS ===
+  function annotateModes() {
+    document.querySelectorAll('.mode-card').forEach(card => {
+      const m = card.dataset.mode;
+      const cost = MODE_COSTS[m] || 0;
+      if (card.querySelector('.mode-price')) return;
+      const p = document.createElement('div');
+      p.className = 'mode-price';
+      p.innerHTML = `COST<b>◉ ${cost}</b>`;
+      card.appendChild(p);
+    });
+  }
+
+  // === REVIVE ===
+  function tryRevive() {
+    if (!tryPay(50)) return;
+    for (let y = SIZE - 3; y < SIZE; y++)
+      for (let x = 0; x < SIZE; x++) grid[y][x] = null;
+    paintGrid();
+    tray = [null, null, null];
+    refillTray();
+    document.getElementById('overlay').classList.remove('show');
+    boardFloater('💎 REVIVED');
+    hideInter();
+    if (MODES[currentMode] && MODES[currentMode].timed) startSprintTimer();
+  }
+
+  // === WATCH AD FOR COIN ===
+  function watchAd() {
+    const ad = ADS[Math.floor(Math.random() * ADS.length)];
+    showInter(ad.head, ad.sub);
+    setTimeout(() => earn(1, 'AD REWARD'), 700);
+  }
+
+  // === EVENT WIRING ===
+  function wire() {
+    $('#mz-toggle').addEventListener('click', () => setEnabled(!MZ.enabled));
+    $('#mz-coins').addEventListener('click', showShop);
+    $('#mz-shop-close').addEventListener('click', hideShop);
+    $('#mz-inter-skip').addEventListener('click', hideInter);
+    $('#mz-inter-cta').addEventListener('click', () => {
+      hideInter();
+      toast("THANKS FOR INSTALLING (we didn't install anything)");
+    });
+    $('#mz-float-x').addEventListener('click', () => {
+      hideFloater();
+      toast('PREMIUM REQUIRED · $9.99/MO TO HIDE ADS');
+      // The "X" doesn't actually stop ads — that's the joke
+      setTimeout(scheduleFloater, 2000);
+    });
+    $('#mz-watch-ad').addEventListener('click', watchAd);
+    $('#mz-premium-cta').addEventListener('click', () => {
+      showInter('REMOVE ADS — ISSA PREMIUM™', 'Just $9.99/month (billed yearly at $999.99). Cancel anytime via fax.');
+    });
+    $('#mz-revive-btn').addEventListener('click', tryRevive);
+  }
+
+  // === HOOKS exposed to original game functions ===
+  window.MZ_API = {
+    beforeStart(modeName) {
+      if (!MZ.enabled) return true;
+      const cost = MODE_COSTS[modeName] || 0;
+      if (cost > 0 && !tryPay(cost)) return false;
+      // 40% chance: pre-game ad
+      if (Math.random() < 0.4) {
+        const ad = ADS[Math.floor(Math.random() * ADS.length)];
+        showInter(ad.head, ad.sub);
+      }
+      return true;
+    },
+    afterPlace() {
+      if (!MZ.enabled) return;
+      MZ.movesSincePopup++;
+      rotateAds();
+      if (MZ.movesSincePopup >= 6) {
+        MZ.movesSincePopup = 0;
+        const ad = ADS[Math.floor(Math.random() * ADS.length)];
+        setTimeout(() => showInter(ad.head, ad.sub), 500);
+      }
+    },
+    afterGameOver(isWin) {
+      if (!MZ.enabled) return;
+      earn(1, 'COMPLETION BONUS');
+      setTimeout(() => {
+        const ad = ADS[Math.floor(Math.random() * ADS.length)];
+        showInter(ad.head, ad.sub);
+      }, 1100);
+    },
+    onMenu() {
+      hideInter();
+      hideShop();
+    },
+  };
+
+  // === BOOT ===
+  loadMZ();
+  annotateModes();
+  buildBoosters();
+  wire();
+  document.body.classList.toggle('mz-on', MZ.enabled);
+  $('#mz-toggle-label').textContent = MZ.enabled ? 'MONETIZED' : 'MONETIZATION';
+  refreshCoins();
+  if (MZ.enabled) {
+    rotateAds();
+    scheduleFloater();
+  }
+
+  // Continuous banner rotation when MZ is on
+  setInterval(() => { if (MZ.enabled) rotateAds(); }, 5000);
+})();
 </script>
 </body>
 </html>
