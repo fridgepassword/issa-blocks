@@ -1172,6 +1172,101 @@
   }
   body.mz-on .mz-revive-btn { display: inline-block; }
 
+  /* === SOUND TOGGLE (top-left) === */
+  .sfx-btn {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    z-index: 510;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(20,20,29,0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    line-height: 1;
+    user-select: none;
+    transition: transform 100ms ease;
+  }
+  .sfx-btn:active { transform: scale(0.92); }
+  .sfx-btn.muted { color: var(--dim); }
+  /* When MZ is on, push coins counter to the right of sfx button */
+  body.mz-on .mz-coins {
+    left: max(54px, calc(env(safe-area-inset-left) + 46px));
+  }
+
+  /* === HOLD TRAY (stash) === */
+  .hold-tray {
+    width: 100%;
+    max-width: 440px;
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    gap: 6px;
+  }
+  .hold-tray.has-slots { display: grid; }
+  .hold-label {
+    width: 100%;
+    max-width: 440px;
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-align: left;
+    margin-bottom: -4px;
+  }
+  .hold-tray.has-slots ~ .hold-label,
+  .hold-label.show { display: block; }
+  .hold-slot {
+    background: var(--bg-2);
+    border-radius: 10px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    box-shadow:
+      0 0 0 1px var(--cell-edge),
+      inset 0 0 16px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 140ms ease, background 140ms ease, transform 200ms cubic-bezier(.34,1.4,.5,1);
+  }
+  .hold-slot.empty::after {
+    content: '+';
+    position: absolute;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: rgba(255,255,255,0.08);
+  }
+  .hold-slot.empty {
+    border: 1.5px dashed rgba(255,255,255,0.06);
+  }
+  .hold-slot.hover {
+    box-shadow: 0 0 0 2px var(--accent), inset 0 0 16px rgba(255,184,77,0.18);
+    background: rgba(255,184,77,0.08);
+  }
+  .hold-slot.unavailable {
+    box-shadow: 0 0 0 2px var(--danger), inset 0 0 16px rgba(255,95,95,0.15);
+  }
+  .hold-slot.spawning {
+    animation: hold-spawn 420ms cubic-bezier(.34, 1.4, .5, 1) backwards;
+  }
+  @keyframes hold-spawn {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .hold-slot .piece { cursor: grab; touch-action: none; }
+
   /* When MZ is on, allow vertical scrolling so all the ad clutter doesn't
      hide the actual game UI (mode buttons, board, etc.). */
   html.mz-scroll, body.mz-on {
@@ -1335,6 +1430,9 @@
   <!-- Super-mode bottom sticky ad -->
   <div class="mz-bottom-stick mz-super-only" id="mz-bottom-stick">★ DOWNLOAD COFFEE TYCOON 4 ★ TAP HERE FOR FREE GEMS ★</div>
 
+  <!-- Sound toggle (top-left) -->
+  <button class="sfx-btn" id="sfx-btn" type="button" title="Toggle sound">🔊</button>
+
   <!-- Top-right monetization toggle -->
   <button class="mz-toggle" id="mz-toggle" type="button">
     <span id="mz-toggle-label">MONETIZATION</span>
@@ -1418,6 +1516,10 @@
     <div class="mz-banner mz-super-only" data-banner-id="mid"></div>
 
     <div class="tray" id="tray"></div>
+
+    <!-- HOLD TRAY (stash) — grows by 1 slot per line cleared -->
+    <div class="hold-label" id="hold-label">STASH · DRAG TO STORE</div>
+    <div class="hold-tray" id="hold-tray"></div>
 
     <!-- MZ: pay-to-win boosters -->
     <div class="mz-boosters" id="mz-boosters"></div>
@@ -1623,9 +1725,103 @@ const MODES = {
   },
 };
 
+// === SOUND EFFECTS (Web Audio synth, no external files) ===
+const SFX = (() => {
+  let ctx = null;
+  let muted = false;
+  try { muted = localStorage.getItem('issa-blocks-sfx-muted') === '1'; } catch(e) {}
+
+  function getCtx() {
+    if (ctx) return ctx;
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) return null;
+    ctx = new Ctor();
+    return ctx;
+  }
+  function tone({ freq, dur = 0.1, type = 'sine', vol = 0.15, slide, delay = 0 }) {
+    if (muted) return;
+    const c = getCtx(); if (!c) return;
+    if (c.state === 'suspended') { try { c.resume(); } catch(e) {} }
+    const start = c.currentTime + delay / 1000;
+    const o = c.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, start);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, start + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, start);
+    g.gain.linearRampToValueAtTime(vol, start + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    o.connect(g).connect(c.destination);
+    o.start(start);
+    o.stop(start + dur + 0.05);
+  }
+
+  return {
+    get muted() { return muted; },
+    setMuted(m) {
+      muted = m;
+      try { localStorage.setItem('issa-blocks-sfx-muted', m ? '1' : '0'); } catch(e) {}
+    },
+    place() {
+      tone({ freq: 220, dur: 0.05, type: 'square', vol: 0.05 });
+      tone({ freq: 110, dur: 0.08, type: 'sine',   vol: 0.12, delay: 5 });
+    },
+    pickup() { tone({ freq: 660, dur: 0.04, type: 'triangle', vol: 0.1 }); },
+    invalid() { tone({ freq: 150, dur: 0.1, type: 'sawtooth', vol: 0.1 }); },
+    store() {
+      tone({ freq: 440, dur: 0.05, type: 'square',   vol: 0.10 });
+      tone({ freq: 660, dur: 0.05, type: 'triangle', vol: 0.08, delay: 30 });
+    },
+    clearLine() {
+      tone({ freq: 523, dur: 0.08, type: 'triangle', vol: 0.18, delay: 0 });
+      tone({ freq: 659, dur: 0.08, type: 'triangle', vol: 0.18, delay: 60 });
+      tone({ freq: 784, dur: 0.12, type: 'triangle', vol: 0.20, delay: 120 });
+    },
+    combo() {
+      tone({ freq: 659,  dur: 0.08, type: 'triangle', vol: 0.20, delay: 0 });
+      tone({ freq: 880,  dur: 0.08, type: 'triangle', vol: 0.20, delay: 60 });
+      tone({ freq: 988,  dur: 0.08, type: 'triangle', vol: 0.20, delay: 120 });
+      tone({ freq: 1175, dur: 0.18, type: 'triangle', vol: 0.22, delay: 180 });
+    },
+    holdEarn() {
+      tone({ freq: 880,  dur: 0.06, type: 'triangle', vol: 0.18, delay: 0 });
+      tone({ freq: 1175, dur: 0.10, type: 'triangle', vol: 0.18, delay: 60 });
+    },
+    over() {
+      tone({ freq: 392, dur: 0.18, type: 'sawtooth', vol: 0.15, delay: 0 });
+      tone({ freq: 311, dur: 0.18, type: 'sawtooth', vol: 0.15, delay: 180 });
+      tone({ freq: 233, dur: 0.4,  type: 'sawtooth', vol: 0.18, delay: 360 });
+    },
+    win() {
+      tone({ freq: 523,  dur: 0.1, type: 'triangle', vol: 0.20, delay: 0 });
+      tone({ freq: 659,  dur: 0.1, type: 'triangle', vol: 0.20, delay: 100 });
+      tone({ freq: 784,  dur: 0.1, type: 'triangle', vol: 0.20, delay: 200 });
+      tone({ freq: 1047, dur: 0.3, type: 'triangle', vol: 0.22, delay: 300 });
+    },
+    newBest() {
+      tone({ freq: 1047, dur: 0.10, type: 'triangle', vol: 0.20, delay: 0 });
+      tone({ freq: 1319, dur: 0.10, type: 'triangle', vol: 0.20, delay: 80 });
+      tone({ freq: 1568, dur: 0.20, type: 'triangle', vol: 0.22, delay: 160 });
+      tone({ freq: 2093, dur: 0.30, type: 'triangle', vol: 0.18, delay: 280 });
+    },
+    coin() {
+      tone({ freq: 988,  dur: 0.06, type: 'triangle', vol: 0.18, delay: 0 });
+      tone({ freq: 1318, dur: 0.10, type: 'triangle', vol: 0.16, delay: 50 });
+    },
+    start() {
+      tone({ freq: 392, dur: 0.06, type: 'triangle', vol: 0.15, delay: 0 });
+      tone({ freq: 523, dur: 0.06, type: 'triangle', vol: 0.15, delay: 60 });
+      tone({ freq: 659, dur: 0.10, type: 'triangle', vol: 0.18, delay: 120 });
+    },
+  };
+})();
+
 // === STATE ===
 let currentMode = 'classic';
 let grid, tray;
+let holds = [];           // pieces in stash slots (or null)
+let maxHoldSlots = 0;     // earned 1 per line cleared, capped
+const HOLD_SLOT_CAP = 8;
 let score = 0, streak = 0;
 let drag = null;
 
@@ -1722,11 +1918,17 @@ function initGame() {
   sprintFinalSeconds = 0;
   stopSprintTimer();
 
+  // Reset holds for new run
+  holds = [];
+  maxHoldSlots = 0;
+
   buildGrid();
   refillTray();
+  renderHolds();
 
   document.getElementById('score').textContent = '0';
   updateLeftStat(true);
+  SFX.start();
 }
 
 function updateLeftStat(immediate = false) {
@@ -1832,7 +2034,7 @@ function renderTray() {
         }
       }
       slot.appendChild(el);
-      attachDrag(el, i);
+      attachDrag(el, { kind: 'tray', idx: i });
 
       if (piece._entering) {
         const delay = i * 90;
@@ -1855,15 +2057,23 @@ function gridCellSize() {
   if (!first) return 40;
   return first.getBoundingClientRect().width;
 }
-function attachDrag(el, idx) {
-  el.addEventListener('pointerdown', e => startDrag(e, el, idx), { passive: false });
+// `source` is { kind: 'tray' | 'hold', idx: number }
+function attachDrag(el, source) {
+  el.addEventListener('pointerdown', e => startDrag(e, el, source), { passive: false });
 }
-function startDrag(e, el, idx) {
+function getPieceFrom(source) {
+  return source.kind === 'hold' ? holds[source.idx] : tray[source.idx];
+}
+function clearPieceFrom(source) {
+  if (source.kind === 'hold') holds[source.idx] = null;
+  else tray[source.idx] = null;
+}
+function startDrag(e, el, source) {
   if (drag) return;
   e.preventDefault();
-  if (!tray[idx]) return;
+  const piece = getPieceFrom(source);
+  if (!piece) return;
 
-  const piece = tray[idx];
   const cell = gridCellSize();
   const gap = 3;
   const w = pieceW(piece), h = pieceH(piece);
@@ -1871,7 +2081,7 @@ function startDrag(e, el, idx) {
   const fullH = h * cell + (h - 1) * gap;
 
   drag = {
-    idx, piece, el, cell, gap, w, h, fullW, fullH,
+    source, piece, el, cell, gap, w, h, fullW, fullH,
     anchorOffsetX: fullW / 2,
     anchorOffsetY: fullH + cell * 0.6,
     placement: null,
@@ -1889,6 +2099,7 @@ function startDrag(e, el, idx) {
   document.addEventListener('pointercancel', onDragEnd, { passive: false });
 
   if (navigator.vibrate) navigator.vibrate(8);
+  SFX.pickup();
 }
 function moveDragTo(clientX, clientY) {
   if (!drag) return;
@@ -1913,8 +2124,36 @@ function moveDragTo(clientX, clientY) {
     gy = Math.max(0, Math.min(SIZE - drag.h, gy));
   }
 
-  drag.placement = { gx, gy, overGrid };
+  // Detect hover over hold slots (for storing pieces)
+  let holdIdx = -1;
+  if (!overGrid) {
+    const slots = document.querySelectorAll('.hold-slot');
+    for (let i = 0; i < slots.length; i++) {
+      const r = slots[i].getBoundingClientRect();
+      const m = 8;
+      if (clientX >= r.left - m && clientX <= r.right + m &&
+          clientY >= r.top  - m && clientY <= r.bottom + m) {
+        holdIdx = i;
+        break;
+      }
+    }
+  }
+
+  drag.placement = { gx, gy, overGrid, holdIdx };
   paintPreview();
+  paintHoldHover();
+}
+
+function paintHoldHover() {
+  document.querySelectorAll('.hold-slot').forEach((s, i) => {
+    s.classList.remove('hover', 'unavailable');
+    if (!drag || !drag.placement) return;
+    if (drag.placement.holdIdx !== i) return;
+    // Cannot drop into a filled slot, or into the same slot we picked up from
+    const isOrigin = drag.source.kind === 'hold' && drag.source.idx === i;
+    if (holds[i] || isOrigin) s.classList.add('unavailable');
+    else s.classList.add('hover');
+  });
 }
 function onDragMove(e) { e.preventDefault(); moveDragTo(e.clientX, e.clientY); }
 
@@ -1947,17 +2186,36 @@ function onDragEnd(e) {
   document.removeEventListener('pointercancel', onDragEnd);
 
   const placement = drag.placement;
-  const ok = placement && placement.overGrid &&
-             canPlace(drag.piece, placement.gx, placement.gy);
+  const onGridOk = placement && placement.overGrid &&
+                   canPlace(drag.piece, placement.gx, placement.gy);
+  const holdIdx = placement ? placement.holdIdx : -1;
+  const isOriginHold = drag.source.kind === 'hold' && drag.source.idx === holdIdx;
+  const onHoldOk = holdIdx >= 0 && !isOriginHold && !holds[holdIdx];
 
-  if (ok) {
-    placePiece(drag.idx, placement.gx, placement.gy);
+  if (onGridOk) {
+    placePiece(drag.source, placement.gx, placement.gy);
+  } else if (onHoldOk) {
+    storeInHold(drag.source, holdIdx);
   } else {
     snapPieceBack(drag.el, drag.w, drag.h);
+    if (placement && (placement.overGrid || holdIdx >= 0)) SFX.invalid();
   }
   drag = null;
   paintPreview();
+  paintHoldHover();
   paintGrid();
+}
+
+// Move a piece from tray/hold into a hold slot (no game-over check needed —
+// storing doesn't worsen the board state).
+function storeInHold(fromSource, holdIdx) {
+  const piece = getPieceFrom(fromSource);
+  if (!piece) return;
+  clearPieceFrom(fromSource);
+  holds[holdIdx] = piece;
+  SFX.store();
+  renderTray();
+  renderHolds();
 }
 
 // FLIP-style snap-back to the tray slot. Restores tray cell sizing
@@ -2011,11 +2269,59 @@ function canPlaceAnywhere(piece) {
   return false;
 }
 function isGameOver() {
-  return tray.every(p => !p || !canPlaceAnywhere(p));
+  // Game over only if NO piece — neither in the tray nor in the stash —
+  // can be placed anywhere on the current board.
+  for (const p of tray)  if (p && canPlaceAnywhere(p)) return false;
+  for (const p of holds) if (p && canPlaceAnywhere(p)) return false;
+  return true;
 }
 
-function placePiece(idx, gx, gy) {
-  const piece = tray[idx];
+// Render the stash row. `opts.spawnFrom` (optional) animates new slots
+// from index N onward.
+function renderHolds(opts) {
+  opts = opts || {};
+  const wrap = document.getElementById('hold-tray');
+  const lbl = document.getElementById('hold-label');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const has = maxHoldSlots > 0;
+  wrap.classList.toggle('has-slots', has);
+  if (lbl) lbl.classList.toggle('show', has);
+
+  for (let i = 0; i < maxHoldSlots; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'hold-slot' + (holds[i] ? '' : ' empty');
+    slot.dataset.holdIdx = i;
+    if (opts.spawnFrom != null && i >= opts.spawnFrom) {
+      slot.classList.add('spawning');
+      slot.style.animationDelay = ((i - opts.spawnFrom) * 80) + 'ms';
+    }
+    if (holds[i]) {
+      const piece = holds[i];
+      const w = pieceW(piece), h = pieceH(piece);
+      const cell = Math.min(13, Math.floor(48 / Math.max(w, h)));
+      const el = document.createElement('div');
+      el.className = 'piece';
+      el.style.gridTemplateColumns = `repeat(${w}, ${cell}px)`;
+      el.style.gridTemplateRows    = `repeat(${h}, ${cell}px)`;
+      el.style.setProperty('--c', COLORS[piece.color]);
+      const set = new Set(piece.cells.map(c => `${c[0]},${c[1]}`));
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const c = document.createElement('div');
+          c.className = set.has(`${x},${y}`) ? 'pcell' : 'pcell empty';
+          el.appendChild(c);
+        }
+      }
+      slot.appendChild(el);
+      attachDrag(el, { kind: 'hold', idx: i });
+    }
+    wrap.appendChild(slot);
+  }
+}
+
+function placePiece(source, gx, gy) {
+  const piece = getPieceFrom(source);
   const mode = MODES[currentMode];
 
   // Start sprint timer on first placement
@@ -2027,7 +2333,8 @@ function placePiece(idx, gx, gy) {
     grid[y][x] = piece.color;
     placed.push([x, y]);
   }
-  tray[idx] = null;
+  clearPieceFrom(source);
+  SFX.place();
 
   const placementScore = Math.round(piece.cells.length * mode.multiplier);
   score += placementScore;
@@ -2063,6 +2370,20 @@ function placePiece(idx, gx, gy) {
   if (totalLines > 0) {
     streak += 1;
     sprintLines += totalLines;
+
+    // Award one hold slot per cleared line (capped)
+    const newSlots = Math.min(HOLD_SLOT_CAP, maxHoldSlots + totalLines) - maxHoldSlots;
+    if (newSlots > 0) {
+      maxHoldSlots += newSlots;
+      // Stagger the slot-earn chime so it's audibly separate from the line clear
+      setTimeout(() => SFX.holdEarn(), 220);
+      // Re-render after the clear animation kicks in so spawn animation plays
+      setTimeout(() => renderHolds({ spawnFrom: maxHoldSlots - newSlots }), 60);
+    }
+
+    // Sound: line clear or combo
+    if (totalLines >= 2 || streak >= 2) SFX.combo();
+    else SFX.clearLine();
 
     const toClear = new Set();
     for (const y of fullRows) for (let x = 0; x < SIZE; x++) toClear.add(`${x},${y}`);
@@ -2139,11 +2460,12 @@ function afterMove() {
     return;
   }
   if (tray.every(p => !p)) {
-    refillTray();
+    refillTray();          // refillTray() itself triggers a game-over check
   } else {
     renderTray();
     if (isGameOver()) showGameOver(false);
   }
+  renderHolds();
 }
 
 function textForClear(lines, streak, gained) {
@@ -2291,7 +2613,14 @@ function showGameOver(isWin) {
   }
 
   newBest.classList.toggle('show', isNewBest);
+  // Don't fire SFX twice if the overlay is already showing
+  const wasShowing = overlay.classList.contains('show');
   overlay.classList.add('show');
+  if (!wasShowing) {
+    if (isNewBest)      SFX.newBest();
+    else if (isWin)     SFX.win();
+    else                SFX.over();
+  }
   // === MZ HOOK: post-game ad + completion bonus ===
   if (window.MZ_API) window.MZ_API.afterGameOver(isWin);
 }
@@ -2301,6 +2630,19 @@ window.addEventListener('load', () => {
   loadBests();
   refreshBestLabels();
   showScreen('title');
+
+  // Sound toggle wiring
+  const sfxBtn = document.getElementById('sfx-btn');
+  function refreshSfxBtn() {
+    sfxBtn.textContent = SFX.muted ? '🔇' : '🔊';
+    sfxBtn.classList.toggle('muted', SFX.muted);
+  }
+  refreshSfxBtn();
+  sfxBtn.addEventListener('click', () => {
+    SFX.setMuted(!SFX.muted);
+    refreshSfxBtn();
+    if (!SFX.muted) SFX.pickup();    // tiny chirp confirms unmute
+  });
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -2501,6 +2843,7 @@ document.addEventListener('visibilitychange', () => {
     saveMZ();
     refreshCoins();
     toast(`+${n} ISSA COIN${n>1?'S':''}${label?' · '+label:''}`);
+    if (typeof SFX !== 'undefined') SFX.coin();
   }
 
   // === ENABLE/DISABLE / SUPER (3-state cycle) ===
