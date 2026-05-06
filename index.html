@@ -1171,6 +1171,143 @@
     margin-top: 6px;
   }
   body.mz-on .mz-revive-btn { display: inline-block; }
+
+  /* ============================================ */
+  /* === SUPER MONETIZATION MODE ================== */
+  /* ============================================ */
+
+  /* Toggle in super state */
+  body.mz-super .mz-toggle {
+    background: linear-gradient(135deg, #ff5f5f, #f783ac, #ff9f43);
+    background-size: 200% 200%;
+    color: white;
+    border-color: rgba(255,0,128,0.7);
+    animation: super-pulse 0.6s ease-in-out infinite alternate, super-shift 2s linear infinite;
+  }
+  @keyframes super-pulse {
+    0%   { box-shadow: 0 0 22px rgba(255,95,95,0.55); }
+    100% { box-shadow: 0 0 46px rgba(255,0,128,0.95); }
+  }
+  @keyframes super-shift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  body.mz-super .mz-track { background: rgba(0,0,0,0.6); }
+  body.mz-super .mz-knob {
+    transform: translateX(12px);
+    background: #fff;
+    box-shadow: 0 0 6px #ff5f5f, 0 0 12px #f783ac;
+  }
+
+  /* Super-only elements: hidden by default, shown when body has mz-super */
+  .mz-super-only { display: none !important; }
+  body.mz-super .mz-super-only { display: block !important; }
+  body.mz-super .mz-super-only.mz-banner { display: block !important; }
+
+  /* Top subscribe-strip */
+  .mz-sub-strip {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: linear-gradient(90deg, #ff0080, #ffd93b, #ff5f5f, #ffd93b, #ff0080);
+    background-size: 400% 100%;
+    color: #1a0000;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    text-align: center;
+    padding: 5px 6px;
+    z-index: 480;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    animation: super-shift 1.4s linear infinite;
+    border-bottom: 2px solid #1a0000;
+    line-height: 1.2;
+    overflow: hidden;
+  }
+  body.mz-super { padding-top: max(46px, calc(env(safe-area-inset-top) + 30px)) !important; }
+
+  /* Side promo stickers (vertical) */
+  .mz-side {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%) rotate(-10deg);
+    background: linear-gradient(135deg, #ff5f5f, #ffd93b);
+    color: #1a0000;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 6px 9px;
+    border-radius: 8px;
+    z-index: 470;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    cursor: pointer;
+    animation: shake 0.5s ease-in-out infinite;
+    text-align: center;
+    line-height: 1.1;
+    border: 2px solid #1a0000;
+  }
+  .mz-side.left  { left: 4px; }
+  .mz-side.right { right: 4px; transform: translateY(-50%) rotate(10deg); }
+  .mz-side strong { display: block; font-size: 14px; }
+
+  /* Floating popup stacks higher in super mode + appears faster */
+  body.mz-super .mz-float { animation: shake 0.35s ease-in-out infinite; }
+  body.mz-super .mz-float-2 { bottom: 88px; }
+  body.mz-super .mz-float-3 { bottom: 160px; transform: rotate(-1deg); }
+
+  /* Banner ads in super mode: thicker, more aggressive */
+  body.mz-super .mz-banner {
+    min-height: 64px;
+    padding: 20px 24px 10px;
+    border-width: 2px;
+    animation: ad-flash 0.5s ease-in-out infinite alternate;
+  }
+
+  /* Persistent "tap here" ribbon over the board */
+  .mz-ribbon {
+    position: absolute;
+    top: 28px;
+    right: -34px;
+    background: linear-gradient(135deg, #ff5f5f, #ff0080);
+    color: white;
+    padding: 4px 36px;
+    transform: rotate(35deg);
+    transform-origin: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 7;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    pointer-events: none;
+    animation: super-pulse 0.6s ease-in-out infinite alternate;
+  }
+
+  /* Bottom sticky ad in super mode */
+  .mz-bottom-stick {
+    position: fixed;
+    left: 0; right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #5c7cfa, #9775fa, #f783ac, #5c7cfa);
+    background-size: 300% 100%;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 6px;
+    z-index: 480;
+    border-top: 2px solid rgba(0,0,0,0.5);
+    cursor: pointer;
+    animation: super-shift 1.6s linear infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 </style>
 </head>
 <body data-screen="title" data-mode="classic">
@@ -1178,6 +1315,16 @@
   <!-- ============================================ -->
   <!-- MONETIZATION UPDATE v1.1 — TOP-LEVEL FLOATING -->
   <!-- ============================================ -->
+
+  <!-- Super-mode subscribe strip (top of viewport) -->
+  <div class="mz-sub-strip mz-super-only" id="mz-sub-strip">⚡ SUBSCRIBE TO ISSA PREMIUM™ · JUST $19.99/MO · TAP NOW ⚡</div>
+
+  <!-- Super-mode side stickers -->
+  <div class="mz-side left mz-super-only" id="mz-side-left">FLASH<br><strong>SALE</strong><br>−99%</div>
+  <div class="mz-side right mz-super-only" id="mz-side-right">LIMITED<br><strong>OFFER</strong><br>0:23</div>
+
+  <!-- Super-mode bottom sticky ad -->
+  <div class="mz-bottom-stick mz-super-only" id="mz-bottom-stick">★ DOWNLOAD COFFEE TYCOON 4 ★ TAP HERE FOR FREE GEMS ★</div>
 
   <!-- Top-right monetization toggle -->
   <button class="mz-toggle" id="mz-toggle" type="button">
@@ -1225,6 +1372,8 @@
     <!-- MZ: free coin button + banner ad on title screen -->
     <button class="mz-watch-ad" id="mz-watch-ad" type="button">▶ WATCH AD · GET 1 ISSA COIN</button>
     <div class="mz-banner" data-banner-id="title"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="title-2"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="title-3"></div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -1247,12 +1396,17 @@
 
     <!-- MZ: top banner ad above board -->
     <div class="mz-banner" data-banner-id="top"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="top-2"></div>
 
     <div class="board" id="board">
       <div class="grid" id="grid"></div>
       <div class="mz-sponsored">SPONSORED BY MERGE COFFEE TYCOON 4</div>
       <button class="mz-premium-cta" id="mz-premium-cta" type="button">REMOVE ADS · $9.99/MO</button>
+      <div class="mz-ribbon mz-super-only">TAP HERE</div>
     </div>
+
+    <!-- MZ: middle banner (super only) -->
+    <div class="mz-banner mz-super-only" data-banner-id="mid"></div>
 
     <div class="tray" id="tray"></div>
 
@@ -1261,6 +1415,8 @@
 
     <!-- MZ: bottom banner ad -->
     <div class="mz-banner" data-banner-id="bottom"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="bottom-2"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="bottom-3"></div>
   </div>
 
   <!-- ============================================ -->
@@ -1293,6 +1449,17 @@
     <button class="x" id="mz-float-x" type="button">×</button>
     <strong id="mz-float-headline">Headline</strong>
     <span id="mz-float-sub">Subheadline</span>
+  </div>
+  <!-- Extra floating popups for super mode -->
+  <div class="mz-float mz-float-2 mz-super-only" id="mz-float2">
+    <button class="x" id="mz-float2-x" type="button">×</button>
+    <strong id="mz-float2-headline">Headline</strong>
+    <span id="mz-float2-sub">Subheadline</span>
+  </div>
+  <div class="mz-float mz-float-3 mz-super-only" id="mz-float3">
+    <button class="x" id="mz-float3-x" type="button">×</button>
+    <strong id="mz-float3-headline">Headline</strong>
+    <span id="mz-float3-sub">Subheadline</span>
   </div>
 
   <!-- Toast for notifications -->
@@ -2155,13 +2322,23 @@ document.addEventListener('visibilitychange', () => {
   const MZ_KEY = 'issa-blocks-mz-v1';
   const MZ = {
     enabled: false,
+    super: false,         // 🔥 SUPER MONETIZATION MODE 🔥
     coins: 5,
     movesSincePopup: 0,
     adRotation: 0,
   };
 
-  // Mode entry costs (in Issa Coins)
+  // Mode entry costs (in Issa Coins). Super mode multiplies these.
   const MODE_COSTS = { classic: 1, alou: 10, sprint: 5, hardcore: 25 };
+  const SUPER_MODE_MULT = 10;     // mode entry cost ×10 in super
+  const SUPER_BOOSTER_MULT = 5;   // booster cost ×5 in super
+  function modeCost(name) {
+    const base = MODE_COSTS[name] || 0;
+    return MZ.super ? base * SUPER_MODE_MULT : base;
+  }
+  function boosterCost(base) {
+    return MZ.super ? base * SUPER_BOOSTER_MULT : base;
+  }
 
   // Fake ads pool (purposefully bad)
   const ADS = [
@@ -2252,13 +2429,16 @@ document.addEventListener('visibilitychange', () => {
       if (raw) {
         const p = JSON.parse(raw);
         if (typeof p.enabled === 'boolean') MZ.enabled = p.enabled;
+        if (typeof p.super === 'boolean') MZ.super = p.super;
         if (typeof p.coins === 'number') MZ.coins = p.coins;
       }
     } catch(e) {}
   }
   function saveMZ() {
     try {
-      localStorage.setItem(MZ_KEY, JSON.stringify({ enabled: MZ.enabled, coins: MZ.coins }));
+      localStorage.setItem(MZ_KEY, JSON.stringify({
+        enabled: MZ.enabled, super: MZ.super, coins: MZ.coins,
+      }));
     } catch(e) {}
   }
 
@@ -2314,24 +2494,59 @@ document.addEventListener('visibilitychange', () => {
     toast(`+${n} ISSA COIN${n>1?'S':''}${label?' · '+label:''}`);
   }
 
-  // === ENABLE/DISABLE ===
-  function setEnabled(on) {
-    MZ.enabled = on;
-    document.body.classList.toggle('mz-on', on);
+  // === ENABLE/DISABLE / SUPER (3-state cycle) ===
+  function applyState() {
+    document.body.classList.toggle('mz-on', MZ.enabled);
+    document.body.classList.toggle('mz-super', MZ.enabled && MZ.super);
     const lbl = $('#mz-toggle-label');
-    if (lbl) lbl.textContent = on ? 'MONETIZED' : 'MONETIZATION';
-    saveMZ();
+    if (lbl) {
+      if (!MZ.enabled) lbl.textContent = 'MONETIZATION';
+      else if (MZ.super) lbl.textContent = '🔥 SUPER MZ 🔥';
+      else lbl.textContent = 'MONETIZED';
+    }
+    annotateModes(); // refresh price labels with super multiplier
+    rebuildBoosters(); // refresh booster costs with super multiplier
     refreshCoins();
-    if (on) {
+  }
+
+  // Cycle: OFF → NORMAL → SUPER → OFF
+  function cycleToggle() {
+    if (!MZ.enabled) {
+      MZ.enabled = true;
+      MZ.super = false;
+      saveMZ();
+      applyState();
       rotateAds();
       scheduleFloater();
       toast('💰 MONETIZATION MODE ACTIVATED');
+    } else if (!MZ.super) {
+      MZ.super = true;
+      saveMZ();
+      applyState();
+      rotateAds();
+      scheduleFloater();
+      toast('🔥 SUPER MONETIZATION ACTIVATED · GOOD LUCK 🔥');
+      // Pre-show a stack of interstitials and floaters
+      setTimeout(() => showFloaters(), 200);
     } else {
-      hideFloater();
+      MZ.enabled = false;
+      MZ.super = false;
+      saveMZ();
+      applyState();
+      hideAllFloaters();
       hideInter();
       hideShop();
       toast('AD-FREE MODE');
     }
+  }
+
+  // Back-compat helper
+  function setEnabled(on) {
+    MZ.enabled = on;
+    if (!on) MZ.super = false;
+    saveMZ();
+    applyState();
+    if (on) { rotateAds(); scheduleFloater(); }
   }
 
   // === BANNERS ===
@@ -2365,7 +2580,8 @@ document.addEventListener('visibilitychange', () => {
     $('#mz-inter-sub').textContent = sub || '';
     const skip = $('#mz-inter-skip');
     skip.disabled = true;
-    let n = 5;
+    // Super mode: 10-second forced wait. Normal: 5.
+    let n = MZ.super ? 10 : 5;
     skip.textContent = `SKIP IN ${n}`;
     el.classList.add('show');
     if (_interIv) clearInterval(_interIv);
@@ -2386,27 +2602,43 @@ document.addEventListener('visibilitychange', () => {
     if (el) el.classList.remove('show');
   }
 
-  // === FLOATING POPUP ===
+  // === FLOATING POPUPS ===
   let _floatT;
   function scheduleFloater() {
     clearTimeout(_floatT);
-    _floatT = setTimeout(showFloater, 11000 + Math.random() * 8000);
+    const fast = MZ.super ? 2500 + Math.random() * 2500 : 11000 + Math.random() * 8000;
+    _floatT = setTimeout(MZ.super ? showFloaters : showFloater, fast);
+  }
+  function fillFloater(idEl, idHead, idSub) {
+    const ad = ADS[Math.floor(Math.random() * ADS.length)];
+    const el = $('#'+idEl);
+    if (!el) return;
+    $('#'+idHead).textContent = ad.head;
+    $('#'+idSub).textContent = ad.sub;
+    el.style.background = ad.bg;
+    el.classList.add('show');
   }
   function showFloater() {
     if (!MZ.enabled) return;
-    const el = $('#mz-float');
-    const ad = ADS[Math.floor(Math.random() * ADS.length)];
-    $('#mz-float-headline').textContent = ad.head;
-    $('#mz-float-sub').textContent = ad.sub;
-    el.style.background = ad.bg;
-    el.classList.add('show');
+    fillFloater('mz-float','mz-float-headline','mz-float-sub');
+    scheduleFloater();
+  }
+  function showFloaters() {
+    if (!MZ.enabled) return;
+    fillFloater('mz-float','mz-float-headline','mz-float-sub');
+    if (MZ.super) {
+      fillFloater('mz-float2','mz-float2-headline','mz-float2-sub');
+      fillFloater('mz-float3','mz-float3-headline','mz-float3-sub');
+    }
     scheduleFloater();
   }
   function hideFloater() {
     clearTimeout(_floatT);
-    const el = $('#mz-float');
-    if (el) el.classList.remove('show');
+    ['mz-float','mz-float2','mz-float3'].forEach(id => {
+      const el = $('#'+id); if (el) el.classList.remove('show');
+    });
   }
+  function hideAllFloaters() { hideFloater(); }
 
   // === SHOP ===
   function showShop() {
@@ -2439,33 +2671,43 @@ document.addEventListener('visibilitychange', () => {
   }
 
   // === BOOSTERS ===
-  function buildBoosters() {
+  function rebuildBoosters() {
     const wrap = $('#mz-boosters');
     if (!wrap) return;
     wrap.innerHTML = '';
     BOOSTERS.forEach(b => {
+      const cost = boosterCost(b.cost);
       const btn = document.createElement('button');
       btn.className = 'mz-booster';
       btn.type = 'button';
-      btn.innerHTML = `<span class="icon">${b.icon}</span>${b.label}<span class="cost">◉ ${b.cost}</span>`;
+      btn.innerHTML = `<span class="icon">${b.icon}</span>${b.label}<span class="cost">◉ ${cost}</span>`;
       btn.onclick = () => {
-        if (!tryPay(b.cost)) return;
+        if (!tryPay(cost)) return;
+        // In super mode, every booster click forces an interstitial first
+        if (MZ.super) {
+          const ad = ADS[Math.floor(Math.random() * ADS.length)];
+          showInter(ad.head, ad.sub);
+        }
         b.run();
       };
       wrap.appendChild(btn);
     });
   }
+  // Back-compat alias
+  function buildBoosters() { rebuildBoosters(); }
 
-  // === MODE PRICE TAGS ===
+  // === MODE PRICE TAGS (rebuild every time so super multiplier shows) ===
   function annotateModes() {
     document.querySelectorAll('.mode-card').forEach(card => {
       const m = card.dataset.mode;
-      const cost = MODE_COSTS[m] || 0;
-      if (card.querySelector('.mode-price')) return;
-      const p = document.createElement('div');
-      p.className = 'mode-price';
+      const cost = modeCost(m);
+      let p = card.querySelector('.mode-price');
+      if (!p) {
+        p = document.createElement('div');
+        p.className = 'mode-price';
+        card.appendChild(p);
+      }
       p.innerHTML = `COST<b>◉ ${cost}</b>`;
-      card.appendChild(p);
     });
   }
 
@@ -2492,7 +2734,7 @@ document.addEventListener('visibilitychange', () => {
 
   // === EVENT WIRING ===
   function wire() {
-    $('#mz-toggle').addEventListener('click', () => setEnabled(!MZ.enabled));
+    $('#mz-toggle').addEventListener('click', cycleToggle);
     $('#mz-coins').addEventListener('click', showShop);
     $('#mz-shop-close').addEventListener('click', hideShop);
     $('#mz-inter-skip').addEventListener('click', hideInter);
@@ -2500,27 +2742,42 @@ document.addEventListener('visibilitychange', () => {
       hideInter();
       toast("THANKS FOR INSTALLING (we didn't install anything)");
     });
-    $('#mz-float-x').addEventListener('click', () => {
-      hideFloater();
-      toast('PREMIUM REQUIRED · $9.99/MO TO HIDE ADS');
-      // The "X" doesn't actually stop ads — that's the joke
-      setTimeout(scheduleFloater, 2000);
+    // Floater X buttons — none actually close permanently
+    ['mz-float-x','mz-float2-x','mz-float3-x'].forEach(id => {
+      const el = $('#'+id);
+      if (!el) return;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wrap = el.parentElement;
+        if (wrap) wrap.classList.remove('show');
+        toast('PREMIUM REQUIRED · $9.99/MO TO HIDE ADS');
+        setTimeout(() => { if (MZ.enabled) (MZ.super ? showFloaters : showFloater)(); }, 1500);
+      });
     });
     $('#mz-watch-ad').addEventListener('click', watchAd);
     $('#mz-premium-cta').addEventListener('click', () => {
       showInter('REMOVE ADS — ISSA PREMIUM™', 'Just $9.99/month (billed yearly at $999.99). Cancel anytime via fax.');
     });
     $('#mz-revive-btn').addEventListener('click', tryRevive);
+    // Super-only widgets
+    ['#mz-sub-strip','#mz-side-left','#mz-side-right','#mz-bottom-stick'].forEach(sel => {
+      const el = $(sel);
+      if (!el) return;
+      el.addEventListener('click', () => {
+        showInter('★ ISSA PREMIUM™ — UNLIMITED ★', 'Subscribe for $19.99/mo (billed yearly at $1,999.99). Trial expires when you tap accept.');
+      });
+    });
   }
 
   // === HOOKS exposed to original game functions ===
   window.MZ_API = {
     beforeStart(modeName) {
       if (!MZ.enabled) return true;
-      const cost = MODE_COSTS[modeName] || 0;
+      const cost = modeCost(modeName);
       if (cost > 0 && !tryPay(cost)) return false;
-      // 40% chance: pre-game ad
-      if (Math.random() < 0.4) {
+      // Pre-game ad chance: 40% normal, 100% super (and back-to-back stack of 2)
+      const chance = MZ.super ? 1.0 : 0.4;
+      if (Math.random() < chance) {
         const ad = ADS[Math.floor(Math.random() * ADS.length)];
         showInter(ad.head, ad.sub);
       }
@@ -2530,10 +2787,12 @@ document.addEventListener('visibilitychange', () => {
       if (!MZ.enabled) return;
       MZ.movesSincePopup++;
       rotateAds();
-      if (MZ.movesSincePopup >= 6) {
+      // Super mode: interstitial after EVERY 2 placements (was 6)
+      const threshold = MZ.super ? 2 : 6;
+      if (MZ.movesSincePopup >= threshold) {
         MZ.movesSincePopup = 0;
         const ad = ADS[Math.floor(Math.random() * ADS.length)];
-        setTimeout(() => showInter(ad.head, ad.sub), 500);
+        setTimeout(() => showInter(ad.head, ad.sub), 400);
       }
     },
     afterGameOver(isWin) {
@@ -2552,19 +2811,23 @@ document.addEventListener('visibilitychange', () => {
 
   // === BOOT ===
   loadMZ();
-  annotateModes();
-  buildBoosters();
   wire();
-  document.body.classList.toggle('mz-on', MZ.enabled);
-  $('#mz-toggle-label').textContent = MZ.enabled ? 'MONETIZED' : 'MONETIZATION';
-  refreshCoins();
+  applyState();          // sets body classes + builds modes/boosters using current super state
   if (MZ.enabled) {
     rotateAds();
     scheduleFloater();
   }
 
-  // Continuous banner rotation when MZ is on
-  setInterval(() => { if (MZ.enabled) rotateAds(); }, 5000);
+  // Continuous banner rotation when MZ is on (faster in super mode)
+  let _bannerTickStep = 0;
+  setInterval(() => {
+    if (!MZ.enabled) return;
+    _bannerTickStep++;
+    // Tick every 750ms but only rotate every 2 ticks (1.5s) in super,
+    // every 6 ticks (4.5s) in normal mode.
+    const every = MZ.super ? 2 : 6;
+    if (_bannerTickStep % every === 0) rotateAds();
+  }, 750);
 })();
 </script>
 </body>
