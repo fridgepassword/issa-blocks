@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0f">
+<title>Issa Blocks</title>
+
+<meta property="og:title" content="Issa Blocks">
+<meta property="og:description" content="Tap to play.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="issa-blocks-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Issa Blocks">
+<meta name="twitter:description" content="Tap to play.">
+<meta name="twitter:image" content="issa-blocks-preview.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0f'/%3E%3Crect x='10' y='10' width='20' height='20' rx='4' fill='%23ffb84d'/%3E%3Crect x='34' y='10' width='20' height='20' rx='4' fill='%235c7cfa'/%3E%3Crect x='10' y='34' width='20' height='20' rx='4' fill='%2351cf66'/%3E%3Crect x='34' y='34' width='20' height='20' rx='4' fill='%23f783ac'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #14141d;
+    --cell: #1f1f2c;
+    --cell-edge: rgba(255,255,255,0.04);
+    --text: #f5f5f7;
+    --dim: #6c6c7a;
+    --accent: #ffb84d;
+    --sprint: #4dd0e1;
+    --hard:  #ff5f5f;
+    --easy:  #51cf66;
+    --danger: #ff5f5f;
+    --gap: 3px;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding:
+      max(12px, env(safe-area-inset-top))
+      14px
+      max(12px, env(safe-area-inset-bottom));
+    gap: 14px;
+    min-height: 100dvh;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,184,77,0.08), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.06), transparent 60%),
+      var(--bg);
+    touch-action: none;
+  }
+
+  /* Screen routing */
+  body[data-screen="title"] .game-screen { display: none; }
+  body[data-screen="game"]  .title-screen { display: none; }
+
+  /* === TITLE SCREEN === */
+  .title-screen {
+    width: 100%;
+    max-width: 440px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 8px 4px 4px;
+    animation: screen-in 380ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  @keyframes screen-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    margin-top: 8vh;
+  }
+
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 38px);
+    grid-template-rows: repeat(2, 38px);
+    gap: 6px;
+    animation: logo-bob 4.5s ease-in-out infinite;
+  }
+  @keyframes logo-bob {
+    0%, 100% { transform: translateY(0)    rotate(-1deg); }
+    50%      { transform: translateY(-6px) rotate(1deg); }
+  }
+  .logo-grid > div {
+    border-radius: 8px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.25),
+      inset 0 -2px 0 rgba(0,0,0,0.25),
+      0 6px 14px -4px rgba(0,0,0,0.5);
+  }
+  .logo-grid > div:nth-child(1) { background: #ffb84d; }
+  .logo-grid > div:nth-child(2) { background: #5c7cfa; }
+  .logo-grid > div:nth-child(3) { background: #51cf66; }
+  .logo-grid > div:nth-child(4) { background: #f783ac; }
+
+  .wordmark {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 44px;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    text-align: center;
+  }
+  .wordmark span { color: var(--accent); }
+
+  .tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .modes {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+
+  .mode-card {
+    width: 100%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 120ms ease, border-color 160ms ease, background 160ms ease;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 4px 14px;
+    font-family: inherit;
+  }
+  .mode-card:active { transform: scale(0.98); }
+  .mode-card[data-mode="classic"]:hover {
+    border-color: rgba(255,184,77,0.35);
+    background: linear-gradient(180deg, rgba(255,184,77,0.08), rgba(255,184,77,0.02));
+  }
+  .mode-card[data-mode="alou"]:hover {
+    border-color: rgba(81,207,102,0.4);
+    background: linear-gradient(180deg, rgba(81,207,102,0.08), rgba(81,207,102,0.02));
+  }
+  .mode-card[data-mode="sprint"]:hover {
+    border-color: rgba(77,208,225,0.35);
+    background: linear-gradient(180deg, rgba(77,208,225,0.08), rgba(77,208,225,0.02));
+  }
+  .mode-card[data-mode="hardcore"]:hover {
+    border-color: rgba(255,95,95,0.35);
+    background: linear-gradient(180deg, rgba(255,95,95,0.08), rgba(255,95,95,0.02));
+  }
+
+  .mode-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    grid-column: 1; grid-row: 1;
+  }
+  .mode-card[data-mode="classic"]  .mode-name { color: var(--accent); }
+  .mode-card[data-mode="alou"]     .mode-name { color: var(--easy); }
+  .mode-card[data-mode="sprint"]   .mode-name { color: var(--sprint); }
+  .mode-card[data-mode="hardcore"] .mode-name { color: var(--hard); }
+
+  .mode-desc {
+    grid-column: 1; grid-row: 2;
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .mode-best {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-align: right;
+    line-height: 1.5;
+  }
+  .mode-best b {
+    display: block;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 700;
+    letter-spacing: 0;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* === GAME SCREEN === */
+  .game-screen {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+
+  .header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .stat { display: flex; flex-direction: column; }
+  .stat.right { align-items: flex-end; }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    margin-bottom: 2px;
+  }
+
+  .stat-value {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat.right .stat-value { color: var(--text); }
+  .stat.left  .stat-value { color: var(--accent); }
+  body[data-mode="sprint"]   .stat.left .stat-value { color: var(--sprint); }
+  body[data-mode="hardcore"] .stat.left .stat-value { color: var(--hard); }
+  body[data-mode="alou"]     .stat.left .stat-value { color: var(--easy); }
+
+  .center-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .game-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    line-height: 1.1;
+  }
+  .mode-pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--dim);
+    cursor: pointer;
+    transition: all 140ms ease;
+    border: none;
+    font-family: inherit;
+  }
+  .mode-pill.classic  { color: var(--accent); background: rgba(255,184,77,0.12); }
+  .mode-pill.alou     { color: var(--easy);   background: rgba(81,207,102,0.12); }
+  .mode-pill.sprint   { color: var(--sprint); background: rgba(77,208,225,0.12); }
+  .mode-pill.hardcore { color: var(--hard);   background: rgba(255,95,95,0.12); }
+  .mode-pill:active   { transform: scale(0.94); }
+
+  .sprint-target {
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--sprint);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  body[data-mode="sprint"] .sprint-target { display: block; }
+
+  /* === BOARD === */
+  .board {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg-2);
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow:
+      0 0 0 1px var(--cell-edge),
+      0 30px 60px -20px rgba(0,0,0,0.5),
+      inset 0 0 80px rgba(0,0,0,0.4);
+    position: relative;
+    transition: box-shadow 200ms ease;
+  }
+  .board.combo-flash { animation: combo-flash 720ms ease-out; }
+  @keyframes combo-flash {
+    0%, 100% {
+      box-shadow:
+        0 0 0 1px var(--cell-edge),
+        0 30px 60px -20px rgba(0,0,0,0.5),
+        inset 0 0 80px rgba(0,0,0,0.4);
+    }
+    25% {
+      box-shadow:
+        0 0 0 1px rgba(255,184,77,0.5),
+        0 30px 60px -20px rgba(0,0,0,0.5),
+        inset 0 0 80px rgba(0,0,0,0.3),
+        0 0 90px 6px rgba(255,184,77,0.4);
+    }
+  }
+
+  .grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: var(--gap);
+    position: relative;
+  }
+
+  .cell {
+    background: var(--cell);
+    border-radius: 5px;
+    position: relative;
+    transition: background 80ms ease;
+  }
+  .cell.filled {
+    background: var(--c, var(--accent));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      inset 0 -2px 0 rgba(0,0,0,0.28),
+      0 1px 2px rgba(0,0,0,0.3);
+  }
+  .cell.preview {
+    background: color-mix(in srgb, var(--c, var(--accent)) 45%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 60%, transparent);
+  }
+  .cell.preview-bad {
+    background: color-mix(in srgb, var(--danger) 25%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 50%, transparent);
+  }
+
+  .cell.placing {
+    animation: place 300ms cubic-bezier(.34, 1.5, .5, 1) backwards;
+  }
+  @keyframes place {
+    0% {
+      transform: scale(0.55);
+      filter: brightness(1.6);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.4),
+        inset 0 -2px 0 rgba(0,0,0,0.28),
+        0 0 0 0 transparent;
+    }
+    55% {
+      transform: scale(1.08);
+      filter: brightness(1.25);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.5),
+        inset 0 -2px 0 rgba(0,0,0,0.28),
+        0 0 14px 1px color-mix(in srgb, var(--c) 70%, transparent);
+    }
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        inset 0 -2px 0 rgba(0,0,0,0.28),
+        0 1px 2px rgba(0,0,0,0.3);
+    }
+  }
+
+  .cell.clearing {
+    animation: clear 440ms cubic-bezier(.4, 0, .2, 1) backwards;
+    z-index: 2;
+  }
+  @keyframes clear {
+    0%   { transform: scale(1) rotate(0deg);    filter: brightness(1); }
+    25%  { transform: scale(1.22) rotate(2deg); filter: brightness(2.4) saturate(1.5); }
+    100% { transform: scale(0) rotate(10deg);   filter: brightness(0.4); opacity: 0; }
+  }
+
+  /* === TRAY === */
+  .tray {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    height: 132px;
+  }
+
+  .slot {
+    background: var(--bg-2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-shadow:
+      0 0 0 1px var(--cell-edge),
+      inset 0 0 30px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .slot.empty::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(255,255,255,0.05);
+    border-radius: 8px;
+  }
+
+  .piece {
+    display: grid;
+    gap: var(--gap);
+    cursor: grab;
+    touch-action: none;
+    transition: transform 200ms cubic-bezier(.3,1,.4,1);
+    will-change: transform, left, top;
+  }
+  .piece.dragging {
+    transition: none;
+    cursor: grabbing;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .piece.entering {
+    animation: piece-in 420ms cubic-bezier(.34, 1.4, .5, 1) backwards;
+  }
+  @keyframes piece-in {
+    0%   { opacity: 0; transform: translateY(28px) scale(0.55); }
+    100% { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+
+  .pcell {
+    background: var(--c);
+    border-radius: 5px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      inset 0 -2px 0 rgba(0,0,0,0.28);
+    aspect-ratio: 1;
+  }
+  .pcell.empty { background: transparent; box-shadow: none; }
+
+  /* === SPARKS === */
+  .spark {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 5;
+    will-change: transform, opacity;
+  }
+
+  /* === FLOATER === */
+  .floater {
+    position: absolute;
+    pointer-events: none;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    text-shadow: 0 0 24px rgba(255,184,77,0.7), 0 2px 8px rgba(0,0,0,0.6);
+    animation: floater 900ms cubic-bezier(.3,.9,.4,1) forwards;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  @keyframes floater {
+    0%   { transform: translate(-50%, 0)    scale(0.5); opacity: 0; }
+    20%  { transform: translate(-50%, -8px) scale(1.15); opacity: 1; }
+    100% { transform: translate(-50%, -70px) scale(0.95); opacity: 0; }
+  }
+
+  /* === GAME OVER OVERLAY === */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    z-index: 1000;
+  }
+  .overlay.show { display: flex; animation: fade 300ms ease-out; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .overlay .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--dim);
+  }
+  .overlay h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 44px;
+    letter-spacing: -0.04em;
+  }
+  .overlay .final {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 88px;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  body[data-mode="sprint"]   .overlay .final { color: var(--sprint); }
+  body[data-mode="hardcore"] .overlay .final { color: var(--hard); }
+  body[data-mode="alou"]     .overlay .final { color: var(--easy); }
+
+  .overlay .meta {
+    color: var(--dim);
+    font-size: 12px;
+    margin-top: -2px;
+  }
+
+  .new-best {
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    background: rgba(255,184,77,0.12);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-top: -2px;
+  }
+  .new-best.show { display: inline-block; animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    background: var(--accent);
+    color: #1a1100;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 100ms;
+    box-shadow: 0 10px 30px -10px rgba(255,184,77,0.6);
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: none;
+  }
+</style>
+</head>
+<body data-screen="title" data-mode="classic">
+
+  <!-- TITLE SCREEN -->
+  <div class="title-screen">
+    <div class="hero">
+      <div class="logo-grid"><div></div><div></div><div></div><div></div></div>
+      <div class="wordmark">ISSA<span>·</span>BLOCKS</div>
+      <div class="tagline">An 8×8 block puzzle</div>
+    </div>
+
+    <div class="modes">
+      <button class="mode-card" data-mode="classic" onclick="startGame('classic')">
+        <div class="mode-name">CLASSIC</div>
+        <div class="mode-desc">Score as high as you can. No timer, no mercy.</div>
+        <div class="mode-best">BEST<b id="best-classic">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="alou" onclick="startGame('alou')">
+        <div class="mode-name">FOR ALOU</div>
+        <div class="mode-desc">Super super easy, for Alou.</div>
+        <div class="mode-best">BEST<b id="best-alou">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="sprint" onclick="startGame('sprint')">
+        <div class="mode-name">SPRINT</div>
+        <div class="mode-desc">Clear 20 lines as fast as possible.</div>
+        <div class="mode-best">BEST<b id="best-sprint">—</b></div>
+      </button>
+      <button class="mode-card" data-mode="hardcore" onclick="startGame('hardcore')">
+        <div class="mode-name">HARDCORE</div>
+        <div class="mode-desc">Brutal pieces. 1.5× score multiplier.</div>
+        <div class="mode-best">BEST<b id="best-hardcore">0</b></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="game-screen">
+    <div class="header">
+      <div class="stat left">
+        <div class="stat-label" id="left-label">BEST</div>
+        <div class="stat-value" id="left-stat">0</div>
+        <div class="sprint-target" id="sprint-target">0 / 20</div>
+      </div>
+      <div class="center-col">
+        <div class="game-title">ISSA<span style="color:var(--accent)">·</span>BLOCKS</div>
+        <button class="mode-pill" id="mode-pill" onclick="goToMenu()">CLASSIC</button>
+      </div>
+      <div class="stat right">
+        <div class="stat-label">SCORE</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+    </div>
+
+    <div class="board" id="board">
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="tray" id="tray"></div>
+  </div>
+
+  <!-- GAME OVER OVERLAY -->
+  <div class="overlay" id="overlay">
+    <div class="label" id="overlay-label">GAME OVER</div>
+    <h2 id="overlay-title">NICE RUN</h2>
+    <div class="new-best" id="new-best">★ NEW BEST ★</div>
+    <div class="final" id="final-score">0</div>
+    <div class="meta" id="best-meta">Best: 0</div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="goToMenu()">MENU</button>
+      <button class="btn" onclick="restartCurrent()">PLAY AGAIN</button>
+    </div>
+  </div>
+
+<script>
+'use strict';
+
+// === CONFIG ===
+const SIZE = 8;
+
+const COLORS = {
+  red:'#ff6b6b', orange:'#ff9f43', amber:'#ffb84d', yellow:'#ffd93b',
+  lime:'#9be15d', green:'#51cf66', teal:'#3bc9b0', cyan:'#4dd0e1',
+  blue:'#5c7cfa', violet:'#9775fa', pink:'#f783ac',
+};
+
+const PIECES = [
+  // Singles
+  { cells: [[0,0]], color: 'amber' },
+  // Lines horizontal
+  { cells: [[0,0],[1,0]],                   color: 'cyan' },
+  { cells: [[0,0],[1,0],[2,0]],             color: 'green' },
+  { cells: [[0,0],[1,0],[2,0],[3,0]],       color: 'blue' },
+  { cells: [[0,0],[1,0],[2,0],[3,0],[4,0]], color: 'violet' },
+  // Lines vertical
+  { cells: [[0,0],[0,1]],                   color: 'cyan' },
+  { cells: [[0,0],[0,1],[0,2]],             color: 'green' },
+  { cells: [[0,0],[0,1],[0,2],[0,3]],       color: 'blue' },
+  { cells: [[0,0],[0,1],[0,2],[0,3],[0,4]], color: 'violet' },
+  // Squares
+  { cells: [[0,0],[1,0],[0,1],[1,1]],       color: 'orange' },
+  { cells: [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[0,2],[1,2],[2,2]], color: 'red' },
+  // Small L (3-cell)
+  { cells: [[0,0],[0,1],[1,1]], color: 'pink' },
+  { cells: [[1,0],[0,1],[1,1]], color: 'pink' },
+  { cells: [[0,0],[1,0],[0,1]], color: 'pink' },
+  { cells: [[0,0],[1,0],[1,1]], color: 'pink' },
+  // Big L (4-cell)
+  { cells: [[0,0],[0,1],[0,2],[1,2]], color: 'lime' },
+  { cells: [[0,0],[1,0],[1,1],[1,2]], color: 'lime' },
+  { cells: [[1,0],[1,1],[0,2],[1,2]], color: 'lime' },
+  { cells: [[0,0],[0,1],[1,0],[2,0]], color: 'lime' },
+  { cells: [[0,0],[1,0],[2,0],[2,1]], color: 'lime' },
+  { cells: [[2,0],[0,1],[1,1],[2,1]], color: 'lime' },
+  { cells: [[0,0],[0,1],[1,1],[2,1]], color: 'lime' },
+  { cells: [[0,0],[1,0],[2,0],[0,1]], color: 'lime' },
+  // S / Z
+  { cells: [[1,0],[2,0],[0,1],[1,1]], color: 'teal' },
+  { cells: [[0,0],[1,0],[1,1],[2,1]], color: 'teal' },
+  { cells: [[1,0],[0,1],[1,1],[0,2]], color: 'teal' },
+  { cells: [[0,0],[0,1],[1,1],[1,2]], color: 'teal' },
+  // T
+  { cells: [[0,0],[1,0],[2,0],[1,1]], color: 'yellow' },
+  { cells: [[1,0],[0,1],[1,1],[1,2]], color: 'yellow' },
+  { cells: [[1,0],[0,1],[1,1],[2,1]], color: 'yellow' },
+  { cells: [[0,0],[0,1],[1,1],[0,2]], color: 'yellow' },
+  // Diagonals
+  { cells: [[0,0],[1,1]], color: 'red' },
+  { cells: [[1,0],[0,1]], color: 'red' },
+  { cells: [[0,0],[1,1],[2,2]], color: 'red' },
+  { cells: [[2,0],[1,1],[0,2]], color: 'red' },
+  // Corner pieces (2x2 missing one)
+  { cells: [[0,0],[1,0],[0,1]], color: 'amber' },
+  { cells: [[0,0],[1,0],[1,1]], color: 'amber' },
+  { cells: [[0,0],[0,1],[1,1]], color: 'amber' },
+  { cells: [[1,0],[0,1],[1,1]], color: 'amber' },
+];
+
+// Easy pool for ALOU mode — only the simplest shapes
+const EASY_PIECES = [
+  // Singles
+  { cells: [[0,0]], color: 'amber' },
+  // Short lines (2-3 cells)
+  { cells: [[0,0],[1,0]],       color: 'cyan' },
+  { cells: [[0,0],[0,1]],       color: 'cyan' },
+  { cells: [[0,0],[1,0],[2,0]], color: 'green' },
+  { cells: [[0,0],[0,1],[0,2]], color: 'green' },
+  // 2x2 square
+  { cells: [[0,0],[1,0],[0,1],[1,1]], color: 'orange' },
+  // Small L (3-cell)
+  { cells: [[0,0],[0,1],[1,1]], color: 'pink' },
+  { cells: [[1,0],[0,1],[1,1]], color: 'pink' },
+  { cells: [[0,0],[1,0],[0,1]], color: 'pink' },
+  { cells: [[0,0],[1,0],[1,1]], color: 'pink' },
+];
+
+// Hardcore-only: bigger / nastier shapes
+const HARD_PIECES = [
+  // 4x4 filled
+  { cells: [[0,0],[1,0],[2,0],[3,0],[0,1],[1,1],[2,1],[3,1],
+            [0,2],[1,2],[2,2],[3,2],[0,3],[1,3],[2,3],[3,3]], color: 'red' },
+  // 5-cell L variants
+  { cells: [[0,0],[0,1],[0,2],[0,3],[1,3]], color: 'violet' },
+  { cells: [[1,0],[1,1],[1,2],[1,3],[0,3]], color: 'violet' },
+  { cells: [[0,0],[1,0],[2,0],[3,0],[0,1]], color: 'violet' },
+  { cells: [[0,0],[1,0],[2,0],[3,0],[3,1]], color: 'violet' },
+  // 5-cell plus
+  { cells: [[1,0],[0,1],[1,1],[2,1],[1,2]], color: 'pink' },
+  // 4x2 / 2x4 rectangles
+  { cells: [[0,0],[1,0],[2,0],[3,0],[0,1],[1,1],[2,1],[3,1]], color: 'orange' },
+  { cells: [[0,0],[1,0],[0,1],[1,1],[0,2],[1,2],[0,3],[1,3]], color: 'orange' },
+  // 5-cell U
+  { cells: [[0,0],[2,0],[0,1],[1,1],[2,1]], color: 'teal' },
+  { cells: [[0,0],[1,0],[2,0],[0,1],[2,1]], color: 'teal' },
+];
+
+// === MODES ===
+const MODES = {
+  classic: {
+    name: 'CLASSIC',
+    pool: PIECES,
+    multiplier: 1,
+    timed: false,
+    target: null,
+  },
+  alou: {
+    name: 'FOR ALOU',
+    pool: EASY_PIECES,
+    multiplier: 1,
+    timed: false,
+    target: null,
+  },
+  sprint: {
+    name: 'SPRINT',
+    pool: PIECES,
+    multiplier: 1,
+    timed: true,
+    target: 20,  // lines to clear
+  },
+  hardcore: {
+    name: 'HARDCORE',
+    // Weight standard pool with hard pieces
+    pool: [...PIECES, ...HARD_PIECES, ...HARD_PIECES],
+    multiplier: 1.5,
+    timed: false,
+    target: null,
+  },
+};
+
+// === STATE ===
+let currentMode = 'classic';
+let grid, tray;
+let score = 0, streak = 0;
+let drag = null;
+
+// Sprint state
+let sprintLines = 0;
+let sprintStartMs = 0;
+let sprintTimerId = null;
+let sprintWon = false;
+let sprintFinalSeconds = 0;
+let sprintHiddenAt = 0;
+
+let bests = { classic: 0, alou: 0, sprint: null, hardcore: 0 };
+
+// === PERSISTENCE ===
+const STORAGE_KEY = 'issa-blocks-v1';
+
+function loadBests() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, ...parsed };
+      }
+    }
+  } catch (e) {}
+}
+function saveBests() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bests)); }
+  catch (e) {}
+}
+function refreshBestLabels() {
+  document.getElementById('best-classic').textContent  = bests.classic ?? 0;
+  document.getElementById('best-alou').textContent     = bests.alou ?? 0;
+  document.getElementById('best-hardcore').textContent = bests.hardcore ?? 0;
+  document.getElementById('best-sprint').textContent =
+    (bests.sprint != null) ? formatTime(bests.sprint) : '—';
+}
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// === SCREEN ROUTING ===
+function showScreen(name) {
+  document.body.dataset.screen = name;
+  if (name === 'title') refreshBestLabels();
+}
+
+function startGame(modeName) {
+  currentMode = modeName;
+  document.body.dataset.mode = modeName;
+  const mode = MODES[modeName];
+
+  const pill = document.getElementById('mode-pill');
+  pill.textContent = mode.name;
+  pill.className = 'mode-pill ' + modeName;
+
+  document.getElementById('left-label').textContent = mode.timed ? 'TIME' : 'BEST';
+
+  document.getElementById('overlay').classList.remove('show');
+  showScreen('game');
+  initGame();
+}
+
+function goToMenu() {
+  stopSprintTimer();
+  document.getElementById('overlay').classList.remove('show');
+  showScreen('title');
+}
+
+function restartCurrent() {
+  document.getElementById('overlay').classList.remove('show');
+  initGame();
+}
+
+// === INIT ===
+function emptyGrid() {
+  return Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
+}
+
+function initGame() {
+  grid = emptyGrid();
+  score = 0;
+  streak = 0;
+  sprintLines = 0;
+  sprintStartMs = 0;
+  sprintHiddenAt = 0;
+  sprintWon = false;
+  sprintFinalSeconds = 0;
+  stopSprintTimer();
+
+  buildGrid();
+  refillTray();
+
+  document.getElementById('score').textContent = '0';
+  updateLeftStat(true);
+}
+
+function updateLeftStat(immediate = false) {
+  const mode = MODES[currentMode];
+  const el = document.getElementById('left-stat');
+  const targetEl = document.getElementById('sprint-target');
+
+  if (mode.timed) {
+    targetEl.textContent = `${sprintLines} / ${mode.target}`;
+    if (immediate) el.textContent = '0:00';
+  } else {
+    targetEl.textContent = '';
+    const target = bests[currentMode] || 0;
+    if (immediate) el.textContent = target;
+    else setScoreDisplay('left-stat', target);
+  }
+}
+
+// === SPRINT TIMER ===
+function startSprintTimer() {
+  sprintStartMs = performance.now();
+  if (sprintTimerId) cancelAnimationFrame(sprintTimerId);
+  const tick = () => {
+    if (!MODES[currentMode].timed || sprintWon) return;
+    const elapsed = (performance.now() - sprintStartMs) / 1000;
+    document.getElementById('left-stat').textContent = formatTime(elapsed);
+    sprintTimerId = requestAnimationFrame(tick);
+  };
+  sprintTimerId = requestAnimationFrame(tick);
+}
+function stopSprintTimer() {
+  if (sprintTimerId) {
+    cancelAnimationFrame(sprintTimerId);
+    sprintTimerId = null;
+  }
+}
+
+// === GRID RENDER ===
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const c = document.createElement('div');
+      c.className = 'cell';
+      c.dataset.x = x; c.dataset.y = y;
+      g.appendChild(c);
+    }
+  }
+  paintGrid();
+}
+function paintGrid() {
+  const cells = document.getElementById('grid').children;
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const cell = cells[y * SIZE + x];
+      const v = grid[y][x];
+      cell.className = 'cell' + (v ? ' filled' : '');
+      if (v) cell.style.setProperty('--c', COLORS[v]);
+      else   cell.style.removeProperty('--c');
+    }
+  }
+}
+function getCellEl(x, y) { return document.getElementById('grid').children[y * SIZE + x]; }
+
+// === TRAY ===
+function refillTray() {
+  const pool = MODES[currentMode].pool;
+  tray = [pickFrom(pool), pickFrom(pool), pickFrom(pool)];
+  tray.forEach(p => { p._entering = true; });
+  renderTray();
+  if (isGameOver()) showGameOver(false);
+}
+function pickFrom(pool) {
+  return { ...pool[Math.floor(Math.random() * pool.length)] };
+}
+function pieceW(p) { return Math.max(...p.cells.map(c => c[0])) + 1; }
+function pieceH(p) { return Math.max(...p.cells.map(c => c[1])) + 1; }
+
+function renderTray() {
+  const trayEl = document.getElementById('tray');
+  trayEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot' + (tray[i] ? '' : ' empty');
+    if (tray[i]) {
+      const piece = tray[i];
+      const w = pieceW(piece), h = pieceH(piece);
+      const trayCell = Math.min(20, Math.floor(96 / Math.max(w, h)));
+      const el = document.createElement('div');
+      el.className = 'piece';
+      el.dataset.idx = i;
+      el.style.gridTemplateColumns = `repeat(${w}, ${trayCell}px)`;
+      el.style.gridTemplateRows    = `repeat(${h}, ${trayCell}px)`;
+      el.style.setProperty('--c', COLORS[piece.color]);
+
+      const set = new Set(piece.cells.map(c => `${c[0]},${c[1]}`));
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const c = document.createElement('div');
+          c.className = set.has(`${x},${y}`) ? 'pcell' : 'pcell empty';
+          el.appendChild(c);
+        }
+      }
+      slot.appendChild(el);
+      attachDrag(el, i);
+
+      if (piece._entering) {
+        const delay = i * 90;
+        el.classList.add('entering');
+        el.style.animationDelay = delay + 'ms';
+        setTimeout(() => {
+          el.classList.remove('entering');
+          el.style.animationDelay = '';
+        }, 500 + delay);
+        delete piece._entering;
+      }
+    }
+    trayEl.appendChild(slot);
+  }
+}
+
+// === DRAG ===
+function gridCellSize() {
+  const first = document.getElementById('grid').firstChild;
+  if (!first) return 40;
+  return first.getBoundingClientRect().width;
+}
+function attachDrag(el, idx) {
+  el.addEventListener('pointerdown', e => startDrag(e, el, idx), { passive: false });
+}
+function startDrag(e, el, idx) {
+  if (drag) return;
+  e.preventDefault();
+  if (!tray[idx]) return;
+
+  const piece = tray[idx];
+  const cell = gridCellSize();
+  const gap = 3;
+  const w = pieceW(piece), h = pieceH(piece);
+  const fullW = w * cell + (w - 1) * gap;
+  const fullH = h * cell + (h - 1) * gap;
+
+  drag = {
+    idx, piece, el, cell, gap, w, h, fullW, fullH,
+    anchorOffsetX: fullW / 2,
+    anchorOffsetY: fullH + cell * 0.6,
+    placement: null,
+  };
+
+  el.classList.add('dragging');
+  el.style.position = 'fixed';
+  el.style.gridTemplateColumns = `repeat(${w}, ${cell}px)`;
+  el.style.gridTemplateRows    = `repeat(${h}, ${cell}px)`;
+
+  moveDragTo(e.clientX, e.clientY);
+
+  document.addEventListener('pointermove', onDragMove, { passive: false });
+  document.addEventListener('pointerup', onDragEnd, { passive: false });
+  document.addEventListener('pointercancel', onDragEnd, { passive: false });
+
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+function moveDragTo(clientX, clientY) {
+  if (!drag) return;
+  const x = clientX - drag.anchorOffsetX;
+  const y = clientY - drag.anchorOffsetY;
+  drag.el.style.left = x + 'px';
+  drag.el.style.top  = y + 'px';
+
+  const gridRect = document.getElementById('grid').getBoundingClientRect();
+  const step = drag.cell + drag.gap;
+  let gx = Math.round((x - gridRect.left) / step);
+  let gy = Math.round((y - gridRect.top) / step);
+
+  // Forgiving edge clamping when finger is near/over the grid
+  const margin = drag.cell * 0.6;
+  const overGrid =
+    clientX >= gridRect.left - margin && clientX <= gridRect.right + margin &&
+    clientY >= gridRect.top  - margin && clientY <= gridRect.bottom + margin;
+
+  if (overGrid) {
+    gx = Math.max(0, Math.min(SIZE - drag.w, gx));
+    gy = Math.max(0, Math.min(SIZE - drag.h, gy));
+  }
+
+  drag.placement = { gx, gy, overGrid };
+  paintPreview();
+}
+function onDragMove(e) { e.preventDefault(); moveDragTo(e.clientX, e.clientY); }
+
+function paintPreview() {
+  const cells = document.getElementById('grid').children;
+  for (let i = 0; i < cells.length; i++) {
+    cells[i].classList.remove('preview', 'preview-bad');
+    if (!grid[Math.floor(i / SIZE)][i % SIZE]) cells[i].style.removeProperty('--c');
+  }
+  if (!drag || !drag.placement || !drag.placement.overGrid) return;
+
+  const { gx, gy } = drag.placement;
+  const ok = canPlace(drag.piece, gx, gy);
+
+  for (const [dx, dy] of drag.piece.cells) {
+    const cx = gx + dx, cy = gy + dy;
+    if (cx < 0 || cx >= SIZE || cy < 0 || cy >= SIZE) continue;
+    const cell = getCellEl(cx, cy);
+    if (cell.classList.contains('filled')) continue;
+    cell.classList.add(ok ? 'preview' : 'preview-bad');
+    cell.style.setProperty('--c', COLORS[drag.piece.color]);
+  }
+}
+
+function onDragEnd(e) {
+  if (!drag) return;
+  e.preventDefault();
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.removeEventListener('pointercancel', onDragEnd);
+
+  const placement = drag.placement;
+  const ok = placement && placement.overGrid &&
+             canPlace(drag.piece, placement.gx, placement.gy);
+
+  if (ok) {
+    placePiece(drag.idx, placement.gx, placement.gy);
+  } else {
+    snapPieceBack(drag.el, drag.w, drag.h);
+  }
+  drag = null;
+  paintPreview();
+  paintGrid();
+}
+
+// FLIP-style snap-back to the tray slot. Restores tray cell sizing
+// (clearing the inline grid template would collapse the piece to 0 size).
+function snapPieceBack(el, w, h) {
+  const fromRect = el.getBoundingClientRect();
+
+  // Reset positioning, but restore the tray's grid template
+  const trayCell = Math.min(20, Math.floor(96 / Math.max(w, h)));
+  el.style.position = '';
+  el.style.left = '';
+  el.style.top = '';
+  el.style.gridTemplateColumns = `repeat(${w}, ${trayCell}px)`;
+  el.style.gridTemplateRows    = `repeat(${h}, ${trayCell}px)`;
+  el.classList.remove('dragging');
+
+  const toRect = el.getBoundingClientRect();
+  const dx = fromRect.left - toRect.left;
+  const dy = fromRect.top  - toRect.top;
+  const sx = fromRect.width  / Math.max(1, toRect.width);
+  const sy = fromRect.height / Math.max(1, toRect.height);
+
+  el.style.transition = 'none';
+  el.style.transformOrigin = '0 0';
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+
+  requestAnimationFrame(() => {
+    el.style.transition = 'transform 280ms cubic-bezier(.34, 1.3, .5, 1)';
+    el.style.transform  = '';
+    setTimeout(() => {
+      el.style.transition = '';
+      el.style.transformOrigin = '';
+      el.style.transform = '';
+    }, 300);
+  });
+}
+
+// === GAME LOGIC ===
+function canPlace(piece, gx, gy) {
+  for (const [dx, dy] of piece.cells) {
+    const x = gx + dx, y = gy + dy;
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
+    if (grid[y][x]) return false;
+  }
+  return true;
+}
+function canPlaceAnywhere(piece) {
+  for (let y = 0; y < SIZE; y++)
+    for (let x = 0; x < SIZE; x++)
+      if (canPlace(piece, x, y)) return true;
+  return false;
+}
+function isGameOver() {
+  return tray.every(p => !p || !canPlaceAnywhere(p));
+}
+
+function placePiece(idx, gx, gy) {
+  const piece = tray[idx];
+  const mode = MODES[currentMode];
+
+  // Start sprint timer on first placement
+  if (mode.timed && sprintLines === 0 && !sprintTimerId) startSprintTimer();
+
+  const placed = [];
+  for (const [dx, dy] of piece.cells) {
+    const x = gx + dx, y = gy + dy;
+    grid[y][x] = piece.color;
+    placed.push([x, y]);
+  }
+  tray[idx] = null;
+
+  const placementScore = Math.round(piece.cells.length * mode.multiplier);
+  score += placementScore;
+
+  paintGrid();
+
+  // Staggered "place" animation outward from piece center
+  const pcx = placed.reduce((s, p) => s + p[0], 0) / placed.length;
+  const pcy = placed.reduce((s, p) => s + p[1], 0) / placed.length;
+  // Per-cell spark count scales down for bigger pieces
+  const sparksPerCell = placed.length <= 3 ? 4 : placed.length <= 5 ? 3 : 2;
+  for (const [x, y] of placed) {
+    const c = getCellEl(x, y);
+    const dist = Math.hypot(x - pcx, y - pcy);
+    const delay = dist * 22;
+    c.classList.remove('placing');
+    void c.offsetWidth;
+    c.style.animationDelay = delay + 'ms';
+    c.classList.add('placing');
+    setTimeout(() => { c.style.animationDelay = ''; }, 600);
+    setTimeout(() => spawnSparks(c, piece.color, sparksPerCell), delay + 80);
+  }
+
+  if (navigator.vibrate) navigator.vibrate(10);
+
+  // Detect full lines
+  const fullRows = [], fullCols = [];
+  for (let y = 0; y < SIZE; y++) if (grid[y].every(v => v)) fullRows.push(y);
+  for (let x = 0; x < SIZE; x++) if (grid.every(row => row[x])) fullCols.push(x);
+
+  const totalLines = fullRows.length + fullCols.length;
+
+  if (totalLines > 0) {
+    streak += 1;
+    sprintLines += totalLines;
+
+    const toClear = new Set();
+    for (const y of fullRows) for (let x = 0; x < SIZE; x++) toClear.add(`${x},${y}`);
+    for (const x of fullCols) for (let y = 0; y < SIZE; y++) toClear.add(`${x},${y}`);
+
+    // Wave-clear from the placement focal point
+    const focalX = gx + pieceW(piece) / 2 - 0.5;
+    const focalY = gy + pieceH(piece) / 2 - 0.5;
+    let maxDelay = 0;
+    toClear.forEach(k => {
+      const [x, y] = k.split(',').map(Number);
+      const cell = getCellEl(x, y);
+      const dist = Math.hypot(x - focalX, y - focalY);
+      const delay = Math.round(dist * 32);
+      if (delay > maxDelay) maxDelay = delay;
+      cell.style.animationDelay = delay + 'ms';
+      cell.classList.add('clearing');
+    });
+
+    let gained = totalLines * 10;
+    if (totalLines >= 2) gained += (totalLines - 1) * 10;
+    if (streak > 1) gained += streak * 5;
+    gained = Math.round(gained * mode.multiplier);
+    score += gained;
+
+    showFloater(textForClear(totalLines, streak, gained));
+
+    if (totalLines >= 2 || streak >= 2) {
+      const board = document.getElementById('board');
+      board.classList.remove('combo-flash');
+      void board.offsetWidth;
+      board.classList.add('combo-flash');
+      setTimeout(() => board.classList.remove('combo-flash'), 720);
+    }
+
+    if (navigator.vibrate) navigator.vibrate([15, 30, 25]);
+
+    setTimeout(() => {
+      toClear.forEach(k => {
+        const [x, y] = k.split(',').map(Number);
+        grid[y][x] = null;
+      });
+      paintGrid();
+      afterMove();
+    }, 420 + maxDelay);
+  } else {
+    streak = 0;
+    afterMove();
+  }
+
+  setScoreDisplay('score', score);
+  if (mode.timed) {
+    document.getElementById('sprint-target').textContent = `${sprintLines} / ${mode.target}`;
+  }
+}
+
+function afterMove() {
+  const mode = MODES[currentMode];
+  if (mode.timed && sprintLines >= mode.target && !sprintWon) {
+    sprintWon = true;
+    stopSprintTimer();
+    sprintFinalSeconds = (performance.now() - sprintStartMs) / 1000;
+
+    // Celebration: combo flash + sparks across the board
+    const board = document.getElementById('board');
+    board.classList.remove('combo-flash');
+    void board.offsetWidth;
+    board.classList.add('combo-flash');
+    celebrate();
+
+    setTimeout(() => showGameOver(true), 750);
+    return;
+  }
+  if (tray.every(p => !p)) {
+    refillTray();
+  } else {
+    renderTray();
+    if (isGameOver()) showGameOver(false);
+  }
+}
+
+function textForClear(lines, streak, gained) {
+  if (lines >= 4) return `MEGA +${gained}`;
+  if (lines === 3) return `TRIPLE +${gained}`;
+  if (lines === 2) return `DOUBLE +${gained}`;
+  if (streak >= 3) return `STREAK \u00d7${streak} +${gained}`;
+  return `+${gained}`;
+}
+
+function showFloater(text) {
+  const board = document.getElementById('board');
+  const f = document.createElement('div');
+  f.className = 'floater';
+  f.textContent = text;
+  f.style.left = '50%';
+  f.style.top = '40%';
+  board.appendChild(f);
+  setTimeout(() => f.remove(), 920);
+}
+
+function spawnSparksAt(x, y, colorKey, count) {
+  const board = document.getElementById('board');
+  const color = COLORS[colorKey];
+
+  for (let i = 0; i < count; i++) {
+    const baseAngle = (i / count) * Math.PI * 2;
+    const angle = baseAngle + (Math.random() - 0.5) * 0.9;
+    const dist = 24 + Math.random() * 22;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist - 6;
+    const size = 4 + Math.random() * 3;
+
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    spark.style.left = x + 'px';
+    spark.style.top  = y + 'px';
+    spark.style.width  = size + 'px';
+    spark.style.height = size + 'px';
+    spark.style.marginLeft = (-size / 2) + 'px';
+    spark.style.marginTop  = (-size / 2) + 'px';
+    spark.style.background = color;
+    spark.style.boxShadow  = `0 0 8px ${color}`;
+    board.appendChild(spark);
+
+    const anim = spark.animate([
+      { opacity: 1, transform: 'translate(0, 0) scale(1)' },
+      { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(0.2)` }
+    ], {
+      duration: 650,
+      easing: 'cubic-bezier(.2, .6, .3, 1)',
+      fill: 'forwards',
+    });
+    anim.onfinish = () => spark.remove();
+  }
+}
+
+function spawnSparks(cellEl, colorKey, count) {
+  const board = document.getElementById('board');
+  const cellRect = cellEl.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+  const cx = cellRect.left - boardRect.left + cellRect.width / 2;
+  const cy = cellRect.top  - boardRect.top  + cellRect.height / 2;
+  spawnSparksAt(cx, cy, colorKey, count);
+}
+
+function celebrate() {
+  const board = document.getElementById('board');
+  const rect = board.getBoundingClientRect();
+  const palette = ['amber', 'cyan', 'green', 'pink', 'blue', 'orange', 'yellow', 'violet'];
+  for (let i = 0; i < 22; i++) {
+    setTimeout(() => {
+      const x = 40 + Math.random() * (rect.width - 80);
+      const y = 40 + Math.random() * (rect.height - 80);
+      const c = palette[Math.floor(Math.random() * palette.length)];
+      spawnSparksAt(x, y, c, 5);
+    }, i * 35);
+  }
+}
+
+// === SCORE TICKER ===
+const _scoreAnim = {};
+function setScoreDisplay(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (_scoreAnim[id]) cancelAnimationFrame(_scoreAnim[id]);
+  const start = parseInt(el.textContent, 10) || 0;
+  const diff = target - start;
+  if (diff === 0) { el.textContent = target; return; }
+  const duration = Math.min(700, 220 + Math.abs(diff) * 6);
+  const t0 = performance.now();
+  const tick = now => {
+    const t = Math.min(1, (now - t0) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(start + diff * eased);
+    if (t < 1) _scoreAnim[id] = requestAnimationFrame(tick);
+  };
+  _scoreAnim[id] = requestAnimationFrame(tick);
+}
+
+// === GAME OVER ===
+function showGameOver(isWin) {
+  stopSprintTimer();
+  const mode = MODES[currentMode];
+  const overlay = document.getElementById('overlay');
+  const title = document.getElementById('overlay-title');
+  const label = document.getElementById('overlay-label');
+  const final = document.getElementById('final-score');
+  const meta = document.getElementById('best-meta');
+  const newBest = document.getElementById('new-best');
+
+  let isNewBest = false;
+
+  if (mode.timed) {
+    if (isWin) {
+      label.textContent = `CLEARED ${mode.target} LINES`;
+      title.textContent = 'GG';
+      final.textContent = formatTime(sprintFinalSeconds);
+      const prev = bests.sprint;
+      if (prev == null || sprintFinalSeconds < prev) {
+        bests.sprint = sprintFinalSeconds;
+        saveBests();
+        isNewBest = true;
+      }
+      meta.textContent = `Best: ${formatTime(bests.sprint)}`;
+    } else {
+      label.textContent = 'GAME OVER';
+      title.textContent = 'OOF';
+      final.textContent = `${sprintLines}/${mode.target}`;
+      meta.textContent = (bests.sprint != null) ? `Best: ${formatTime(bests.sprint)}` : 'Best: —';
+    }
+  } else {
+    label.textContent = 'GAME OVER';
+    final.textContent = score;
+    if (score > (bests[currentMode] || 0)) {
+      bests[currentMode] = score;
+      saveBests();
+      isNewBest = true;
+    }
+    meta.textContent = `Best: ${bests[currentMode] || 0}`;
+    title.textContent =
+      score === 0 ? 'OOF' :
+      isNewBest   ? 'NEW BEST' :
+                    'NICE RUN';
+  }
+
+  newBest.classList.toggle('show', isNewBest);
+  overlay.classList.add('show');
+}
+
+// === BOOT ===
+window.addEventListener('load', () => {
+  loadBests();
+  refreshBestLabels();
+  showScreen('title');
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && drag) {
+    snapPieceBack(drag.el, drag.w, drag.h);
+    drag = null;
+    paintPreview();
+  }
+
+  // Pause/resume sprint timer so backgrounding doesn't ruin runs
+  const mode = MODES[currentMode];
+  if (mode && mode.timed && !sprintWon && sprintStartMs > 0) {
+    if (document.hidden) {
+      sprintHiddenAt = performance.now();
+      stopSprintTimer();
+    } else if (sprintHiddenAt > 0) {
+      sprintStartMs += performance.now() - sprintHiddenAt;
+      sprintHiddenAt = 0;
+      startSprintTimer();
+    }
+  }
+});
+</script>
+</body>
+</html>
