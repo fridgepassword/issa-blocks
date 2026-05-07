@@ -41,8 +41,14 @@
   }
 
   html, body {
-    height: 100%;
-    overflow: hidden;
+    /* Allow vertical scroll everywhere — the title screen (5 mode cards),
+       custom config, MZ banners, and super mode all need it on shorter
+       viewports. Pieces themselves still have `touch-action: none` so
+       drags don't accidentally scroll. */
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: var(--bg);
     color: var(--text);
     font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -66,7 +72,7 @@
       radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,184,77,0.08), transparent 60%),
       radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.06), transparent 60%),
       var(--bg);
-    touch-action: none;
+    touch-action: pan-y;
   }
 
   /* Screen routing */
