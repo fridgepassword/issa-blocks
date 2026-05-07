@@ -1824,19 +1824,172 @@
   body.feature-clear-all .clear-all-btn.used { display: none; }
   .clear-all-btn:active { transform: scale(0.95); }
 
-  /* Bomb piece styling */
+  /* Special piece styling */
   .piece-bomb .pcell:not(.empty) {
     background: radial-gradient(circle at 35% 30%, #ff8a8a, #c30 60%, #4a0000) !important;
     position: relative;
   }
   .piece-bomb .pcell:not(.empty)::after {
     content: '💣';
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 60%; line-height: 1;
+  }
+  .piece-lightning .pcell:not(.empty) {
+    background: radial-gradient(circle at 35% 30%, #fff7c2, #ffd93b 50%, #b27f00) !important;
+    position: relative;
+  }
+  .piece-lightning .pcell:not(.empty)::after {
+    content: '⚡';
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 65%; line-height: 1;
+  }
+  .piece-colorBomb .pcell:not(.empty) {
+    background: conic-gradient(from 0deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f) !important;
+    position: relative;
+  }
+  .piece-colorBomb .pcell:not(.empty)::after {
+    content: '🌈';
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 60%; line-height: 1;
+  }
+  .piece-multiplier .pcell:not(.empty) {
+    background: radial-gradient(circle at 35% 30%, #fff5b8, #ffb84d 60%, #c98a1a) !important;
+    position: relative;
+  }
+  .piece-multiplier .pcell:not(.empty)::after {
+    content: '★';
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 80%; line-height: 1;
+    color: #5a3a00;
+    font-weight: 800;
+  }
+
+  /* Undo / Skip buttons (custom mode features) */
+  .game-extras {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+  }
+  body.feature-undo .game-extras,
+  body.feature-skip .game-extras { display: grid; }
+  body:not(.feature-undo) #undo-btn,
+  body:not(.feature-skip) #skip-btn { display: none; }
+  body.feature-undo:not(.feature-skip) .game-extras,
+  body.feature-skip:not(.feature-undo) .game-extras { grid-template-columns: 1fr; }
+  .extras-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: transform 100ms ease, background 160ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .extras-btn:active { transform: scale(0.96); }
+  .extras-btn .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    margin-left: 2px;
+  }
+  .extras-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
+
+  /* Theme picker (in custom config) */
+  .cc-themes {
     display: grid;
-    place-items: center;
-    font-size: 60%;
-    line-height: 1;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .cc-theme {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 6px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 120ms ease;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  .cc-theme.active {
+    background: rgba(255,184,77,0.15);
+    border-color: rgba(255,184,77,0.5);
+    color: var(--accent);
+  }
+  .cc-theme .swatches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    height: 16px;
+    margin-bottom: 4px;
+  }
+  .cc-theme .swatches > div { border-radius: 3px; }
+
+  /* Tray slot count CSS variable for variable tray sizes */
+  .tray { grid-template-columns: repeat(var(--tray-cols, 3), 1fr) !important; }
+
+  /* === THEMES === */
+  body.theme-retro {
+    --bg: #001a00;
+    --bg-2: #002a00;
+    --cell: #003a00;
+    --cell-edge: rgba(0,255,0,0.15);
+    --text: #00ff88;
+    --dim: #339966;
+    --accent: #00ff44;
+  }
+  body.theme-retro {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%,    rgba(0,255,68,0.12), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0,255,136,0.06), transparent 60%),
+      var(--bg) !important;
+  }
+  body.theme-neon {
+    --bg: #0a0020;
+    --bg-2: #14002a;
+    --cell: #1f0040;
+    --cell-edge: rgba(255,0,255,0.12);
+    --text: #ffffff;
+    --dim: #9a6cd0;
+    --accent: #ff00ff;
+  }
+  body.theme-neon {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%,    rgba(255,0,255,0.18), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(0,255,255,0.10), transparent 60%),
+      var(--bg) !important;
+  }
+  body.theme-pastel {
+    --bg: #1d1428;
+    --bg-2: #2c1f3c;
+    --cell: #3d2c52;
+    --cell-edge: rgba(255,255,255,0.08);
+    --text: #fde0fc;
+    --dim: #b09cc4;
+    --accent: #f7b3d9;
+  }
+  body.theme-pastel {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%,    rgba(247,179,217,0.18), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(155,225,225,0.10), transparent 60%),
+      var(--bg) !important;
   }
   /* Hint highlight on board */
   .cell.hint {
@@ -2047,6 +2200,12 @@
 
     <div class="tray" id="tray"></div>
 
+    <!-- Custom-mode in-game buttons (Undo / Skip refresh) -->
+    <div class="game-extras" id="game-extras">
+      <button class="extras-btn" id="undo-btn" type="button">↶ UNDO <span class="count" id="undo-count">3</span></button>
+      <button class="extras-btn" id="skip-btn" type="button">↻ SKIP <span class="count" id="skip-count">3</span></button>
+    </div>
+
     <!-- HOLD TRAY (stash) — grows by 1 slot per line cleared -->
     <div class="hold-label" id="hold-label">STASH · DRAG TO STORE</div>
     <div class="hold-tray" id="hold-tray"></div>
@@ -2078,6 +2237,12 @@
         <button type="button" data-diff="hard">HARD<span>×1.5</span></button>
         <button type="button" data-diff="insane">INSANE<span>×2.0</span></button>
       </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="cc-section">
+      <div class="cc-section-title">THEME</div>
+      <div class="cc-themes" id="cc-themes"></div>
     </div>
 
     <!-- Piece pool -->
@@ -2112,9 +2277,25 @@
         <label>STARTING HOLD SLOTS <b id="cc-hold-out">0</b></label>
         <input type="range" id="cc-hold" min="0" max="8" step="1" value="0">
       </div>
+      <div class="cc-slider-row">
+        <label>TRAY SIZE <b id="cc-tray-out">3</b></label>
+        <input type="range" id="cc-tray" min="2" max="5" step="1" value="3">
+      </div>
+      <div class="cc-slider-row">
+        <label>PRE-FILL DENSITY <b id="cc-prefill-out">0%</b></label>
+        <input type="range" id="cc-prefill" min="0" max="50" step="5" value="0">
+      </div>
       <div class="cc-slider-row" id="cc-explosion-row" style="display:none">
-        <label>EXPLOSION SPAWN RATE <b id="cc-explosion-out">10%</b></label>
+        <label>SPECIAL PIECE RATE <b id="cc-explosion-out">10%</b></label>
         <input type="range" id="cc-explosion-rate" min="0" max="50" step="5" value="10">
+      </div>
+      <div class="cc-slider-row" id="cc-undo-row" style="display:none">
+        <label>UNDO USES <b id="cc-undo-out">3</b></label>
+        <input type="range" id="cc-undo-count" min="1" max="10" step="1" value="3">
+      </div>
+      <div class="cc-slider-row" id="cc-skip-row" style="display:none">
+        <label>SKIP USES <b id="cc-skip-out">3</b></label>
+        <input type="range" id="cc-skip-count" min="1" max="5" step="1" value="3">
       </div>
     </div>
 
@@ -2362,6 +2543,7 @@ const COLOR_KEYS = ['amber','red','orange','yellow','lime','green','teal','cyan'
 const CC_KEY = 'issa-blocks-custom-v1';
 const customConfig = {
   difficulty: 'normal',
+  theme: 'default',
   categories: {
     singles: true, lines: true, squares: true, L: true,
     sz: true, t: true, diag: true, hardcore: false,
@@ -2370,12 +2552,22 @@ const customConfig = {
   features: {
     clearAll: false,
     explosions: false,
+    lightning: false,
+    colorBomb: false,
+    multiplier: false,
     zen: false,
     hint: false,
+    comboPersist: false,
+    undo: false,
+    skip: false,
   },
   scoreMultiplier: 1.0,
   startingHoldSlots: 0,
-  explosionRate: 10,  // percent (0-50)
+  explosionRate: 10,  // percent (0-50) — applied per enabled special piece type
+  traySize: 3,        // 2..5
+  preFillDensity: 0,  // 0..50 percent of board pre-filled
+  undoCount: 3,       // 1..10
+  skipCount: 3,       // 1..5
 };
 
 const DIFFICULTY_MULT = { easy: 0.8, normal: 1.0, hard: 1.5, insane: 2.0 };
@@ -2498,6 +2690,15 @@ const HOLD_SLOT_CAP = 8;
 let score = 0, streak = 0;
 let drag = null;
 
+// Custom mode runtime state
+let traySize = 3;          // configurable in custom mode (2..5)
+let nextClearMult = 1;     // bumped to ×3 by multiplier piece for next clear
+let undosRemaining = 0;
+let skipsRemaining = 0;
+let history = [];          // last N pre-placement state snapshots
+const MAX_HISTORY = 10;
+let _undoLockUntil = 0;    // ms-timestamp until which undo is disabled (animation in flight)
+
 // Sprint state
 let sprintLines = 0;
 let sprintStartMs = 0;
@@ -2585,6 +2786,9 @@ function initGame() {
   grid = emptyGrid();
   score = 0;
   streak = 0;
+  nextClearMult = 1;
+  history = [];
+  _undoLockUntil = 0;
   sprintLines = 0;
   sprintStartMs = 0;
   sprintHiddenAt = 0;
@@ -2595,24 +2799,75 @@ function initGame() {
   // Reset holds for new run; custom mode may grant starting slots
   holds = [];
   maxHoldSlots = 0;
+
+  // Custom mode-specific config
   if (currentMode === 'custom') {
+    traySize = Math.max(2, Math.min(5, customConfig.traySize || 3));
     maxHoldSlots = Math.min(HOLD_SLOT_CAP, customConfig.startingHoldSlots || 0);
     holds = Array(maxHoldSlots).fill(null);
+    undosRemaining = customConfig.features.undo ? (customConfig.undoCount || 3) : 0;
+    skipsRemaining = customConfig.features.skip ? (customConfig.skipCount || 3) : 0;
+  } else {
+    traySize = 3;
+    undosRemaining = 0;
+    skipsRemaining = 0;
   }
 
-  // Toggle body class for the in-game Clear All button
-  document.body.classList.toggle('feature-clear-all',
-    currentMode === 'custom' && customConfig.features.clearAll);
+  // Toggle body classes for in-game custom features
+  const isCustom = currentMode === 'custom';
+  document.body.classList.toggle('feature-clear-all', isCustom && customConfig.features.clearAll);
+  document.body.classList.toggle('feature-undo',      isCustom && customConfig.features.undo);
+  document.body.classList.toggle('feature-skip',      isCustom && customConfig.features.skip);
+  // Theme — clear all theme classes, then apply selected one
+  ['theme-default','theme-retro','theme-neon','theme-pastel'].forEach(c => document.body.classList.remove(c));
+  if (isCustom && customConfig.theme && customConfig.theme !== 'default') {
+    document.body.classList.add('theme-' + customConfig.theme);
+  }
+
   const clearBtn = document.getElementById('clear-all-btn');
   if (clearBtn) clearBtn.classList.remove('used');
+  refreshExtrasUI();
 
   buildGrid();
+
+  // Pre-fill density: scatter random colored cells before refilling tray
+  if (isCustom && customConfig.preFillDensity > 0) {
+    const total = SIZE * SIZE;
+    const target = Math.floor(total * Math.min(50, customConfig.preFillDensity) / 100);
+    const colorPool = ['amber','red','orange','yellow','lime','green','teal','cyan','blue','violet','pink'];
+    let placed = 0, tries = 0;
+    while (placed < target && tries < 1000) {
+      const x = Math.floor(Math.random() * SIZE);
+      const y = Math.floor(Math.random() * SIZE);
+      tries++;
+      if (!grid[y][x]) {
+        grid[y][x] = colorPool[Math.floor(Math.random() * colorPool.length)];
+        placed++;
+      }
+    }
+    paintGrid();
+  }
+
   refillTray();
   renderHolds();
 
   document.getElementById('score').textContent = '0';
+  setScoreDisplay('score', score);
   updateLeftStat(true);
   SFX.start();
+}
+
+function refreshExtrasUI() {
+  const undoBtn = document.getElementById('undo-btn');
+  const skipBtn = document.getElementById('skip-btn');
+  if (undoBtn) {
+    document.getElementById('undo-count').textContent = undosRemaining;
+    undoBtn.disabled = undosRemaining <= 0 || history.length === 0;
+  }
+  if (skipBtn) {
+    document.getElementById('skip-count').textContent = skipsRemaining;
+    skipBtn.disabled = skipsRemaining <= 0;
+  }
 }
 
 function updateLeftStat(immediate = false) {
@@ -2681,7 +2936,8 @@ function getCellEl(x, y) { return document.getElementById('grid').children[y * S
 // === TRAY ===
 function refillTray() {
   const pool = MODES[currentMode].pool;
-  tray = [pickFrom(pool), pickFrom(pool), pickFrom(pool)];
+  tray = [];
+  for (let i = 0; i < traySize; i++) tray.push(pickFrom(pool));
   tray.forEach(p => { p._entering = true; });
   renderTray();
   if (isGameOver()) showGameOver(false);
@@ -2695,7 +2951,8 @@ function pieceH(p) { return Math.max(...p.cells.map(c => c[1])) + 1; }
 function renderTray() {
   const trayEl = document.getElementById('tray');
   trayEl.innerHTML = '';
-  for (let i = 0; i < 3; i++) {
+  trayEl.style.setProperty('--tray-cols', traySize);
+  for (let i = 0; i < traySize; i++) {
     const slot = document.createElement('div');
     slot.className = 'slot' + (tray[i] ? '' : ' empty');
     if (tray[i]) {
@@ -2703,7 +2960,7 @@ function renderTray() {
       const w = pieceW(piece), h = pieceH(piece);
       const trayCell = Math.min(20, Math.floor(96 / Math.max(w, h)));
       const el = document.createElement('div');
-      el.className = 'piece' + (piece.special === 'bomb' ? ' piece-bomb' : '');
+      el.className = 'piece' + (piece.special ? ' piece-' + piece.special : '');
       el.dataset.idx = i;
       el.style.gridTemplateColumns = `repeat(${w}, ${trayCell}px)`;
       el.style.gridTemplateRows    = `repeat(${h}, ${trayCell}px)`;
@@ -3007,7 +3264,7 @@ function renderHolds(opts) {
       const w = pieceW(piece), h = pieceH(piece);
       const cell = Math.min(13, Math.floor(48 / Math.max(w, h)));
       const el = document.createElement('div');
-      el.className = 'piece' + (piece.special === 'bomb' ? ' piece-bomb' : '');
+      el.className = 'piece' + (piece.special ? ' piece-' + piece.special : '');
       el.style.gridTemplateColumns = `repeat(${w}, ${cell}px)`;
       el.style.gridTemplateRows    = `repeat(${h}, ${cell}px)`;
       el.style.setProperty('--c', COLORS[piece.color]);
@@ -3029,6 +3286,19 @@ function renderHolds(opts) {
 function placePiece(source, gx, gy) {
   const piece = getPieceFrom(source);
   const mode = MODES[currentMode];
+
+  // Snapshot current state for Undo (custom mode)
+  if (currentMode === 'custom' && customConfig.features.undo) {
+    if (history.length >= MAX_HISTORY) history.shift();
+    history.push({
+      grid: grid.map(row => [...row]),
+      score, streak, nextClearMult, sprintLines, maxHoldSlots,
+      tray:  tray.map(p => p ? { ...p } : null),
+      holds: holds.map(p => p ? { ...p } : null),
+    });
+    _undoLockUntil = performance.now() + 700;
+    refreshExtrasUI();
+  }
 
   // Start sprint timer on first placement
   if (mode.timed && sprintLines === 0 && !sprintTimerId) startSprintTimer();
@@ -3066,9 +3336,13 @@ function placePiece(source, gx, gy) {
 
   if (navigator.vibrate) navigator.vibrate(10);
 
-  // === EXPLOSION PIECE: clear a 3x3 around the placement center ===
-  if (piece.special === 'bomb') {
-    setTimeout(() => detonateAt(gx, gy, piece), 220);
+  // === SPECIAL PIECE EFFECTS ===
+  if (piece.special === 'bomb')      setTimeout(() => detonateAt(gx, gy, piece), 220);
+  if (piece.special === 'lightning') setTimeout(() => detonateLightning(gx, gy, piece), 220);
+  if (piece.special === 'colorBomb') setTimeout(() => detonateColorBomb(gx, gy, piece), 220);
+  if (piece.special === 'multiplier') {
+    nextClearMult = 3;
+    showFloater('★ ×3 NEXT CLEAR');
   }
 
   // Detect full lines
@@ -3117,8 +3391,9 @@ function placePiece(source, gx, gy) {
     let gained = totalLines * 10;
     if (totalLines >= 2) gained += (totalLines - 1) * 10;
     if (streak > 1) gained += streak * 5;
-    gained = Math.round(gained * mode.multiplier);
+    gained = Math.round(gained * mode.multiplier * nextClearMult);
     score += gained;
+    if (nextClearMult !== 1) nextClearMult = 1;     // multiplier piece's effect consumed
 
     showFloater(textForClear(totalLines, streak, gained));
 
@@ -3141,7 +3416,10 @@ function placePiece(source, gx, gy) {
       afterMove();
     }, 420 + maxDelay);
   } else {
-    streak = 0;
+    // Combo persistence (custom mode): keep streak alive across no-clear moves
+    if (!(currentMode === 'custom' && customConfig.features.comboPersist)) {
+      streak = 0;
+    }
     afterMove();
   }
 
@@ -3178,13 +3456,14 @@ function afterMove() {
     if (currentMode === 'custom' && customConfig.features.zen &&
         tray.every(p => !p || !canPlaceAnywhere(p)) &&
         holds.every(p => !p || !canPlaceAnywhere(p))) {
-      tray = [null, null, null];
+      tray = Array(traySize).fill(null);
       refillTray();
     } else if (isGameOver()) {
       showGameOver(false);
     }
   }
   renderHolds();
+  refreshExtrasUI();
 }
 
 function textForClear(lines, streak, gained) {
@@ -3356,14 +3635,20 @@ function buildCustomPool() {
   if (Array.isArray(customConfig.customPieces)) {
     pool.push(...customConfig.customPieces);
   }
-  // Inject explosion (bomb) pieces by spawn rate
-  if (customConfig.features.explosions && pool.length > 0) {
-    const ratePct = Math.max(0, Math.min(50, customConfig.explosionRate || 0));
-    const target = Math.max(1, Math.round(pool.length * (ratePct / 100)));
-    for (let i = 0; i < target; i++) {
-      pool.push({ cells: [[0,0]], color: 'red', special: 'bomb' });
+  // Inject special pieces, each at the configured rate
+  const ratePct = Math.max(0, Math.min(50, customConfig.explosionRate || 0));
+  const baseSize = pool.length;
+  function spawnSpecials(specialType, color) {
+    if (baseSize === 0) return;
+    const n = Math.max(1, Math.round(baseSize * (ratePct / 100)));
+    for (let i = 0; i < n; i++) {
+      pool.push({ cells: [[0,0]], color, special: specialType });
     }
   }
+  if (customConfig.features.explosions) spawnSpecials('bomb',       'red');
+  if (customConfig.features.lightning)  spawnSpecials('lightning',  'yellow');
+  if (customConfig.features.colorBomb)  spawnSpecials('colorBomb',  'pink');
+  if (customConfig.features.multiplier) spawnSpecials('multiplier', 'amber');
   // Fallback: never let the pool be empty
   if (pool.length === 0) pool.push({ cells: [[0,0]], color: 'amber' });
   return pool;
@@ -3416,6 +3701,106 @@ function detonateAt(gx, gy, piece) {
   }, 440);
 }
 
+function detonateLightning(gx, gy, piece) {
+  const [dx, dy] = piece.cells[0];
+  const cx = gx + dx, cy = gy + dy;
+  const cleared = new Set();
+  for (let x = 0; x < SIZE; x++) if (grid[cy][x]) cleared.add(`${x},${cy}`);
+  for (let y = 0; y < SIZE; y++) if (grid[y][cx]) cleared.add(`${cx},${y}`);
+  cleared.delete(`${cx},${cy}`); // bomb cell already counted
+  cleared.add(`${cx},${cy}`);
+  if (cleared.size === 0) return;
+  const points = Math.round(cleared.size * 4 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  if (nextClearMult !== 1) nextClearMult = 1;
+  cleared.forEach(k => {
+    const [x, y] = k.split(',').map(Number);
+    const c = getCellEl(x, y);
+    c.style.animationDelay = (Math.hypot(x - cx, y - cy) * 30) + 'ms';
+    c.classList.add('clearing');
+  });
+  score += points;
+  setScoreDisplay('score', score);
+  showFloater(`⚡ ZAP +${points}`);
+  SFX.combo();
+  if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+  setTimeout(() => {
+    cleared.forEach(k => {
+      const [x, y] = k.split(',').map(Number);
+      grid[y][x] = null;
+    });
+    paintGrid();
+    if (isGameOver()) showGameOver(false);
+  }, 480);
+}
+
+function detonateColorBomb(gx, gy, piece) {
+  // Pick the most common non-special color on the board
+  const counts = {};
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+    const v = grid[y][x];
+    if (v) counts[v] = (counts[v] || 0) + 1;
+  }
+  let target = null, max = 0;
+  for (const c in counts) if (counts[c] > max) { max = counts[c]; target = c; }
+  if (!target) return;
+  const cleared = [];
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+    if (grid[y][x] === target) cleared.push([x, y]);
+  }
+  if (cleared.length === 0) return;
+  const points = Math.round(cleared.length * 5 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  if (nextClearMult !== 1) nextClearMult = 1;
+  for (const [x, y] of cleared) {
+    const c = getCellEl(x, y);
+    c.style.animationDelay = (Math.random() * 200) + 'ms';
+    c.classList.add('clearing');
+  }
+  score += points;
+  setScoreDisplay('score', score);
+  showFloater(`🌈 ${target.toUpperCase()} +${points}`);
+  SFX.combo();
+  if (navigator.vibrate) navigator.vibrate([15, 30, 15, 30, 15]);
+  setTimeout(() => {
+    for (const [x, y] of cleared) grid[y][x] = null;
+    paintGrid();
+    if (isGameOver()) showGameOver(false);
+  }, 540);
+}
+
+function undoMove() {
+  if (currentMode !== 'custom' || !customConfig.features.undo) return;
+  if (undosRemaining <= 0 || history.length === 0) return;
+  if (performance.now() < _undoLockUntil) return;
+  const s = history.pop();
+  grid = s.grid;
+  score = s.score;
+  streak = s.streak;
+  nextClearMult = s.nextClearMult;
+  sprintLines = s.sprintLines;
+  maxHoldSlots = s.maxHoldSlots;
+  tray = s.tray;
+  holds = s.holds;
+  undosRemaining--;
+  paintGrid();
+  renderTray();
+  renderHolds();
+  setScoreDisplay('score', score);
+  refreshExtrasUI();
+  showFloater('↶ UNDO');
+  SFX.pickup();
+}
+
+function skipTray() {
+  if (currentMode !== 'custom' || !customConfig.features.skip) return;
+  if (skipsRemaining <= 0) return;
+  skipsRemaining--;
+  tray = Array(traySize).fill(null);
+  refillTray();
+  refreshExtrasUI();
+  showFloater('↻ SKIP');
+  SFX.pickup();
+}
+
 function clearAllAction() {
   if (currentMode !== 'custom' || !customConfig.features.clearAll) return;
   const btn = document.getElementById('clear-all-btn');
@@ -3453,12 +3838,20 @@ function closeCustomConfig() {
 }
 function resetCustomConfig() {
   customConfig.difficulty = 'normal';
+  customConfig.theme = 'default';
   customConfig.categories = { singles: true, lines: true, squares: true, L: true, sz: true, t: true, diag: true, hardcore: false };
   customConfig.customPieces = [];
-  customConfig.features = { clearAll: false, explosions: false, zen: false, hint: false };
+  customConfig.features = {
+    clearAll: false, explosions: false, lightning: false, colorBomb: false, multiplier: false,
+    zen: false, hint: false, comboPersist: false, undo: false, skip: false,
+  };
   customConfig.scoreMultiplier = 1.0;
   customConfig.startingHoldSlots = 0;
   customConfig.explosionRate = 10;
+  customConfig.traySize = 3;
+  customConfig.preFillDensity = 0;
+  customConfig.undoCount = 3;
+  customConfig.skipCount = 3;
   saveCustomConfig();
   renderCustomConfig();
 }
@@ -3549,12 +3942,50 @@ function renderCustomConfig() {
     list.appendChild(wrap);
   });
 
-  // Feature toggles
+  // Theme picker
+  const THEMES = [
+    { key: 'default', label: 'Default', swatches: ['#ffb84d','#5c7cfa','#51cf66','#f783ac'] },
+    { key: 'retro',   label: 'Retro',   swatches: ['#00ff44','#003a00','#00ff88','#001a00'] },
+    { key: 'neon',    label: 'Neon',    swatches: ['#ff00ff','#00ffff','#ffff00','#ff0080'] },
+    { key: 'pastel',  label: 'Pastel',  swatches: ['#f7b3d9','#b3d9f7','#d9f7b3','#f7d9b3'] },
+  ];
+  const themesEl = document.getElementById('cc-themes');
+  themesEl.innerHTML = '';
+  for (const t of THEMES) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cc-theme' + (t.key === customConfig.theme ? ' active' : '');
+    const sw = document.createElement('div');
+    sw.className = 'swatches';
+    for (const c of t.swatches) {
+      const d = document.createElement('div');
+      d.style.background = c;
+      sw.appendChild(d);
+    }
+    btn.appendChild(sw);
+    const lbl = document.createElement('div');
+    lbl.textContent = t.label.toUpperCase();
+    btn.appendChild(lbl);
+    btn.onclick = () => {
+      customConfig.theme = t.key;
+      saveCustomConfig();
+      renderCustomConfig();
+    };
+    themesEl.appendChild(btn);
+  }
+
+  // Feature toggles (now organized: specials first, then qol)
   const FEATURES = [
-    { key: 'clearAll',   icon: '💥', name: 'Clear All button',     desc: 'A button on the board that wipes everything. One use per run.' },
-    { key: 'explosions', icon: '💣', name: 'Explosion blocks',     desc: 'Random bomb pieces appear in the tray. Placing one detonates a 3×3.' },
-    { key: 'zen',        icon: '🧘', name: 'Zen mode',             desc: "No game over. If pieces don't fit, the tray refills automatically." },
-    { key: 'hint',       icon: '💡', name: 'Hint highlights',      desc: 'When you pick up a piece, the board faintly highlights any spot it can fit.' },
+    { key: 'explosions',   icon: '💣', name: 'Explosion pieces',     desc: 'Bomb pieces that detonate a 3×3 on placement.' },
+    { key: 'lightning',    icon: '⚡', name: 'Lightning pieces',     desc: 'Clears the entire row AND column at the placement point.' },
+    { key: 'colorBomb',    icon: '🌈', name: 'Color bomb pieces',    desc: 'Wipes every cell of the most-common color on the board.' },
+    { key: 'multiplier',   icon: '★',  name: 'Multiplier pieces',    desc: 'Placing one makes your next line clear score ×3.' },
+    { key: 'clearAll',     icon: '💥', name: 'Clear-All button',     desc: 'A button on the board that wipes everything. One use per run.' },
+    { key: 'zen',          icon: '🧘', name: 'Zen mode',             desc: "No game over. If pieces don't fit, the tray refills automatically." },
+    { key: 'hint',         icon: '💡', name: 'Hint highlights',      desc: 'When you pick up a piece, the board faintly highlights any spot it can fit.' },
+    { key: 'comboPersist', icon: '🔥', name: 'Combo persistence',    desc: "Your streak doesn't reset when you place a piece without clearing a line." },
+    { key: 'undo',         icon: '↶',  name: 'Undo button',          desc: 'In-game button to reverse your last placement. Limited uses per run.' },
+    { key: 'skip',         icon: '↻',  name: 'Skip refresh button',  desc: 'In-game button to throw out the current tray and pull fresh pieces.' },
   ];
   const togWrap = document.getElementById('cc-toggles');
   togWrap.innerHTML = '';
@@ -3596,14 +4027,61 @@ function renderCustomConfig() {
     saveCustomConfig();
   };
 
+  // Show special-piece rate slider if any special-piece feature is on
+  const anySpecial = customConfig.features.explosions || customConfig.features.lightning ||
+                     customConfig.features.colorBomb  || customConfig.features.multiplier;
   const expRow = document.getElementById('cc-explosion-row');
-  expRow.style.display = customConfig.features.explosions ? '' : 'none';
+  expRow.style.display = anySpecial ? '' : 'none';
   const expSlider = document.getElementById('cc-explosion-rate');
   expSlider.value = customConfig.explosionRate;
   document.getElementById('cc-explosion-out').textContent = customConfig.explosionRate + '%';
   expSlider.oninput = () => {
     customConfig.explosionRate = parseInt(expSlider.value, 10);
     document.getElementById('cc-explosion-out').textContent = customConfig.explosionRate + '%';
+    saveCustomConfig();
+  };
+
+  // Tray size slider
+  const traySlider = document.getElementById('cc-tray');
+  traySlider.value = customConfig.traySize || 3;
+  document.getElementById('cc-tray-out').textContent = customConfig.traySize || 3;
+  traySlider.oninput = () => {
+    customConfig.traySize = parseInt(traySlider.value, 10);
+    document.getElementById('cc-tray-out').textContent = customConfig.traySize;
+    saveCustomConfig();
+  };
+
+  // Pre-fill density slider
+  const preSlider = document.getElementById('cc-prefill');
+  preSlider.value = customConfig.preFillDensity || 0;
+  document.getElementById('cc-prefill-out').textContent = (customConfig.preFillDensity || 0) + '%';
+  preSlider.oninput = () => {
+    customConfig.preFillDensity = parseInt(preSlider.value, 10);
+    document.getElementById('cc-prefill-out').textContent = customConfig.preFillDensity + '%';
+    saveCustomConfig();
+  };
+
+  // Undo count slider (only shown when undo enabled)
+  const undoRow = document.getElementById('cc-undo-row');
+  undoRow.style.display = customConfig.features.undo ? '' : 'none';
+  const undoSlider = document.getElementById('cc-undo-count');
+  undoSlider.value = customConfig.undoCount || 3;
+  document.getElementById('cc-undo-out').textContent = customConfig.undoCount || 3;
+  undoSlider.oninput = () => {
+    customConfig.undoCount = parseInt(undoSlider.value, 10);
+    document.getElementById('cc-undo-out').textContent = customConfig.undoCount;
+    saveCustomConfig();
+  };
+
+  // Skip count slider (only shown when skip enabled)
+  const skipRow = document.getElementById('cc-skip-row');
+  skipRow.style.display = customConfig.features.skip ? '' : 'none';
+  const skipSlider = document.getElementById('cc-skip-count');
+  skipSlider.value = customConfig.skipCount || 3;
+  document.getElementById('cc-skip-out').textContent = customConfig.skipCount || 3;
+  skipSlider.oninput = () => {
+    customConfig.skipCount = parseInt(skipSlider.value, 10);
+    document.getElementById('cc-skip-out').textContent = customConfig.skipCount;
     saveCustomConfig();
   };
 }
@@ -3690,6 +4168,12 @@ window.addEventListener('load', () => {
   // Clear-All button (custom mode feature)
   const clearBtn = document.getElementById('clear-all-btn');
   if (clearBtn) clearBtn.addEventListener('click', clearAllAction);
+
+  // Undo / Skip buttons (custom mode features)
+  const undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) undoBtn.addEventListener('click', undoMove);
+  const skipBtn = document.getElementById('skip-btn');
+  if (skipBtn) skipBtn.addEventListener('click', skipTray);
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -3772,7 +4256,7 @@ document.addEventListener('visibilitychange', () => {
         boardFloater('+100 (PAID)');
     } },
     { key:'refresh', icon:'🔄', label:'NEW',    cost: 8, run() {
-        tray = [null, null, null];
+        tray = Array(traySize).fill(null);
         refillTray();
         boardFloater('NEW PIECES');
     } },
@@ -4231,7 +4715,7 @@ document.addEventListener('visibilitychange', () => {
     for (let y = SIZE - 3; y < SIZE; y++)
       for (let x = 0; x < SIZE; x++) grid[y][x] = null;
     paintGrid();
-    tray = [null, null, null];
+    tray = Array(traySize).fill(null);
     refillTray();
     document.getElementById('overlay').classList.remove('show');
     boardFloater('💎 REVIVED');
