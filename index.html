@@ -70,8 +70,14 @@
   }
 
   /* Screen routing */
-  body[data-screen="title"] .game-screen { display: none; }
-  body[data-screen="game"]  .title-screen { display: none; }
+  body[data-screen="title"]  .game-screen,
+  body[data-screen="title"]  .custom-config { display: none; }
+  body[data-screen="game"]   .title-screen,
+  body[data-screen="game"]   .custom-config { display: none; }
+  body[data-screen="custom"] .title-screen,
+  body[data-screen="custom"] .game-screen { display: none; }
+  body[data-screen="custom"] { overflow-y: auto !important; height: auto !important; touch-action: pan-y !important; }
+  html.cc-scroll { overflow-y: auto !important; height: auto !important; }
 
   /* === TITLE SCREEN === */
   .title-screen {
@@ -1413,6 +1419,425 @@
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 
+  /* ============================================ */
+  /* === CUSTOM GAME CONFIG ====================== */
+  /* ============================================ */
+  .custom-config {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px 4px 24px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .cc-header { display: flex; align-items: center; gap: 12px; }
+  .cc-header h1 {
+    flex: 1;
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+  }
+  .cc-back {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding: 7px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .cc-section {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cc-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+  .cc-section-sub {
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.4;
+    margin-top: -6px;
+  }
+
+  .cc-difficulty {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .cc-difficulty button {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 9px 4px 7px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    transition: all 120ms ease;
+  }
+  .cc-difficulty button span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--dim);
+    margin-top: 4px;
+    letter-spacing: 0.05em;
+  }
+  .cc-difficulty button.active {
+    background: rgba(255,184,77,0.15);
+    border-color: rgba(255,184,77,0.5);
+    color: var(--accent);
+    box-shadow: 0 0 18px rgba(255,184,77,0.2);
+  }
+  .cc-difficulty button.active span { color: var(--accent); }
+
+  .cc-piece-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .cc-piece-toggle {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 120ms ease;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+  .cc-piece-toggle.active {
+    background: rgba(81,207,102,0.1);
+    border-color: rgba(81,207,102,0.4);
+    color: var(--easy);
+  }
+  .cc-piece-toggle .preview {
+    display: grid;
+    gap: 1px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .cc-piece-toggle .preview > div {
+    border-radius: 2px;
+  }
+  .cc-piece-toggle .preview > div.filled {
+    background: var(--c, var(--accent));
+  }
+  .cc-piece-toggle .preview > div.empty {
+    background: rgba(255,255,255,0.02);
+  }
+  .cc-piece-toggle .label {
+    flex: 1;
+  }
+  .cc-piece-toggle .check {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    color: transparent;
+  }
+  .cc-piece-toggle.active .check {
+    background: var(--easy);
+    border-color: var(--easy);
+    color: #003311;
+  }
+  .cc-piece-toggle.active .check::after { content: '✓'; }
+
+  .cc-custom-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 6px;
+  }
+  .cc-custom-list:empty { display: none; }
+  .cc-custom-piece {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+  }
+  .cc-custom-piece .x {
+    position: absolute;
+    top: 2px; right: 2px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    border: none;
+    line-height: 1;
+  }
+  .cc-design-btn {
+    background: rgba(81,207,102,0.1);
+    border: 1px dashed rgba(81,207,102,0.5);
+    color: var(--easy);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+  }
+
+  .cc-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cc-toggle-row {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 120ms ease;
+  }
+  .cc-toggle-row.active {
+    background: rgba(255,184,77,0.06);
+    border-color: rgba(255,184,77,0.35);
+  }
+  .cc-toggle-row .icon { font-size: 18px; line-height: 1; }
+  .cc-toggle-row .body { flex: 1; }
+  .cc-toggle-row .name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .cc-toggle-row.active .name { color: var(--accent); }
+  .cc-toggle-row .desc {
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .cc-toggle-row .switch {
+    width: 28px; height: 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background 160ms ease;
+  }
+  .cc-toggle-row .switch::after {
+    content: '';
+    position: absolute;
+    top: 1px; left: 1px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 180ms cubic-bezier(.34,1.5,.5,1);
+  }
+  .cc-toggle-row.active .switch { background: var(--accent); }
+  .cc-toggle-row.active .switch::after { transform: translateX(12px); }
+
+  .cc-slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .cc-slider-row label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+  }
+  .cc-slider-row label b {
+    color: var(--accent);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  .cc-slider-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .cc-play {
+    background: var(--accent);
+    color: #1a1100;
+    border: none;
+    padding: 18px;
+    border-radius: 14px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    box-shadow: 0 14px 40px -12px rgba(255,184,77,0.7);
+    margin-top: 6px;
+    transition: transform 100ms ease;
+  }
+  .cc-play:active { transform: scale(0.98); }
+
+  /* Designer modal */
+  .cc-designer {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.94);
+    backdrop-filter: blur(20px);
+    z-index: 2700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .cc-designer.show { display: flex; animation: fade 220ms ease-out; }
+  .cc-designer-card {
+    background: var(--bg-2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 18px;
+    max-width: 360px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cc-designer h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+  }
+  .cc-design-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    aspect-ratio: 1;
+  }
+  .cc-design-cell {
+    background: var(--cell);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 100ms ease, transform 100ms ease;
+  }
+  .cc-design-cell:active { transform: scale(0.92); }
+  .cc-design-cell.filled {
+    background: var(--c, var(--accent));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.35),
+      inset 0 -2px 0 rgba(0,0,0,0.28);
+  }
+  .cc-color-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cc-color-swatch {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 100ms ease;
+  }
+  .cc-color-swatch.active {
+    border-color: white;
+    transform: scale(1.15);
+  }
+  .cc-designer-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Clear All button on the board (only in custom mode when feature enabled) */
+  .clear-all-btn {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 8;
+    background: linear-gradient(135deg, #ff5f5f, #ff9f43);
+    color: #1a0000;
+    border: 2px solid rgba(0,0,0,0.4);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(255,95,95,0.5);
+  }
+  body.feature-clear-all .clear-all-btn { display: block; }
+  body.feature-clear-all .clear-all-btn.used { display: none; }
+  .clear-all-btn:active { transform: scale(0.95); }
+
+  /* Bomb piece styling */
+  .piece-bomb .pcell:not(.empty) {
+    background: radial-gradient(circle at 35% 30%, #ff8a8a, #c30 60%, #4a0000) !important;
+    position: relative;
+  }
+  .piece-bomb .pcell:not(.empty)::after {
+    content: '💣';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 60%;
+    line-height: 1;
+  }
+  /* Hint highlight on board */
+  .cell.hint {
+    background: color-mix(in srgb, var(--easy) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--easy) 35%, transparent);
+  }
+
   /* === Fake browser-style download notifications (super mode only) === */
   .mz-downloads {
     position: fixed;
@@ -1567,6 +1992,11 @@
         <div class="mode-desc">Brutal pieces. 1.5× score multiplier.</div>
         <div class="mode-best">BEST<b id="best-hardcore">0</b></div>
       </button>
+      <button class="mode-card" data-mode="custom" onclick="openCustomConfig()">
+        <div class="mode-name">CUSTOM</div>
+        <div class="mode-desc">Build your own run. Pieces, features, difficulty.</div>
+        <div class="mode-best">BEST<b id="best-custom">0</b></div>
+      </button>
     </div>
 
     <!-- MZ: free coin button + banner ad on title screen -->
@@ -1603,6 +2033,7 @@
       <div class="mz-sponsored">SPONSORED BY MERGE COFFEE TYCOON 4</div>
       <button class="mz-premium-cta" id="mz-premium-cta" type="button">REMOVE ADS · $9.99/MO</button>
       <div class="mz-ribbon mz-super-only">TAP HERE</div>
+      <button class="clear-all-btn" id="clear-all-btn" type="button" title="Clear the entire board (one use)">💥 CLEAR ALL</button>
     </div>
 
     <!-- MZ: middle banner (super only) -->
@@ -1621,6 +2052,82 @@
     <div class="mz-banner" data-banner-id="bottom"></div>
     <div class="mz-banner mz-super-only" data-banner-id="bottom-2"></div>
     <div class="mz-banner mz-super-only" data-banner-id="bottom-3"></div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- CUSTOM GAME CONFIG SCREEN                     -->
+  <!-- ============================================ -->
+  <div class="custom-config" id="custom-config">
+    <div class="cc-header">
+      <button class="cc-back" type="button" onclick="closeCustomConfig()">← BACK</button>
+      <h1>CUSTOM GAME</h1>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="cc-section">
+      <div class="cc-section-title">DIFFICULTY</div>
+      <div class="cc-difficulty" id="cc-difficulty">
+        <button type="button" data-diff="easy">EASY<span>×0.8</span></button>
+        <button type="button" data-diff="normal" class="active">NORMAL<span>×1.0</span></button>
+        <button type="button" data-diff="hard">HARD<span>×1.5</span></button>
+        <button type="button" data-diff="insane">INSANE<span>×2.0</span></button>
+      </div>
+    </div>
+
+    <!-- Piece pool -->
+    <div class="cc-section">
+      <div class="cc-section-title">PIECE POOL</div>
+      <div class="cc-section-sub">Pick which kinds of pieces show up.</div>
+      <div class="cc-piece-grid" id="cc-piece-grid"></div>
+    </div>
+
+    <!-- Custom pieces -->
+    <div class="cc-section">
+      <div class="cc-section-title">CUSTOM PIECES</div>
+      <div class="cc-section-sub">Design your own. They go into the pool.</div>
+      <div class="cc-custom-list" id="cc-custom-list"></div>
+      <button class="cc-design-btn" type="button" onclick="openDesigner()">+ DESIGN A PIECE</button>
+    </div>
+
+    <!-- Features -->
+    <div class="cc-section">
+      <div class="cc-section-title">FEATURES</div>
+      <div class="cc-toggles" id="cc-toggles"></div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="cc-section">
+      <div class="cc-section-title">TUNING</div>
+      <div class="cc-slider-row">
+        <label>SCORE MULTIPLIER <b id="cc-score-out">×1.0</b></label>
+        <input type="range" id="cc-score" min="0.5" max="5" step="0.5" value="1">
+      </div>
+      <div class="cc-slider-row">
+        <label>STARTING HOLD SLOTS <b id="cc-hold-out">0</b></label>
+        <input type="range" id="cc-hold" min="0" max="8" step="1" value="0">
+      </div>
+      <div class="cc-slider-row" id="cc-explosion-row" style="display:none">
+        <label>EXPLOSION SPAWN RATE <b id="cc-explosion-out">10%</b></label>
+        <input type="range" id="cc-explosion-rate" min="0" max="50" step="5" value="10">
+      </div>
+    </div>
+
+    <button class="cc-play" type="button" onclick="playCustom()">▶ PLAY</button>
+    <button class="btn secondary" type="button" onclick="resetCustomConfig()" style="align-self:center;margin-top:6px;font-size:9px;letter-spacing:0.18em">RESET TO DEFAULTS</button>
+  </div>
+
+  <!-- Custom piece designer modal -->
+  <div class="cc-designer" id="cc-designer">
+    <div class="cc-designer-card">
+      <h2>DESIGN A PIECE</h2>
+      <div class="cc-section-sub">Tap cells to toggle. Pick a color.</div>
+      <div class="cc-design-grid" id="cc-design-grid"></div>
+      <div class="cc-color-picker" id="cc-color-picker"></div>
+      <div class="cc-designer-btns">
+        <button class="btn secondary" type="button" onclick="closeDesigner()">CANCEL</button>
+        <button class="btn" type="button" onclick="saveDesignerPiece()">SAVE</button>
+      </div>
+    </div>
   </div>
 
   <!-- ============================================ -->
@@ -1819,7 +2326,71 @@ const MODES = {
     timed: false,
     target: null,
   },
+  // CUSTOM mode: pool / multiplier / features get filled in by playCustom()
+  custom: {
+    name: 'CUSTOM',
+    pool: [],
+    multiplier: 1,
+    timed: false,
+    target: null,
+    features: {},
+    zen: false,
+  },
 };
+
+// === PIECE CATEGORIES (for custom mode pool selection) ===
+const PIECE_CATEGORIES = {
+  singles:   { label: 'Singles',   icon: [[0,0]],                                   pieces: [PIECES[0]] },
+  lines:     { label: 'Lines',     icon: [[0,0],[1,0],[2,0]],                       pieces: PIECES.slice(1, 9) },
+  squares:   { label: 'Squares',   icon: [[0,0],[1,0],[0,1],[1,1]],                 pieces: PIECES.slice(9, 11) },
+  L:         { label: 'L-shapes',  icon: [[0,0],[0,1],[0,2],[1,2]],                 pieces: [...PIECES.slice(11, 23), ...PIECES.slice(35, 39)] },
+  sz:        { label: 'S / Z',     icon: [[1,0],[2,0],[0,1],[1,1]],                 pieces: PIECES.slice(23, 27) },
+  t:         { label: 'T-shapes',  icon: [[0,0],[1,0],[2,0],[1,1]],                 pieces: PIECES.slice(27, 31) },
+  diag:      { label: 'Diagonals', icon: [[0,0],[1,1],[2,2]],                       pieces: PIECES.slice(31, 35) },
+  hardcore:  { label: 'Hardcore',  icon: [[0,0],[1,0],[0,1],[1,1],[2,0],[2,1],[0,2],[1,2],[2,2]], pieces: HARD_PIECES },
+};
+
+const COLOR_KEYS = ['amber','red','orange','yellow','lime','green','teal','cyan','blue','violet','pink'];
+
+// === CUSTOM CONFIG ===
+const CC_KEY = 'issa-blocks-custom-v1';
+const customConfig = {
+  difficulty: 'normal',
+  categories: {
+    singles: true, lines: true, squares: true, L: true,
+    sz: true, t: true, diag: true, hardcore: false,
+  },
+  customPieces: [],   // user-designed pieces
+  features: {
+    clearAll: false,
+    explosions: false,
+    zen: false,
+    hint: false,
+  },
+  scoreMultiplier: 1.0,
+  startingHoldSlots: 0,
+  explosionRate: 10,  // percent (0-50)
+};
+
+const DIFFICULTY_MULT = { easy: 0.8, normal: 1.0, hard: 1.5, insane: 2.0 };
+
+function loadCustomConfig() {
+  try {
+    const raw = localStorage.getItem(CC_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p && typeof p === 'object') {
+        // Shallow-merge to keep defaults for missing keys
+        Object.assign(customConfig, p);
+        if (p.categories) customConfig.categories = { ...customConfig.categories, ...p.categories };
+        if (p.features)   customConfig.features   = { ...customConfig.features,   ...p.features };
+      }
+    }
+  } catch(e) {}
+}
+function saveCustomConfig() {
+  try { localStorage.setItem(CC_KEY, JSON.stringify(customConfig)); } catch(e) {}
+}
 
 // === SOUND EFFECTS (Web Audio synth, no external files) ===
 const SFX = (() => {
@@ -1929,7 +2500,7 @@ let sprintWon = false;
 let sprintFinalSeconds = 0;
 let sprintHiddenAt = 0;
 
-let bests = { classic: 0, alou: 0, sprint: null, hardcore: 0 };
+let bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, custom: 0 };
 
 // === PERSISTENCE ===
 const STORAGE_KEY = 'issa-blocks-v1';
@@ -1940,7 +2511,7 @@ function loadBests() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, ...parsed };
+        bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, custom: 0, ...parsed };
       }
     }
   } catch (e) {}
@@ -1953,6 +2524,7 @@ function refreshBestLabels() {
   document.getElementById('best-classic').textContent  = bests.classic ?? 0;
   document.getElementById('best-alou').textContent     = bests.alou ?? 0;
   document.getElementById('best-hardcore').textContent = bests.hardcore ?? 0;
+  document.getElementById('best-custom').textContent   = bests.custom ?? 0;
   document.getElementById('best-sprint').textContent =
     (bests.sprint != null) ? formatTime(bests.sprint) : '—';
 }
@@ -2014,9 +2586,19 @@ function initGame() {
   sprintFinalSeconds = 0;
   stopSprintTimer();
 
-  // Reset holds for new run
+  // Reset holds for new run; custom mode may grant starting slots
   holds = [];
   maxHoldSlots = 0;
+  if (currentMode === 'custom') {
+    maxHoldSlots = Math.min(HOLD_SLOT_CAP, customConfig.startingHoldSlots || 0);
+    holds = Array(maxHoldSlots).fill(null);
+  }
+
+  // Toggle body class for the in-game Clear All button
+  document.body.classList.toggle('feature-clear-all',
+    currentMode === 'custom' && customConfig.features.clearAll);
+  const clearBtn = document.getElementById('clear-all-btn');
+  if (clearBtn) clearBtn.classList.remove('used');
 
   buildGrid();
   refillTray();
@@ -2115,7 +2697,7 @@ function renderTray() {
       const w = pieceW(piece), h = pieceH(piece);
       const trayCell = Math.min(20, Math.floor(96 / Math.max(w, h)));
       const el = document.createElement('div');
-      el.className = 'piece';
+      el.className = 'piece' + (piece.special === 'bomb' ? ' piece-bomb' : '');
       el.dataset.idx = i;
       el.style.gridTemplateColumns = `repeat(${w}, ${trayCell}px)`;
       el.style.gridTemplateRows    = `repeat(${h}, ${trayCell}px)`;
@@ -2196,6 +2778,24 @@ function startDrag(e, el, source) {
 
   if (navigator.vibrate) navigator.vibrate(8);
   SFX.pickup();
+
+  // Hint highlights (custom mode only): paint a faint hint where the piece can fit
+  if (currentMode === 'custom' && customConfig.features.hint) paintHints(piece);
+}
+
+function paintHints(piece) {
+  clearHints();
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+    if (canPlace(piece, x, y)) {
+      for (const [dx, dy] of piece.cells) {
+        const c = getCellEl(x + dx, y + dy);
+        if (c && !c.classList.contains('filled')) c.classList.add('hint');
+      }
+    }
+  }
+}
+function clearHints() {
+  document.querySelectorAll('.cell.hint').forEach(c => c.classList.remove('hint'));
 }
 function moveDragTo(clientX, clientY) {
   if (!drag) return;
@@ -2299,6 +2899,7 @@ function onDragEnd(e) {
   drag = null;
   paintPreview();
   paintHoldHover();
+  clearHints();
   paintGrid();
 }
 
@@ -2365,6 +2966,9 @@ function canPlaceAnywhere(piece) {
   return false;
 }
 function isGameOver() {
+  // Custom mode with Zen toggle: never game over — pieces will keep refilling
+  // (we'll auto-clear the tray if everything is unplaceable).
+  if (currentMode === 'custom' && customConfig.features.zen) return false;
   // Game over only if NO piece — neither in the tray nor in the stash —
   // can be placed anywhere on the current board.
   for (const p of tray)  if (p && canPlaceAnywhere(p)) return false;
@@ -2397,7 +3001,7 @@ function renderHolds(opts) {
       const w = pieceW(piece), h = pieceH(piece);
       const cell = Math.min(13, Math.floor(48 / Math.max(w, h)));
       const el = document.createElement('div');
-      el.className = 'piece';
+      el.className = 'piece' + (piece.special === 'bomb' ? ' piece-bomb' : '');
       el.style.gridTemplateColumns = `repeat(${w}, ${cell}px)`;
       el.style.gridTemplateRows    = `repeat(${h}, ${cell}px)`;
       el.style.setProperty('--c', COLORS[piece.color]);
@@ -2455,6 +3059,11 @@ function placePiece(source, gx, gy) {
   }
 
   if (navigator.vibrate) navigator.vibrate(10);
+
+  // === EXPLOSION PIECE: clear a 3x3 around the placement center ===
+  if (piece.special === 'bomb') {
+    setTimeout(() => detonateAt(gx, gy, piece), 220);
+  }
 
   // Detect full lines
   const fullRows = [], fullCols = [];
@@ -2559,7 +3168,15 @@ function afterMove() {
     refillTray();          // refillTray() itself triggers a game-over check
   } else {
     renderTray();
-    if (isGameOver()) showGameOver(false);
+    // Zen mode: if nothing's playable, force-refill instead of ending
+    if (currentMode === 'custom' && customConfig.features.zen &&
+        tray.every(p => !p || !canPlaceAnywhere(p)) &&
+        holds.every(p => !p || !canPlaceAnywhere(p))) {
+      tray = [null, null, null];
+      refillTray();
+    } else if (isGameOver()) {
+      showGameOver(false);
+    }
   }
   renderHolds();
 }
@@ -2721,9 +3338,333 @@ function showGameOver(isWin) {
   if (window.MZ_API) window.MZ_API.afterGameOver(isWin);
 }
 
+// =================================================================
+// === CUSTOM MODE: pool building, designer, clear-all, detonate ===
+// =================================================================
+
+function buildCustomPool() {
+  const pool = [];
+  for (const k in PIECE_CATEGORIES) {
+    if (customConfig.categories[k]) pool.push(...PIECE_CATEGORIES[k].pieces);
+  }
+  if (Array.isArray(customConfig.customPieces)) {
+    pool.push(...customConfig.customPieces);
+  }
+  // Inject explosion (bomb) pieces by spawn rate
+  if (customConfig.features.explosions && pool.length > 0) {
+    const ratePct = Math.max(0, Math.min(50, customConfig.explosionRate || 0));
+    const target = Math.max(1, Math.round(pool.length * (ratePct / 100)));
+    for (let i = 0; i < target; i++) {
+      pool.push({ cells: [[0,0]], color: 'red', special: 'bomb' });
+    }
+  }
+  // Fallback: never let the pool be empty
+  if (pool.length === 0) pool.push({ cells: [[0,0]], color: 'amber' });
+  return pool;
+}
+
+function playCustom() {
+  // Configure custom mode
+  MODES.custom.pool = buildCustomPool();
+  MODES.custom.multiplier =
+    (DIFFICULTY_MULT[customConfig.difficulty] || 1) *
+    (customConfig.scoreMultiplier || 1);
+  MODES.custom.zen = !!customConfig.features.zen;
+  saveCustomConfig();
+  closeCustomConfig();
+  startGame('custom');
+}
+
+function detonateAt(gx, gy, piece) {
+  // Use the bomb-piece's first cell as the epicenter
+  const [dx, dy] = piece.cells[0];
+  const cx = gx + dx, cy = gy + dy;
+  const cleared = [];
+  for (let yy = cy - 1; yy <= cy + 1; yy++) {
+    for (let xx = cx - 1; xx <= cx + 1; xx++) {
+      if (xx >= 0 && xx < SIZE && yy >= 0 && yy < SIZE && grid[yy][xx]) {
+        cleared.push([xx, yy]);
+      }
+    }
+  }
+  if (cleared.length === 0) return;
+  // Animate clear
+  for (const [x, y] of cleared) {
+    const c = getCellEl(x, y);
+    c.style.animationDelay = '0ms';
+    c.classList.add('clearing');
+  }
+  // Score the explosion (3 pts per cell, multiplied by mode)
+  const mode = MODES[currentMode];
+  const gained = Math.round(cleared.length * 3 * (mode.multiplier || 1));
+  score += gained;
+  setScoreDisplay('score', score);
+  showFloater(`💥 BOOM +${gained}`);
+  SFX.combo();
+  if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+  // After animation, actually clear cells + recheck game state
+  setTimeout(() => {
+    for (const [x, y] of cleared) grid[y][x] = null;
+    paintGrid();
+    if (isGameOver()) showGameOver(false);
+  }, 440);
+}
+
+function clearAllAction() {
+  if (currentMode !== 'custom' || !customConfig.features.clearAll) return;
+  const btn = document.getElementById('clear-all-btn');
+  if (!btn || btn.classList.contains('used')) return;
+  // Sweep the whole board
+  const cleared = [];
+  for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+    if (grid[y][x]) cleared.push([x, y]);
+  }
+  if (cleared.length === 0) return;
+  for (const [x, y] of cleared) {
+    const c = getCellEl(x, y);
+    c.style.animationDelay = (Math.hypot(x - SIZE/2, y - SIZE/2) * 25) + 'ms';
+    c.classList.add('clearing');
+  }
+  showFloater('💥 CLEARED');
+  SFX.combo();
+  btn.classList.add('used');
+  setTimeout(() => {
+    for (const [x, y] of cleared) grid[y][x] = null;
+    paintGrid();
+  }, 600);
+}
+
+// --- Custom config screen open/close + render -------------------------------
+function openCustomConfig() {
+  loadCustomConfig();
+  renderCustomConfig();
+  document.body.dataset.screen = 'custom';
+  document.documentElement.classList.add('cc-scroll');
+}
+function closeCustomConfig() {
+  document.body.dataset.screen = 'title';
+  document.documentElement.classList.remove('cc-scroll');
+}
+function resetCustomConfig() {
+  customConfig.difficulty = 'normal';
+  customConfig.categories = { singles: true, lines: true, squares: true, L: true, sz: true, t: true, diag: true, hardcore: false };
+  customConfig.customPieces = [];
+  customConfig.features = { clearAll: false, explosions: false, zen: false, hint: false };
+  customConfig.scoreMultiplier = 1.0;
+  customConfig.startingHoldSlots = 0;
+  customConfig.explosionRate = 10;
+  saveCustomConfig();
+  renderCustomConfig();
+}
+
+function renderCustomConfig() {
+  // Difficulty buttons
+  document.querySelectorAll('#cc-difficulty button').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === customConfig.difficulty);
+    b.onclick = () => {
+      customConfig.difficulty = b.dataset.diff;
+      saveCustomConfig();
+      renderCustomConfig();
+    };
+  });
+
+  // Piece pool toggles
+  const grid = document.getElementById('cc-piece-grid');
+  grid.innerHTML = '';
+  for (const k in PIECE_CATEGORIES) {
+    const cat = PIECE_CATEGORIES[k];
+    const on = !!customConfig.categories[k];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cc-piece-toggle' + (on ? ' active' : '');
+    // Build a mini preview from cat.icon
+    const w = Math.max(...cat.icon.map(c => c[0])) + 1;
+    const h = Math.max(...cat.icon.map(c => c[1])) + 1;
+    const preview = document.createElement('div');
+    preview.className = 'preview';
+    preview.style.gridTemplateColumns = `repeat(${w}, 1fr)`;
+    preview.style.gridTemplateRows    = `repeat(${h}, 1fr)`;
+    preview.style.setProperty('--c', COLORS.amber);
+    const set = new Set(cat.icon.map(c => `${c[0]},${c[1]}`));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const d = document.createElement('div');
+      d.className = set.has(`${x},${y}`) ? 'filled' : 'empty';
+      preview.appendChild(d);
+    }
+    btn.appendChild(preview);
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = cat.label.toUpperCase() + ' (' + cat.pieces.length + ')';
+    btn.appendChild(label);
+    const check = document.createElement('span');
+    check.className = 'check';
+    btn.appendChild(check);
+    btn.onclick = () => {
+      customConfig.categories[k] = !on;
+      saveCustomConfig();
+      renderCustomConfig();
+    };
+    grid.appendChild(btn);
+  }
+
+  // Custom pieces list
+  const list = document.getElementById('cc-custom-list');
+  list.innerHTML = '';
+  customConfig.customPieces.forEach((piece, i) => {
+    const w = Math.max(...piece.cells.map(c => c[0])) + 1;
+    const h = Math.max(...piece.cells.map(c => c[1])) + 1;
+    const wrap = document.createElement('div');
+    wrap.className = 'cc-custom-piece';
+    const inner = document.createElement('div');
+    inner.style.display = 'grid';
+    inner.style.gap = '2px';
+    inner.style.gridTemplateColumns = `repeat(${w}, 8px)`;
+    inner.style.gridTemplateRows    = `repeat(${h}, 8px)`;
+    inner.style.setProperty('--c', COLORS[piece.color]);
+    const set = new Set(piece.cells.map(c => `${c[0]},${c[1]}`));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const d = document.createElement('div');
+      d.style.borderRadius = '2px';
+      d.style.background = set.has(`${x},${y}`) ? COLORS[piece.color] : 'transparent';
+      inner.appendChild(d);
+    }
+    wrap.appendChild(inner);
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'x';
+    x.textContent = '×';
+    x.onclick = (e) => {
+      e.stopPropagation();
+      customConfig.customPieces.splice(i, 1);
+      saveCustomConfig();
+      renderCustomConfig();
+    };
+    wrap.appendChild(x);
+    list.appendChild(wrap);
+  });
+
+  // Feature toggles
+  const FEATURES = [
+    { key: 'clearAll',   icon: '💥', name: 'Clear All button',     desc: 'A button on the board that wipes everything. One use per run.' },
+    { key: 'explosions', icon: '💣', name: 'Explosion blocks',     desc: 'Random bomb pieces appear in the tray. Placing one detonates a 3×3.' },
+    { key: 'zen',        icon: '🧘', name: 'Zen mode',             desc: "No game over. If pieces don't fit, the tray refills automatically." },
+    { key: 'hint',       icon: '💡', name: 'Hint highlights',      desc: 'When you pick up a piece, the board faintly highlights any spot it can fit.' },
+  ];
+  const togWrap = document.getElementById('cc-toggles');
+  togWrap.innerHTML = '';
+  for (const f of FEATURES) {
+    const on = !!customConfig.features[f.key];
+    const row = document.createElement('div');
+    row.className = 'cc-toggle-row' + (on ? ' active' : '');
+    row.innerHTML =
+      `<div class="icon">${f.icon}</div>
+       <div class="body">
+         <div class="name">${f.name}</div>
+         <div class="desc">${f.desc}</div>
+       </div>
+       <div class="switch"></div>`;
+    row.onclick = () => {
+      customConfig.features[f.key] = !on;
+      saveCustomConfig();
+      renderCustomConfig();
+    };
+    togWrap.appendChild(row);
+  }
+
+  // Sliders
+  const scoreSlider = document.getElementById('cc-score');
+  scoreSlider.value = customConfig.scoreMultiplier;
+  document.getElementById('cc-score-out').textContent = '×' + Number(customConfig.scoreMultiplier).toFixed(1);
+  scoreSlider.oninput = () => {
+    customConfig.scoreMultiplier = parseFloat(scoreSlider.value);
+    document.getElementById('cc-score-out').textContent = '×' + customConfig.scoreMultiplier.toFixed(1);
+    saveCustomConfig();
+  };
+
+  const holdSlider = document.getElementById('cc-hold');
+  holdSlider.value = customConfig.startingHoldSlots;
+  document.getElementById('cc-hold-out').textContent = customConfig.startingHoldSlots;
+  holdSlider.oninput = () => {
+    customConfig.startingHoldSlots = parseInt(holdSlider.value, 10);
+    document.getElementById('cc-hold-out').textContent = customConfig.startingHoldSlots;
+    saveCustomConfig();
+  };
+
+  const expRow = document.getElementById('cc-explosion-row');
+  expRow.style.display = customConfig.features.explosions ? '' : 'none';
+  const expSlider = document.getElementById('cc-explosion-rate');
+  expSlider.value = customConfig.explosionRate;
+  document.getElementById('cc-explosion-out').textContent = customConfig.explosionRate + '%';
+  expSlider.oninput = () => {
+    customConfig.explosionRate = parseInt(expSlider.value, 10);
+    document.getElementById('cc-explosion-out').textContent = customConfig.explosionRate + '%';
+    saveCustomConfig();
+  };
+}
+
+// --- Designer (5x5 piece editor) --------------------------------------------
+let designerCells = new Set();
+let designerColor = 'amber';
+
+function openDesigner() {
+  designerCells = new Set();
+  designerColor = 'amber';
+  renderDesigner();
+  document.getElementById('cc-designer').classList.add('show');
+}
+function closeDesigner() {
+  document.getElementById('cc-designer').classList.remove('show');
+}
+function renderDesigner() {
+  const grid = document.getElementById('cc-design-grid');
+  grid.innerHTML = '';
+  grid.style.setProperty('--c', COLORS[designerColor]);
+  for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 5; x++) {
+      const c = document.createElement('div');
+      const key = `${x},${y}`;
+      c.className = 'cc-design-cell' + (designerCells.has(key) ? ' filled' : '');
+      c.onclick = () => {
+        if (designerCells.has(key)) designerCells.delete(key);
+        else designerCells.add(key);
+        renderDesigner();
+      };
+      grid.appendChild(c);
+    }
+  }
+  // Color picker
+  const picker = document.getElementById('cc-color-picker');
+  picker.innerHTML = '';
+  COLOR_KEYS.forEach(k => {
+    const sw = document.createElement('button');
+    sw.type = 'button';
+    sw.className = 'cc-color-swatch' + (k === designerColor ? ' active' : '');
+    sw.style.background = COLORS[k];
+    sw.title = k;
+    sw.onclick = () => { designerColor = k; renderDesigner(); };
+    picker.appendChild(sw);
+  });
+}
+function saveDesignerPiece() {
+  if (designerCells.size === 0) {
+    closeDesigner();
+    return;
+  }
+  // Normalize: shift cells so the minimum x and y are 0
+  const cells = [...designerCells].map(s => s.split(',').map(Number));
+  const minX = Math.min(...cells.map(c => c[0]));
+  const minY = Math.min(...cells.map(c => c[1]));
+  const normalized = cells.map(([x, y]) => [x - minX, y - minY]);
+  customConfig.customPieces.push({ cells: normalized, color: designerColor });
+  saveCustomConfig();
+  renderCustomConfig();
+  closeDesigner();
+}
+
 // === BOOT ===
 window.addEventListener('load', () => {
   loadBests();
+  loadCustomConfig();
   refreshBestLabels();
   showScreen('title');
 
@@ -2739,6 +3680,10 @@ window.addEventListener('load', () => {
     refreshSfxBtn();
     if (!SFX.muted) SFX.pickup();    // tiny chirp confirms unmute
   });
+
+  // Clear-All button (custom mode feature)
+  const clearBtn = document.getElementById('clear-all-btn');
+  if (clearBtn) clearBtn.addEventListener('click', clearAllAction);
 });
 
 document.addEventListener('visibilitychange', () => {
