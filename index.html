@@ -1412,6 +1412,99 @@
     letter-spacing: 0.08em;
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
+
+  /* === Fake browser-style download notifications (super mode only) === */
+  .mz-downloads {
+    position: fixed;
+    top: 56px;
+    right: 6px;
+    width: 250px;
+    max-width: 65vw;
+    z-index: 1550;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+  }
+  body.mz-super .mz-downloads { top: 80px; }
+  .mz-dl {
+    background: white;
+    color: #222;
+    border: 1px solid #cfd2d6;
+    border-radius: 8px;
+    padding: 9px 10px 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    font-size: 11px;
+    pointer-events: auto;
+    position: relative;
+    animation: dl-in 280ms cubic-bezier(.34, 1.4, .5, 1);
+    line-height: 1.25;
+  }
+  @keyframes dl-in {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+  .mz-dl-title {
+    font-weight: 700;
+    font-size: 11px;
+    margin-bottom: 2px;
+    color: #1a73e8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .mz-dl.done .mz-dl-title { color: #1e8e3e; }
+  .mz-dl-filename {
+    color: #555;
+    font-size: 10px;
+    margin-bottom: 6px;
+    font-family: 'Consolas', 'JetBrains Mono', monospace;
+    word-break: break-all;
+  }
+  .mz-dl-bar {
+    background: #eaecef;
+    border-radius: 999px;
+    height: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  .mz-dl-bar-fill {
+    background: #1a73e8;
+    height: 100%;
+    width: 0%;
+  }
+  .mz-dl.done .mz-dl-bar-fill { background: #1e8e3e; }
+  .mz-dl-meta {
+    color: #5f6368;
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+  .mz-dl-btns {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+  }
+  .mz-dl-btn {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mz-dl-btn.secondary {
+    background: #f1f3f4;
+    color: #444;
+    border: 1px solid #dadce0;
+  }
+  .mz-dl.removing { animation: dl-out 220ms ease-in forwards; }
+  @keyframes dl-out {
+    to { transform: translateX(120%); opacity: 0; }
+  }
 </style>
 </head>
 <body data-screen="title" data-mode="classic">
@@ -1575,6 +1668,9 @@
 
   <!-- Toast for notifications -->
   <div class="mz-toast" id="mz-toast"></div>
+
+  <!-- Fake browser download notifications (super mode only) -->
+  <div class="mz-downloads mz-super-only" id="mz-downloads"></div>
 
   <!-- GAME OVER OVERLAY -->
   <div class="overlay" id="overlay">
@@ -2880,6 +2976,7 @@ document.addEventListener('visibilitychange', () => {
       applyState();
       rotateAds();
       scheduleFloater();
+      startDownloadSpam();
       toast('🔥 SUPER MONETIZATION ACTIVATED · GOOD LUCK 🔥');
       // Pre-show a stack of interstitials and floaters
       setTimeout(() => showFloaters(), 200);
@@ -2889,6 +2986,7 @@ document.addEventListener('visibilitychange', () => {
       saveMZ();
       applyState();
       hideAllFloaters();
+      stopDownloadSpam();
       hideInter();
       hideShop();
       toast('AD-FREE MODE');
@@ -2994,6 +3092,116 @@ document.addEventListener('visibilitychange', () => {
     });
   }
   function hideAllFloaters() { hideFloater(); }
+
+  // === FAKE DOWNLOADS (super mode only) ===
+  const FAKE_DOWNLOADS = [
+    { name: 'issa_blocks_premium_v9.exe',         size: '4.2 MB' },
+    { name: 'FREE_GEMS_SETUP.exe',                size: '12.8 MB' },
+    { name: 'WINDOWS_UPDATE_CRITICAL.zip',        size: '847 MB' },
+    { name: 'BankAccountValidator.dll',           size: '128 KB' },
+    { name: 'AntivirusUltraPro_2026.msi',         size: '78 MB' },
+    { name: 'BitcoinMiner_v2.bat',                size: '9 KB' },
+    { name: 'iPhone99_claim_form.pdf.exe',        size: '2.1 MB' },
+    { name: 'ChromeSecurityUpdate.dll',           size: '34 MB' },
+    { name: 'NEW_INVOICE_ATTACHED.zip',           size: '14 MB' },
+    { name: 'driver_update_required.exe',         size: '67 MB' },
+    { name: 'meeting_recording_2026-05-06.scr',   size: '180 MB' },
+    { name: 'totallyNotAVirus.txt.exe',           size: '6 KB' },
+    { name: 'AmazonGiftCard_$500.pdf.exe',        size: '230 KB' },
+    { name: 'AdobePhotoshopCrack_2026.iso',       size: '3.2 GB' },
+    { name: 'IssaBlocks_BotFarm_API_KEY.json',    size: '1 KB' },
+    { name: 'free_iphone_winner_v2.html.exe',     size: '1 MB' },
+    { name: 'COFFEE_TYCOON_FREE_GEMS_HACK.apk',   size: '24 MB' },
+    { name: 'system32_optimizer.bat',             size: '12 KB' },
+    { name: 'cookies.txt',                        size: '402 KB' },
+    { name: 'urgent_password_reset.html',         size: '18 KB' },
+  ];
+  const MAX_DOWNLOADS_VISIBLE = 5;
+  let _dlIv = null;
+  let _dlCounter = 0;
+
+  function spawnDownload() {
+    const cont = $('#mz-downloads');
+    if (!cont) return;
+    // Cap at MAX_DOWNLOADS_VISIBLE — push out the oldest one
+    while (cont.children.length >= MAX_DOWNLOADS_VISIBLE) {
+      cont.firstElementChild.remove();
+    }
+
+    const f = FAKE_DOWNLOADS[Math.floor(Math.random() * FAKE_DOWNLOADS.length)];
+    const id = ++_dlCounter;
+    const el = document.createElement('div');
+    el.className = 'mz-dl';
+    el.dataset.id = id;
+    el.innerHTML = `
+      <div class="mz-dl-title">⬇ Downloading…</div>
+      <div class="mz-dl-filename">${f.name}</div>
+      <div class="mz-dl-bar"><div class="mz-dl-bar-fill"></div></div>
+      <div class="mz-dl-meta"><span class="dlpct">0%</span> · ${f.size} · <span class="dleta">~12 sec left</span></div>
+      <div class="mz-dl-btns">
+        <button class="mz-dl-btn secondary" data-act="cancel">Cancel</button>
+        <button class="mz-dl-btn" data-act="open">Open</button>
+      </div>
+    `;
+    cont.appendChild(el);
+
+    // Animate progress
+    const totalMs = 2500 + Math.random() * 4500;
+    const startedAt = performance.now();
+    const fill = el.querySelector('.mz-dl-bar-fill');
+    const pctEl = el.querySelector('.dlpct');
+    const etaEl = el.querySelector('.dleta');
+    function tick() {
+      if (!el.isConnected) return;
+      const elapsed = performance.now() - startedAt;
+      const pct = Math.min(100, (elapsed / totalMs) * 100);
+      fill.style.width = pct + '%';
+      pctEl.textContent = Math.floor(pct) + '%';
+      const remaining = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+      etaEl.textContent = `~${remaining} sec left`;
+      if (pct < 100) requestAnimationFrame(tick);
+      else {
+        el.classList.add('done');
+        el.querySelector('.mz-dl-title').innerHTML = '✓ Download complete';
+        etaEl.textContent = 'Click Open to install';
+      }
+    }
+    requestAnimationFrame(tick);
+
+    // "Cancel" closes briefly, then a new one spawns to replace it
+    el.querySelector('[data-act="cancel"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      el.classList.add('removing');
+      setTimeout(() => {
+        if (el.parentNode) el.remove();
+        if (MZ.enabled && MZ.super && Math.random() < 0.7) {
+          setTimeout(spawnDownload, 600);
+        }
+      }, 220);
+    });
+    // "Open" pops a fake-install interstitial
+    el.querySelector('[data-act="open"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showInter(`★ INSTALLING ${f.name.toUpperCase()} ★`,
+        'Tap Run to grant Administrator privileges. By continuing you agree to our 87-page TOS.');
+    });
+  }
+
+  function startDownloadSpam() {
+    if (_dlIv) clearInterval(_dlIv);
+    // Initial flurry: 2 downloads right away
+    setTimeout(() => { if (MZ.enabled && MZ.super) spawnDownload(); }, 200);
+    setTimeout(() => { if (MZ.enabled && MZ.super) spawnDownload(); }, 1400);
+    // Then a steady stream
+    _dlIv = setInterval(() => {
+      if (MZ.enabled && MZ.super) spawnDownload();
+    }, 3500);
+  }
+  function stopDownloadSpam() {
+    if (_dlIv) { clearInterval(_dlIv); _dlIv = null; }
+    const cont = $('#mz-downloads');
+    if (cont) cont.innerHTML = '';
+  }
 
   // === SHOP ===
   function showShop() {
