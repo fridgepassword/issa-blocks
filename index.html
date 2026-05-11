@@ -3504,7 +3504,11 @@ function placePiece(source, gx, gy) {
       tray:  tray.map(p => p ? { ...p } : null),
       holds: holds.map(p => p ? { ...p } : null),
     });
-    _undoLockUntil = performance.now() + 700;
+    // 1000ms covers all in-flight animation timeouts. The longest detonate
+    // (color bomb) settles at 220ms + 540ms = 760ms, the line-clear at
+    // 420ms + maxDelay (up to ~180ms) = ~600ms. 1000ms is the safe ceiling
+    // so the user can't undo while a setTimeout is still mutating the grid.
+    _undoLockUntil = performance.now() + 1000;
     refreshExtrasUI();
   }
 
@@ -4392,6 +4396,9 @@ function mpShowHandoff(player) {
   document.getElementById('mp-handoff-msg').textContent = player === 1
     ? 'You go first. Same pieces will appear for Player 2. Get the highest score you can.'
     : "Player 1 has played. You'll see the exact same pieces — don't peek at their score and beat it.";
+  // Track which player to start when READY is tapped — using mpScores to infer
+  // breaks when a player legitimately scores 0.
+  document.getElementById('mp-handoff').dataset.nextPlayer = String(player);
   document.getElementById('mp-handoff').classList.add('show');
 }
 
@@ -4477,8 +4484,10 @@ window.addEventListener('load', () => {
   // Multiplayer buttons
   const mpReadyBtn = document.getElementById('mp-ready-btn');
   if (mpReadyBtn) mpReadyBtn.addEventListener('click', () => {
-    // mpCurrentPlayer is the player we're starting (1 first, then 2)
-    const nextPlayer = (mpScores[1] && !mpScores[2]) ? 2 : 1;
+    // Read the next-player number from the handoff modal's dataset
+    // (set by mpShowHandoff). This is robust to P1 legitimately scoring 0.
+    const handoff = document.getElementById('mp-handoff');
+    const nextPlayer = parseInt(handoff.dataset.nextPlayer || '1', 10);
     mpStartPlayerTurn(nextPlayer);
   });
   const mpAdvanceBtn = document.getElementById('mp-advance-btn');
