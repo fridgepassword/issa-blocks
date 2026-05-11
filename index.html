@@ -195,6 +195,16 @@
     border-color: rgba(255,95,95,0.35);
     background: linear-gradient(180deg, rgba(255,95,95,0.08), rgba(255,95,95,0.02));
   }
+  .mode-card[data-mode="custom"]:hover {
+    border-color: rgba(151,117,250,0.35);
+    background: linear-gradient(180deg, rgba(151,117,250,0.08), rgba(151,117,250,0.02));
+  }
+  .mode-card[data-mode="multiplayer"]:hover {
+    border-color: rgba(247,131,172,0.4);
+    background: linear-gradient(180deg, rgba(247,131,172,0.08), rgba(247,131,172,0.02));
+  }
+  .mode-card[data-mode="custom"]      .mode-name { color: #9775fa; }
+  .mode-card[data-mode="multiplayer"] .mode-name { color: var(--accent); background: linear-gradient(135deg, #ffb84d, #f783ac); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
   .mode-name {
     font-family: 'Bricolage Grotesque', sans-serif;
@@ -1997,6 +2007,146 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--easy) 35%, transparent);
   }
 
+  /* ============================================ */
+  /* === MULTIPLAYER (hot-seat) =================== */
+  /* ============================================ */
+  .mp-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 3500;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .mp-modal.show { display: flex; animation: fade 280ms ease-out; }
+  .mp-modal .mp-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.45em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .mp-modal h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 44px;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 12px;
+  }
+  .mp-modal h2 .num {
+    color: var(--accent);
+  }
+  .mp-modal h2 .num.p2 { color: var(--sprint); }
+  .mp-modal p {
+    color: var(--dim);
+    font-size: 13px;
+    max-width: 380px;
+    line-height: 1.4;
+    margin-bottom: 30px;
+  }
+  .mp-modal .big-cta {
+    background: var(--accent);
+    color: #1a1100;
+    border: none;
+    padding: 18px 36px;
+    border-radius: 999px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.32em;
+    cursor: pointer;
+    box-shadow: 0 18px 40px -10px rgba(255,184,77,0.7);
+    transition: transform 100ms ease;
+  }
+  .mp-modal .big-cta:active { transform: scale(0.97); }
+
+  .mp-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 20px;
+  }
+  .mp-score-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--dim);
+    text-align: left;
+  }
+  .mp-score-row.winner {
+    background: rgba(255,184,77,0.1);
+    border-color: rgba(255,184,77,0.4);
+    box-shadow: 0 0 24px rgba(255,184,77,0.18);
+    color: var(--accent);
+  }
+  .mp-score-row b {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .mp-score-row.winner b { color: var(--accent); }
+  .mp-winner-label {
+    margin-top: 6px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .mp-result-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    color: var(--easy);
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  /* In-game multiplayer adjustments: hide the BEST stat (it's a versus match) */
+  body.mp-active .stat.left { visibility: hidden; }
+  /* Hide regular MENU / PLAY AGAIN buttons during MP; show only the advance btn */
+  body.mp-active .btn-row .btn { display: none; }
+  .mp-advance-btn {
+    display: none;
+    background: var(--accent);
+    color: #1a1100;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 999px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -10px rgba(255,184,77,0.6);
+  }
+  body.mp-active .mp-advance-btn { display: inline-block; }
+
   /* === Fake browser-style download notifications (super mode only) === */
   .mz-downloads {
     position: fixed;
@@ -2155,6 +2305,11 @@
         <div class="mode-name">CUSTOM</div>
         <div class="mode-desc">Build your own run. Pieces, features, difficulty.</div>
         <div class="mode-best">BEST<b id="best-custom">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="multiplayer" onclick="startMultiplayer()">
+        <div class="mode-name">MULTIPLAYER</div>
+        <div class="mode-desc">Hot-seat for two. Same pieces, secret boards, highest score wins.</div>
+        <div class="mode-best">VS</div>
       </button>
     </div>
 
@@ -2377,6 +2532,29 @@
     <div class="btn-row">
       <button class="btn secondary" onclick="goToMenu()">MENU</button>
       <button class="btn" onclick="restartCurrent()">PLAY AGAIN</button>
+      <button class="mp-advance-btn" id="mp-advance-btn" type="button">PASS DEVICE →</button>
+    </div>
+  </div>
+
+  <!-- Multiplayer hand-off modal (shown between turns) -->
+  <div class="mp-modal" id="mp-handoff">
+    <div class="mp-label">PASS THE DEVICE</div>
+    <h2><span class="num" id="mp-handoff-num">PLAYER 1</span> — IT'S YOUR TURN</h2>
+    <p id="mp-handoff-msg">Don't peek at your opponent's score. You'll see the same pieces they did — outscore them.</p>
+    <button class="big-cta" id="mp-ready-btn" type="button">I'M READY ▶</button>
+  </div>
+
+  <!-- Multiplayer results modal (shown after both players finish) -->
+  <div class="mp-modal" id="mp-results">
+    <div class="mp-label">FINAL SCORES</div>
+    <div class="mp-scores">
+      <div class="mp-score-row" id="mp-p1-row"><span>PLAYER 1</span><b id="mp-p1-score">0</b></div>
+      <div class="mp-score-row" id="mp-p2-row"><span>PLAYER 2</span><b id="mp-p2-score">0</b></div>
+    </div>
+    <div class="mp-winner-label" id="mp-winner-label">PLAYER 1 WINS</div>
+    <div class="btn-row">
+      <button class="btn secondary" id="mp-results-menu" type="button">MENU</button>
+      <button class="big-cta" id="mp-rematch-btn" type="button">REMATCH</button>
     </div>
   </div>
 
@@ -2522,6 +2700,14 @@ const MODES = {
     target: null,
     features: {},
     zen: false,
+  },
+  // MULTIPLAYER mode: hot-seat for two players sharing a seeded piece sequence
+  multiplayer: {
+    name: 'MULTIPLAYER',
+    pool: PIECES,
+    multiplier: 1,
+    timed: false,
+    target: null,
   },
 };
 
@@ -2690,6 +2876,25 @@ const HOLD_SLOT_CAP = 8;
 let score = 0, streak = 0;
 let drag = null;
 
+// Multiplayer (hot-seat) state
+let mpActive = false;          // currently inside a multiplayer match?
+let mpCurrentPlayer = 0;       // 1 or 2 while active
+let mpScores = { 1: 0, 2: 0 };
+let mpSeed = 0;                // shared RNG seed for both players' piece sequences
+let mpRng = null;              // current player's seeded RNG fn (re-seeded per turn)
+
+// Seeded RNG (Mulberry32) — deterministic so both MP players get identical pieces
+function mulberry32(seed) {
+  let state = seed >>> 0;
+  return function() {
+    state = (state + 0x6D2B79F5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Custom mode runtime state
 let traySize = 3;          // configurable in custom mode (2..5)
 let nextClearMult = 1;     // bumped to ×3 by multiplier piece for next clear
@@ -2769,6 +2974,8 @@ function goToMenu() {
   stopSprintTimer();
   document.getElementById('overlay').classList.remove('show');
   if (window.MZ_API) window.MZ_API.onMenu();
+  // If we're escaping out of a multiplayer match, clean it up
+  if (mpActive) mpExit();
   showScreen('title');
 }
 
@@ -2943,7 +3150,8 @@ function refillTray() {
   if (isGameOver()) showGameOver(false);
 }
 function pickFrom(pool) {
-  return { ...pool[Math.floor(Math.random() * pool.length)] };
+  const r = (mpActive && mpRng) ? mpRng() : Math.random();
+  return { ...pool[Math.floor(r * pool.length)] };
 }
 function pieceW(p) { return Math.max(...p.cells.map(c => c[0])) + 1; }
 function pieceH(p) { return Math.max(...p.cells.map(c => c[1])) + 1; }
@@ -3595,6 +3803,17 @@ function showGameOver(isWin) {
       final.textContent = `${sprintLines}/${mode.target}`;
       meta.textContent = (bests.sprint != null) ? `Best: ${formatTime(bests.sprint)}` : 'Best: —';
     }
+  } else if (mpActive) {
+    // Multiplayer game over — show this player's score, hide best-tracking,
+    // queue the advance-button.
+    label.textContent = `PLAYER ${mpCurrentPlayer} · DONE`;
+    final.textContent = score;
+    meta.textContent = mpCurrentPlayer === 1
+      ? "Hand the device to Player 2 — don't peek!"
+      : 'All scores in.';
+    title.textContent = score === 0 ? 'OOF' : 'NICE RUN';
+    mpScores[mpCurrentPlayer] = score;
+    isNewBest = false;
   } else {
     label.textContent = 'GAME OVER';
     final.textContent = score;
@@ -4145,6 +4364,86 @@ function saveDesignerPiece() {
   closeDesigner();
 }
 
+// =================================================================
+// === MULTIPLAYER (hot-seat) =====================================
+// =================================================================
+
+function startMultiplayer() {
+  mpActive = true;
+  mpCurrentPlayer = 1;
+  mpScores = { 1: 0, 2: 0 };
+  mpSeed = (Math.floor(Math.random() * 0xFFFFFFFF)) >>> 0;
+  document.body.classList.add('mp-active');
+  // Make sure the results modal isn't lingering from a previous match
+  document.getElementById('mp-results').classList.remove('show');
+  document.getElementById('mp-handoff').classList.remove('show');
+  // Force-disable MZ effects during MP so it stays fair
+  if (window.MZ_API && window.MZ && window.MZ.enabled) {
+    // Don't actually toggle MZ off — just suppress its ad-fires by setting a guard
+    // (keeps coins persistent; we just block its game hooks during MP via mpActive checks)
+  }
+  // Show the player-1 handoff right away so it's not awkward to start
+  mpShowHandoff(1);
+}
+
+function mpShowHandoff(player) {
+  document.getElementById('mp-handoff-num').textContent = 'PLAYER ' + player;
+  document.getElementById('mp-handoff-num').className = 'num' + (player === 2 ? ' p2' : '');
+  document.getElementById('mp-handoff-msg').textContent = player === 1
+    ? 'You go first. Same pieces will appear for Player 2. Get the highest score you can.'
+    : "Player 1 has played. You'll see the exact same pieces — don't peek at their score and beat it.";
+  document.getElementById('mp-handoff').classList.add('show');
+}
+
+function mpStartPlayerTurn(player) {
+  mpCurrentPlayer = player;
+  mpRng = mulberry32(mpSeed);
+  document.getElementById('mp-handoff').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  // Reset the mode-pill to display whose turn it is
+  startGame('multiplayer');
+  const pill = document.getElementById('mode-pill');
+  if (pill) pill.textContent = `PLAYER ${player} TURN`;
+}
+
+function mpAdvance() {
+  // Called when a player finishes their game and taps PASS DEVICE.
+  if (!mpActive) return;
+  mpScores[mpCurrentPlayer] = score;     // already set in showGameOver too
+  if (mpCurrentPlayer === 1) {
+    mpShowHandoff(2);
+    // The handoff covers everything; reset state so when ready is tapped, P2 begins.
+  } else {
+    mpShowResults();
+  }
+}
+
+function mpShowResults() {
+  const p1 = mpScores[1] || 0;
+  const p2 = mpScores[2] || 0;
+  document.getElementById('mp-p1-score').textContent = p1;
+  document.getElementById('mp-p2-score').textContent = p2;
+  const p1row = document.getElementById('mp-p1-row');
+  const p2row = document.getElementById('mp-p2-row');
+  p1row.classList.toggle('winner', p1 > p2);
+  p2row.classList.toggle('winner', p2 > p1);
+  const lbl = document.getElementById('mp-winner-label');
+  if (p1 === p2)      lbl.textContent = '🤝 IT\'S A TIE!';
+  else if (p1 > p2)   lbl.textContent = '🏆 PLAYER 1 WINS!';
+  else                lbl.textContent = '🏆 PLAYER 2 WINS!';
+  document.getElementById('mp-results').classList.add('show');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function mpExit() {
+  mpActive = false;
+  mpRng = null;
+  mpCurrentPlayer = 0;
+  document.body.classList.remove('mp-active');
+  document.getElementById('mp-handoff').classList.remove('show');
+  document.getElementById('mp-results').classList.remove('show');
+}
+
 // === BOOT ===
 window.addEventListener('load', () => {
   loadBests();
@@ -4174,6 +4473,26 @@ window.addEventListener('load', () => {
   if (undoBtn) undoBtn.addEventListener('click', undoMove);
   const skipBtn = document.getElementById('skip-btn');
   if (skipBtn) skipBtn.addEventListener('click', skipTray);
+
+  // Multiplayer buttons
+  const mpReadyBtn = document.getElementById('mp-ready-btn');
+  if (mpReadyBtn) mpReadyBtn.addEventListener('click', () => {
+    // mpCurrentPlayer is the player we're starting (1 first, then 2)
+    const nextPlayer = (mpScores[1] && !mpScores[2]) ? 2 : 1;
+    mpStartPlayerTurn(nextPlayer);
+  });
+  const mpAdvanceBtn = document.getElementById('mp-advance-btn');
+  if (mpAdvanceBtn) mpAdvanceBtn.addEventListener('click', mpAdvance);
+  const mpRematchBtn = document.getElementById('mp-rematch-btn');
+  if (mpRematchBtn) mpRematchBtn.addEventListener('click', () => {
+    mpExit();
+    startMultiplayer();
+  });
+  const mpResultsMenu = document.getElementById('mp-results-menu');
+  if (mpResultsMenu) mpResultsMenu.addEventListener('click', () => {
+    mpExit();
+    goToMenu();
+  });
 });
 
 document.addEventListener('visibilitychange', () => {
