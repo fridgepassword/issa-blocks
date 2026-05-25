@@ -1328,6 +1328,16 @@
   body[data-screen="fruit"]     .hint-pointer,
   body[data-screen="line"]      .hint-pointer,
   body[data-screen="adventure"] .hint-pointer { display: none !important; }
+
+  /* Hide all floating top-of-viewport controls on sub-screens so they
+     don't cover the sub-screen's own back / score / header content.
+     They're still available from the main title and Extras menus. */
+  body:not([data-screen="title"]):not([data-screen="extras"]) .sfx-btn,
+  body:not([data-screen="title"]):not([data-screen="extras"]) .settings-btn,
+  body:not([data-screen="title"]):not([data-screen="extras"]) .mz-toggle,
+  body:not([data-screen="title"]):not([data-screen="extras"]) .mz-coins {
+    display: none !important;
+  }
   @keyframes hint-bob {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-3px); }
