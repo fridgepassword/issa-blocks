@@ -1268,29 +1268,51 @@
     position: fixed;
     top: max(10px, env(safe-area-inset-top));
     z-index: 510;
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
     background: rgba(20,20,29,0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
     color: var(--text);
     cursor: pointer;
     display: grid;
     place-items: center;
-    font-size: 16px;
+    font-size: 20px;
     line-height: 1;
     user-select: none;
-    transition: transform 100ms ease;
+    transition: transform 100ms ease, width 200ms ease, height 200ms ease, font-size 200ms ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
   }
   .sfx-btn { left: max(10px, env(safe-area-inset-left)); }
-  .settings-btn { left: max(52px, calc(env(safe-area-inset-left) + 44px)); font-size: 18px; }
-  .sfx-btn:active, .settings-btn:active { transform: scale(0.92); }
+  .settings-btn {
+    left: max(60px, calc(env(safe-area-inset-left) + 52px));
+    font-size: 22px;
+    background: rgba(20,20,29,0.92);
+    border-color: rgba(255,184,77,0.25);
+  }
+  .sfx-btn:active, .settings-btn:active { transform: scale(0.92) rotate(-6deg); }
   .sfx-btn.muted { color: var(--dim); }
+
+  /* "Big buttons" option: bumps both top-left buttons up another notch */
+  body.big-buttons .sfx-btn,
+  body.big-buttons .settings-btn {
+    width: 54px;
+    height: 54px;
+    font-size: 26px;
+  }
+  body.big-buttons .settings-btn {
+    left: max(72px, calc(env(safe-area-inset-left) + 64px));
+    font-size: 28px;
+  }
+
   /* When MZ is on, push coins counter to the right of sfx + settings buttons */
   body.mz-on .mz-coins {
-    left: max(96px, calc(env(safe-area-inset-left) + 86px));
+    left: max(108px, calc(env(safe-area-inset-left) + 98px));
+  }
+  body.mz-on.big-buttons .mz-coins {
+    left: max(136px, calc(env(safe-area-inset-left) + 126px));
   }
 
   /* === HOLD TRAY (stash) === */
@@ -4236,6 +4258,10 @@
           <div class="setting-name">📳 Vibration</div>
           <div class="setting-switch"></div>
         </div>
+        <div class="setting-row" data-toggle="bigbuttons">
+          <div class="setting-name">🔍 Big buttons</div>
+          <div class="setting-switch"></div>
+        </div>
 
         <div class="setting-section-title" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.3em;color:var(--dim);margin-top:10px;margin-bottom:-2px">BLOCK SKIN</div>
         <div class="skin-picker" id="skin-picker"></div>
@@ -5049,6 +5075,18 @@ try { vibrationEnabled = localStorage.getItem('issa-blocks-vibe') !== '0'; } cat
 function setVibration(on) {
   vibrationEnabled = on;
   try { localStorage.setItem('issa-blocks-vibe', on ? '1' : '0'); } catch(e){}
+}
+
+// === BIG BUTTONS SETTING (scales top-left sound / settings buttons) ===
+let bigButtons = false;
+try { bigButtons = localStorage.getItem('issa-blocks-bigbtn') === '1'; } catch (e) {}
+function setBigButtons(on) {
+  bigButtons = on;
+  try { localStorage.setItem('issa-blocks-bigbtn', on ? '1' : '0'); } catch (e) {}
+  document.body.classList.toggle('big-buttons', on);
+}
+function applyBigButtons() {
+  document.body.classList.toggle('big-buttons', bigButtons);
 }
 // Wrap navigator.vibrate so toggle works without rewriting every call
 const _origVibrate = navigator.vibrate && navigator.vibrate.bind(navigator);
@@ -8059,6 +8097,7 @@ window.addEventListener('load', () => {
   loadStats();
   loadCustomConfig();
   applySkin();
+  applyBigButtons();
   refreshBestLabels();
   showScreen('title');
 
@@ -8204,7 +8243,8 @@ window.addEventListener('load', () => {
       let active = false;
       if (key === 'sfx')        active = !SFX.muted;
       else if (key === 'music') active = !Music.muted;
-      else if (key === 'vibration') active = vibrationEnabled;
+      else if (key === 'vibration')  active = vibrationEnabled;
+      else if (key === 'bigbuttons') active = bigButtons;
       row.classList.toggle('active', active);
     });
     // Achievement count badge
@@ -8220,7 +8260,8 @@ window.addEventListener('load', () => {
         if (lbl) { lbl.textContent = SFX.muted ? '🔇' : '🔊'; lbl.classList.toggle('muted', SFX.muted); }
       }
       else if (key === 'music') Music.setMuted(!Music.muted);
-      else if (key === 'vibration') setVibration(!vibrationEnabled);
+      else if (key === 'vibration')  setVibration(!vibrationEnabled);
+      else if (key === 'bigbuttons') setBigButtons(!bigButtons);
       syncSettingsToggles();
     });
   });
