@@ -1322,20 +1322,17 @@
     color: white;
     box-shadow: 0 6px 16px -2px rgba(255,95,95,0.55), 0 2px 4px rgba(0,0,0,0.3);
   }
-  /* Hide on every screen that ISN'T the main title or extras menu */
-  body[data-screen="game"]      .hint-pointer,
-  body[data-screen="custom"]    .hint-pointer,
-  body[data-screen="fruit"]     .hint-pointer,
-  body[data-screen="line"]      .hint-pointer,
-  body[data-screen="adventure"] .hint-pointer { display: none !important; }
+  /* Hint chips track their buttons — only visible on the main title screen */
+  body:not([data-screen="title"]) .hint-pointer { display: none !important; }
 
-  /* Hide all floating top-of-viewport controls on sub-screens so they
-     don't cover the sub-screen's own back / score / header content.
-     They're still available from the main title and Extras menus. */
-  body:not([data-screen="title"]):not([data-screen="extras"]) .sfx-btn,
-  body:not([data-screen="title"]):not([data-screen="extras"]) .settings-btn,
-  body:not([data-screen="title"]):not([data-screen="extras"]) .mz-toggle,
-  body:not([data-screen="title"]):not([data-screen="extras"]) .mz-coins {
+  /* Hide all floating top-of-viewport controls on every screen that
+     isn't the main title. Sub-screens (game / custom / fruit / line /
+     adventure / extras) all have their own back-button or header that
+     would get covered by these. */
+  body:not([data-screen="title"]) .sfx-btn,
+  body:not([data-screen="title"]) .settings-btn,
+  body:not([data-screen="title"]) .mz-toggle,
+  body:not([data-screen="title"]) .mz-coins {
     display: none !important;
   }
   @keyframes hint-bob {
@@ -3308,10 +3305,18 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    padding: 32px 16px 24px;
+    padding: 32px 16px 32px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
   }
   .panel-modal.show { display: flex; animation: fade 240ms ease-out; }
+  /* Keep the inner card from clamping the scroll area on tall content */
+  .panel-modal .panel-card {
+    flex-shrink: 0;
+    margin-bottom: 24px;
+  }
   .panel-card {
     width: 100%;
     max-width: 440px;
@@ -5020,6 +5025,7 @@ const ACHIEVEMENTS = [
   { id: 'bomb_25',     name: 'Demolitionist',      desc: 'Detonate 25 bombs',              icon: '🧨', test: s => s.bombsDetonated >= 25 },
   { id: 'hour_play',   name: 'Time Well Spent',    desc: 'Play for a total of 1 hour',     icon: '⏰', test: s => s.totalSecondsPlayed >= 3600 },
   { id: 'long_hauler', name: 'Long Hauler',        desc: 'Play for 10 hours total',        icon: '🛌', test: s => s.totalSecondsPlayed >= 36000 },
+  { id: 'easter_egg',  name: 'Egg Hunter',         desc: 'Find the secret 4-digit code',   icon: '🥚', test: s => Array.isArray(s.achievements) && s.achievements.includes('easter_egg') },
 ];
 
 // === BACKGROUND MUSIC (synth ambient loop) ===
@@ -8301,6 +8307,35 @@ window.addEventListener('load', () => {
   }
 
   // === SECRET CODE NUMPAD ===
+  function codeConfetti() {
+    // Spawn a burst of colored squares falling from the top of the modal
+    const host = document.getElementById('code-modal');
+    if (!host) return;
+    const COLORS = ['#ff5f5f','#ff9f43','#ffd93b','#51cf66','#4dd0e1','#5c7cfa','#9775fa','#f783ac'];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement('div');
+      c.style.position = 'fixed';
+      c.style.top = '0';
+      c.style.left = (Math.random() * 100) + 'vw';
+      c.style.width  = (4 + Math.random() * 8) + 'px';
+      c.style.height = (4 + Math.random() * 8) + 'px';
+      c.style.background = COLORS[Math.floor(Math.random() * COLORS.length)];
+      c.style.borderRadius = '2px';
+      c.style.pointerEvents = 'none';
+      c.style.zIndex = '9999';
+      c.style.transform = 'translateY(-20px) rotate(' + (Math.random() * 360) + 'deg)';
+      host.appendChild(c);
+      const dur = 1400 + Math.random() * 1400;
+      const drift = (Math.random() - 0.5) * 200;
+      const spin = (Math.random() - 0.5) * 720;
+      const anim = c.animate([
+        { transform: c.style.transform, opacity: 1 },
+        { transform: `translate(${drift}px, ${window.innerHeight + 50}px) rotate(${spin}deg)`, opacity: 0.6 }
+      ], { duration: dur, easing: 'cubic-bezier(.2,.6,.4,1)', fill: 'forwards' });
+      anim.onfinish = () => c.remove();
+    }
+  }
+
   let _codeEntered = '';
   function buildCodeNumpad() {
     const pad = document.getElementById('code-numpad');
@@ -8343,10 +8378,23 @@ window.addEventListener('load', () => {
         msg.textContent = hit.message;
         msg.classList.add('good');
         unlockSkin(hit.unlock);
+        // Award the Egg Hunter achievement + persist
+        if (!Array.isArray(stats.achievements)) stats.achievements = [];
+        if (!stats.achievements.includes('easter_egg')) {
+          stats.achievements.push('easter_egg');
+          saveStats();
+        }
+        // Confetti burst — uses the same particle system as sprint celebrations
+        codeConfetti();
         if (typeof SFX !== 'undefined' && SFX.newBest) SFX.newBest();
         // Refresh skin picker if it's visible
         renderSkinPicker();
-        setTimeout(() => { _codeEntered = ''; refreshCodeDisplay(); }, 1800);
+        // Show the achievement popup right after
+        setTimeout(() => {
+          const ach = ACHIEVEMENTS.find(a => a.id === 'easter_egg');
+          if (ach) showAchievementPopup(ach);
+        }, 400);
+        setTimeout(() => { _codeEntered = ''; refreshCodeDisplay(); }, 2200);
       } else {
         d.classList.add('bad');
         msg.textContent = 'INVALID CODE';
