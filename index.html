@@ -1505,6 +1505,129 @@
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 
+  /* === BLOCK SKINS (visual variants for placed cells + tray pieces) === */
+  /* GLASS — translucent frosted look with strong highlight */
+  body.skin-glass .cell.filled,
+  body.skin-glass .pcell:not(.empty) {
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--c, var(--accent)) 60%, white) 0%,
+        var(--c, var(--accent)) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -1px 0 rgba(0,0,0,0.15),
+      inset 0 0 0 1px rgba(255,255,255,0.35),
+      0 2px 6px rgba(0,0,0,0.18) !important;
+  }
+  /* WOOD — warm grain texture */
+  body.skin-wood .cell.filled,
+  body.skin-wood .pcell:not(.empty) {
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.10) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--c, var(--accent)) 75%, #b08960) 0%,
+        color-mix(in srgb, var(--c, var(--accent)) 55%, #5a3f1d) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.28),
+      inset 0 -2px 0 rgba(0,0,0,0.32),
+      0 1px 2px rgba(0,0,0,0.25) !important;
+  }
+  /* NEON — dark fill with glowing edge */
+  body.skin-neon .cell.filled,
+  body.skin-neon .pcell:not(.empty) {
+    background: color-mix(in srgb, var(--c, var(--accent)) 18%, #0a0a0f) !important;
+    box-shadow:
+      inset 0 0 0 1.5px var(--c, var(--accent)),
+      0 0 10px color-mix(in srgb, var(--c, var(--accent)) 85%, transparent),
+      0 0 24px color-mix(in srgb, var(--c, var(--accent)) 45%, transparent) !important;
+  }
+  /* PIXEL — chunky retro with hard edges */
+  body.skin-pixel .cell.filled,
+  body.skin-pixel .pcell:not(.empty) {
+    background: var(--c, var(--accent)) !important;
+    border-radius: 0 !important;
+    image-rendering: pixelated;
+    box-shadow:
+      inset -3px -3px 0 rgba(0,0,0,0.4),
+      inset 3px 3px 0 rgba(255,255,255,0.45) !important;
+  }
+  /* JELLY — heavy gradient, soft + squishy */
+  body.skin-jelly .cell.filled,
+  body.skin-jelly .pcell:not(.empty) {
+    background:
+      radial-gradient(circle at 35% 25%,
+        color-mix(in srgb, white 55%, var(--c, var(--accent))) 0%,
+        var(--c, var(--accent)) 55%,
+        color-mix(in srgb, black 18%, var(--c, var(--accent))) 100%) !important;
+    box-shadow:
+      inset 0 -4px 5px rgba(0,0,0,0.28),
+      inset 0 3px 3px rgba(255,255,255,0.55),
+      0 2px 4px rgba(0,0,0,0.22) !important;
+  }
+  body.skin-jelly .cell.placing { animation-duration: 460ms; }
+
+  /* Skin picker (in settings modal) */
+  .skin-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .skin-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 6px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 120ms ease;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--dim);
+  }
+  .skin-card.active {
+    border-color: rgba(255,184,77,0.5);
+    background: rgba(255,184,77,0.08);
+    color: var(--accent);
+  }
+  .skin-card .skin-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    --c: #ffb84d;
+    background: var(--c);
+  }
+  /* Apply the same skin styles to the preview swatches */
+  .skin-card[data-skin="glass"] .skin-preview {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 60%, white) 0%, var(--c) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 0 0 1px rgba(255,255,255,0.35);
+  }
+  .skin-card[data-skin="wood"] .skin-preview {
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.10) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, #b08960) 0%, color-mix(in srgb, var(--c) 55%, #5a3f1d) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -2px 0 rgba(0,0,0,0.32);
+  }
+  .skin-card[data-skin="neon"] .skin-preview {
+    background: color-mix(in srgb, var(--c) 18%, #0a0a0f);
+    box-shadow: inset 0 0 0 1.5px var(--c), 0 0 10px var(--c);
+  }
+  .skin-card[data-skin="pixel"] .skin-preview {
+    background: var(--c);
+    border-radius: 0;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.4), inset 3px 3px 0 rgba(255,255,255,0.45);
+  }
+  .skin-card[data-skin="jelly"] .skin-preview {
+    background: radial-gradient(circle at 35% 25%, color-mix(in srgb, white 55%, var(--c)) 0%, var(--c) 55%, color-mix(in srgb, black 18%, var(--c)) 100%);
+    box-shadow: inset 0 -4px 5px rgba(0,0,0,0.28), inset 0 3px 3px rgba(255,255,255,0.55);
+  }
+
   /* === ADVENTURE LEVEL SELECT === */
   .adventure-screen {
     flex-direction: column;
@@ -3893,6 +4016,9 @@
           <div class="setting-name">📳 Vibration</div>
           <div class="setting-switch"></div>
         </div>
+
+        <div class="setting-section-title" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.3em;color:var(--dim);margin-top:10px;margin-bottom:-2px">BLOCK SKIN</div>
+        <div class="skin-picker" id="skin-picker"></div>
         <div class="setting-link" data-open="stats-modal">📊 View statistics</div>
         <div class="setting-link" data-open="ach-modal">🏆 Achievements <span class="ach-count" id="ach-count">0/0</span></div>
         <div class="setting-link" data-open="tutorial-modal">📖 How to play</div>
@@ -4628,6 +4754,26 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) Music.stop();
   else if (!Music.muted) Music.start();
 });
+
+// === BLOCK SKINS ===
+const SKINS = [
+  { id: 'default', name: 'Default' },
+  { id: 'glass',   name: 'Glass'   },
+  { id: 'wood',    name: 'Wood'    },
+  { id: 'neon',    name: 'Neon'    },
+  { id: 'pixel',   name: 'Pixel'   },
+  { id: 'jelly',   name: 'Jelly'   },
+];
+let activeSkin = 'default';
+try { activeSkin = localStorage.getItem('issa-blocks-skin-v1') || 'default'; } catch (e) {}
+function setSkin(id) {
+  activeSkin = id;
+  try { localStorage.setItem('issa-blocks-skin-v1', id); } catch (e) {}
+  SKINS.forEach(s => document.body.classList.toggle('skin-' + s.id, s.id === id));
+}
+function applySkin() {
+  SKINS.forEach(s => document.body.classList.toggle('skin-' + s.id, s.id === activeSkin));
+}
 
 // === VIBRATION SETTING ===
 let vibrationEnabled = true;
@@ -6811,7 +6957,7 @@ function fruitRenderLadder() {
     const t = FRUIT_TIERS[i];
     const el = document.createElement('div');
     el.className = 'fruit-tier-mini' + (i <= FRUIT.highestTierUnlocked ? ' unlocked' : '');
-    el.style.background = `radial-gradient(circle at 30% 30%, ${t.color[0]}, ${t.color[1]} 60%, ${t.color[2]})`;
+    el.style.background = `radial-gradient(circle at 30% 30%, ${t.body[0]}, ${t.body[1]} 60%, ${t.body[2]})`;
     el.style.width  = (10 + i) + 'px';
     el.style.height = (10 + i) + 'px';
     wrap.appendChild(el);
@@ -7017,7 +7163,7 @@ function fruitCheckMerges() {
         FRUIT.score += gained;
         fruitUpdateScoreUI();
         // Burst sparks (custom for the fruit container)
-        fruitBurst(mx, my, FRUIT_TIERS[newTier].color[1], 8);
+        fruitBurst(mx, my, FRUIT_TIERS[newTier].body[1], 8);
         // Sound
         if (typeof SFX !== 'undefined') {
           if (newTier === FRUIT_TIERS.length - 1) SFX.newBest && SFX.newBest();
@@ -7631,6 +7777,7 @@ window.addEventListener('load', () => {
   loadBests();
   loadStats();
   loadCustomConfig();
+  applySkin();
   refreshBestLabels();
   showScreen('title');
 
@@ -7680,8 +7827,31 @@ window.addEventListener('load', () => {
 
   document.getElementById('settings-btn').addEventListener('click', () => {
     syncSettingsToggles();
+    renderSkinPicker();
     openPanel('settings-modal');
   });
+
+  // Skin picker
+  function renderSkinPicker() {
+    const wrap = document.getElementById('skin-picker');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (const s of SKINS) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'skin-card' + (s.id === activeSkin ? ' active' : '');
+      card.dataset.skin = s.id;
+      card.innerHTML = `<div class="skin-preview"></div><div>${s.name.toUpperCase()}</div>`;
+      card.onclick = () => {
+        setSkin(s.id);
+        renderSkinPicker();
+        // Repaint the grid + tray so the change is visible immediately
+        if (typeof paintGrid === 'function') paintGrid();
+        if (typeof renderTray === 'function' && Array.isArray(tray)) renderTray();
+      };
+      wrap.appendChild(card);
+    }
+  }
 
   // Toggle rows: sfx / music / vibration
   function syncSettingsToggles() {
