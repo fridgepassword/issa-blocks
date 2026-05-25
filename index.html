@@ -1263,6 +1263,73 @@
   .free-revive-btn.shown { display: inline-block; }
   body.mp-active .free-revive-btn { display: none !important; }
 
+  /* === FIRST-TIME DISCOVERY HINTS === */
+  .hint-pointer {
+    position: fixed;
+    top: max(20px, env(safe-area-inset-top));
+    z-index: 540;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+    animation: hint-bob 1.4s ease-in-out infinite;
+  }
+  body.big-buttons .hint-pointer { top: max(28px, env(safe-area-inset-top)); }
+  .hint-pointer.hidden { display: none; }
+  .hint-pointer.hint-settings {
+    left: max(112px, calc(env(safe-area-inset-left) + 104px));
+  }
+  body.big-buttons .hint-pointer.hint-settings {
+    left: max(136px, calc(env(safe-area-inset-left) + 128px));
+  }
+  .hint-pointer.hint-mz {
+    right: max(140px, calc(env(safe-area-inset-right) + 132px));
+  }
+  .hint-pointer .hint-arrow {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(255,184,77,0.7);
+    line-height: 1;
+    animation: hint-nudge 1.2s ease-in-out infinite;
+  }
+  .hint-pointer.hint-mz .hint-arrow {
+    color: #ff9f43;
+    text-shadow: 0 0 12px rgba(255,159,67,0.7);
+  }
+  .hint-pointer .hint-label {
+    background: linear-gradient(135deg, #ffd93b, #ff9f43);
+    color: #1a1100;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    padding: 6px 12px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    box-shadow: 0 6px 18px -2px rgba(255,184,77,0.55), 0 2px 4px rgba(0,0,0,0.3);
+    white-space: nowrap;
+  }
+  .hint-pointer.hint-mz .hint-label {
+    background: linear-gradient(135deg, #ff9f43, #ff5f5f);
+    color: white;
+    box-shadow: 0 6px 18px -2px rgba(255,95,95,0.55), 0 2px 4px rgba(0,0,0,0.3);
+  }
+  @keyframes hint-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+  @keyframes hint-nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(-3px); }
+  }
+  .hint-pointer.hint-mz .hint-arrow { animation-name: hint-nudge-right; }
+  @keyframes hint-nudge-right {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(3px); }
+  }
+
   /* === TOP-LEFT FLOATING BUTTONS (sound, settings) === */
   .sfx-btn, .settings-btn {
     position: fixed;
@@ -3842,6 +3909,16 @@
   <!-- Settings cog (top-left, next to sound) -->
   <button class="settings-btn" id="settings-btn" type="button" title="Settings">⚙</button>
 
+  <!-- First-time discovery hints — dismiss themselves on first interaction -->
+  <div class="hint-pointer hint-settings hidden" id="hint-settings">
+    <span class="hint-arrow">←</span>
+    <span class="hint-label">SETTINGS</span>
+  </div>
+  <div class="hint-pointer hint-mz hidden" id="hint-mz">
+    <span class="hint-label">MONETIZE!</span>
+    <span class="hint-arrow">→</span>
+  </div>
+
   <!-- Top-right monetization toggle -->
   <button class="mz-toggle" id="mz-toggle" type="button">
     <span id="mz-toggle-label">MONETIZATION</span>
@@ -5077,6 +5154,35 @@ function setVibration(on) {
   try { localStorage.setItem('issa-blocks-vibe', on ? '1' : '0'); } catch(e){}
 }
 
+// === FIRST-TIME DISCOVERY HINTS ===
+// Tiny pointing arrows that show on the title screen for users who haven't
+// yet interacted with the settings cog or the monetization toggle. Each
+// dismisses itself the first time you tap the thing it's pointing at.
+let _settingsHinted = false, _mzHinted = false;
+try { _settingsHinted = localStorage.getItem('issa-blocks-settings-hinted') === '1'; } catch (e) {}
+try { _mzHinted       = localStorage.getItem('issa-blocks-mz-hinted')       === '1'; } catch (e) {}
+function dismissHint(which) {
+  if (which === 'settings') {
+    _settingsHinted = true;
+    try { localStorage.setItem('issa-blocks-settings-hinted', '1'); } catch (e) {}
+    const el = document.getElementById('hint-settings');
+    if (el) el.classList.add('hidden');
+  } else if (which === 'mz') {
+    _mzHinted = true;
+    try { localStorage.setItem('issa-blocks-mz-hinted', '1'); } catch (e) {}
+    const el = document.getElementById('hint-mz');
+    if (el) el.classList.add('hidden');
+  }
+}
+function refreshHints() {
+  // Only show hints on the title or extras screen (not mid-game).
+  const onMenuish = ['title','extras'].includes(document.body.dataset.screen);
+  const sEl = document.getElementById('hint-settings');
+  const mEl = document.getElementById('hint-mz');
+  if (sEl) sEl.classList.toggle('hidden', _settingsHinted || !onMenuish);
+  if (mEl) mEl.classList.toggle('hidden', _mzHinted || !onMenuish);
+}
+
 // === BIG BUTTONS SETTING (scales top-left sound / settings buttons) ===
 let bigButtons = false;
 try { bigButtons = localStorage.getItem('issa-blocks-bigbtn') === '1'; } catch (e) {}
@@ -5179,6 +5285,7 @@ function formatTime(seconds) {
 function showScreen(name) {
   document.body.dataset.screen = name;
   if (name === 'title') refreshBestLabels();
+  if (typeof refreshHints === 'function') refreshHints();
 }
 
 function startGame(modeName) {
@@ -7754,11 +7861,13 @@ function openExtras() {
   _enteredFromExtras = true;
   document.body.dataset.screen = 'extras';
   refreshBestLabels(); // make sure the sub-screen best labels are up to date
+  refreshHints();
 }
 function closeExtras() {
   _enteredFromExtras = false;
   document.body.dataset.screen = 'title';
   refreshBestLabels();
+  refreshHints();
 }
 
 // === ADVENTURE LEVEL SELECT ===
@@ -8146,6 +8255,7 @@ window.addEventListener('load', () => {
   });
 
   document.getElementById('settings-btn').addEventListener('click', () => {
+    dismissHint('settings');
     syncSettingsToggles();
     renderSkinPicker();
     openPanel('settings-modal');
@@ -8919,7 +9029,7 @@ document.addEventListener('visibilitychange', () => {
 
   // === EVENT WIRING ===
   function wire() {
-    $('#mz-toggle').addEventListener('click', cycleToggle);
+    $('#mz-toggle').addEventListener('click', () => { dismissHint('mz'); cycleToggle(); });
     $('#mz-coins').addEventListener('click', showShop);
     $('#mz-shop-close').addEventListener('click', hideShop);
     $('#mz-inter-skip').addEventListener('click', hideInter);
