@@ -76,30 +76,41 @@
   }
 
   /* Screen routing */
-  .fruit-screen, .line-screen { display: none; }
-  body[data-screen="title"]  .game-screen,
-  body[data-screen="title"]  .custom-config,
-  body[data-screen="title"]  .fruit-screen,
-  body[data-screen="title"]  .line-screen { display: none; }
-  body[data-screen="game"]   .title-screen,
-  body[data-screen="game"]   .custom-config,
-  body[data-screen="game"]   .fruit-screen,
-  body[data-screen="game"]   .line-screen { display: none; }
-  body[data-screen="custom"] .title-screen,
-  body[data-screen="custom"] .game-screen,
-  body[data-screen="custom"] .fruit-screen,
-  body[data-screen="custom"] .line-screen { display: none; }
+  .fruit-screen, .line-screen, .extras-screen { display: none; }
+  body[data-screen="title"]   .game-screen,
+  body[data-screen="title"]   .custom-config,
+  body[data-screen="title"]   .fruit-screen,
+  body[data-screen="title"]   .line-screen,
+  body[data-screen="title"]   .extras-screen { display: none; }
+  body[data-screen="game"]    .title-screen,
+  body[data-screen="game"]    .custom-config,
+  body[data-screen="game"]    .fruit-screen,
+  body[data-screen="game"]    .line-screen,
+  body[data-screen="game"]    .extras-screen { display: none; }
+  body[data-screen="custom"]  .title-screen,
+  body[data-screen="custom"]  .game-screen,
+  body[data-screen="custom"]  .fruit-screen,
+  body[data-screen="custom"]  .line-screen,
+  body[data-screen="custom"]  .extras-screen { display: none; }
   body[data-screen="custom"] { overflow-y: auto !important; height: auto !important; touch-action: pan-y !important; }
-  body[data-screen="fruit"] .title-screen,
-  body[data-screen="fruit"] .game-screen,
-  body[data-screen="fruit"] .custom-config,
-  body[data-screen="fruit"] .line-screen { display: none; }
-  body[data-screen="fruit"] .fruit-screen { display: flex; }
-  body[data-screen="line"]  .title-screen,
-  body[data-screen="line"]  .game-screen,
-  body[data-screen="line"]  .custom-config,
-  body[data-screen="line"]  .fruit-screen { display: none; }
-  body[data-screen="line"]  .line-screen { display: flex; }
+  body[data-screen="fruit"]   .title-screen,
+  body[data-screen="fruit"]   .game-screen,
+  body[data-screen="fruit"]   .custom-config,
+  body[data-screen="fruit"]   .line-screen,
+  body[data-screen="fruit"]   .extras-screen { display: none; }
+  body[data-screen="fruit"]   .fruit-screen { display: flex; }
+  body[data-screen="line"]    .title-screen,
+  body[data-screen="line"]    .game-screen,
+  body[data-screen="line"]    .custom-config,
+  body[data-screen="line"]    .fruit-screen,
+  body[data-screen="line"]    .extras-screen { display: none; }
+  body[data-screen="line"]    .line-screen { display: flex; }
+  body[data-screen="extras"]  .title-screen,
+  body[data-screen="extras"]  .game-screen,
+  body[data-screen="extras"]  .custom-config,
+  body[data-screen="extras"]  .fruit-screen,
+  body[data-screen="extras"]  .line-screen { display: none; }
+  body[data-screen="extras"]  .extras-screen { display: flex; }
   html.cc-scroll { overflow-y: auto !important; height: auto !important; }
 
   /* === TITLE SCREEN === */
@@ -1485,6 +1496,77 @@
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 
+  /* === EXTRAS SCREEN === */
+  .extras-screen {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    gap: 14px;
+    padding: 8px 4px 14px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .extras-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .extras-head h1 {
+    flex: 1;
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #f783ac);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .extras-back {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding: 7px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  /* "NEW" badge on the Extras card */
+  .new-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff5f5f, #ffd93b);
+    color: #1a0000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .mode-card[data-mode="extras"] {
+    background: linear-gradient(180deg, rgba(255,184,77,0.10), rgba(255,184,77,0.02));
+    border-color: rgba(255,184,77,0.25);
+  }
+  .mode-card[data-mode="extras"] .mode-name {
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #f783ac);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="extras"]:hover {
+    border-color: rgba(255,184,77,0.5);
+    background: linear-gradient(180deg, rgba(255,184,77,0.16), rgba(255,184,77,0.04));
+  }
+
   /* ============================================ */
   /* === FRUIT DROP MODE ========================== */
   /* ============================================ */
@@ -1799,6 +1881,32 @@
     color: var(--dim);
   }
   .line-level-card.solved .lc-tag { color: var(--easy); }
+  .line-random-card {
+    background: linear-gradient(180deg, rgba(255,184,77,0.14), rgba(247,131,172,0.05));
+    border-color: rgba(255,184,77,0.4);
+  }
+  .line-random-card:hover {
+    border-color: rgba(255,184,77,0.6);
+    background: linear-gradient(180deg, rgba(255,184,77,0.22), rgba(247,131,172,0.08));
+  }
+  .line-random-card .lc-num {
+    color: var(--accent);
+    font-size: 32px !important;
+  }
+  .line-random-card .lc-mini-rand {
+    width: 60%;
+    aspect-ratio: 1;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,184,77,0.4) 30%, transparent 60%),
+      conic-gradient(from 0deg, rgba(255,184,77,0.3), rgba(247,131,172,0.3), rgba(255,184,77,0.3));
+    border-radius: 50%;
+    animation: rnd-spin 8s linear infinite;
+  }
+  @keyframes rnd-spin { to { transform: rotate(360deg); } }
+  .line-random-card .lc-tag {
+    color: var(--accent);
+    font-weight: 800;
+  }
 
   .line-play {
     width: 100%;
@@ -3213,6 +3321,30 @@
         <div class="mode-desc">Brutal pieces. 1.5× score multiplier.</div>
         <div class="mode-best">BEST<b id="best-hardcore">0</b></div>
       </button>
+      <button class="mode-card" data-mode="extras" onclick="openExtras()">
+        <div class="mode-name">EXTRA MODES <span class="new-tag">NEW</span></div>
+        <div class="mode-desc">Custom, multiplayer, daily, fruit drop, line puzzles…</div>
+        <div class="mode-best">→</div>
+      </button>
+    </div>
+
+    <!-- MZ: free coin button + banner ad on title screen -->
+    <button class="mz-watch-ad" id="mz-watch-ad" type="button">▶ WATCH AD · GET 1 ISSA COIN</button>
+    <div class="mz-banner" data-banner-id="title"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="title-2"></div>
+    <div class="mz-banner mz-super-only" data-banner-id="title-3"></div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- EXTRAS SCREEN (alternate game modes)          -->
+  <!-- ============================================ -->
+  <div class="extras-screen">
+    <div class="extras-head">
+      <button class="extras-back" type="button" onclick="closeExtras()">← MENU</button>
+      <h1>EXTRA MODES</h1>
+      <span style="width: 60px"></span>
+    </div>
+    <div class="modes">
       <button class="mode-card" data-mode="custom" onclick="openCustomConfig()">
         <div class="mode-name">CUSTOM</div>
         <div class="mode-desc">Build your own run. Pieces, features, difficulty.</div>
@@ -3239,12 +3371,6 @@
         <div class="mode-best">LVLS<b id="best-line">0</b></div>
       </button>
     </div>
-
-    <!-- MZ: free coin button + banner ad on title screen -->
-    <button class="mz-watch-ad" id="mz-watch-ad" type="button">▶ WATCH AD · GET 1 ISSA COIN</button>
-    <div class="mz-banner" data-banner-id="title"></div>
-    <div class="mz-banner mz-super-only" data-banner-id="title-2"></div>
-    <div class="mz-banner mz-super-only" data-banner-id="title-3"></div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -4326,7 +4452,13 @@ function goToMenu() {
   // Daily / any seeded mode: clear the deterministic RNG
   if (currentMode === 'daily') exitDaily();
   activeRng = null;
-  showScreen('title');
+  // Return to extras if we got here via the extras menu, else title
+  if (_enteredFromExtras) {
+    document.body.dataset.screen = 'extras';
+    refreshBestLabels();
+  } else {
+    showScreen('title');
+  }
 }
 
 function restartCurrent() {
@@ -5568,8 +5700,9 @@ function openCustomConfig() {
   document.documentElement.classList.add('cc-scroll');
 }
 function closeCustomConfig() {
-  document.body.dataset.screen = 'title';
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
   document.documentElement.classList.remove('cc-scroll');
+  refreshBestLabels();
 }
 function resetCustomConfig() {
   customConfig.difficulty = 'normal';
@@ -6073,7 +6206,8 @@ function exitFruit() {
   FRUIT.active = false;
   cancelAnimationFrame(FRUIT.rafId);
   fruitDetachInput();
-  document.body.dataset.screen = 'title';
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
+  refreshBestLabels();
 }
 
 function restartFruit() {
@@ -6507,9 +6641,117 @@ function lineLoadSolved() {
     }
   } catch (e) {}
   while (LINE.solved.length < LINE_LEVELS.length) LINE.solved.push(false);
+  // Also load best-random-level reached
+  try { LINE.randomBest = parseInt(localStorage.getItem(LINE_KEY + '-rnd') || '0', 10) || 0; } catch (e) { LINE.randomBest = 0; }
 }
 function lineSaveSolved() {
   try { localStorage.setItem(LINE_KEY, JSON.stringify(LINE.solved)); } catch (e) {}
+}
+function lineSaveRandomBest() {
+  try { localStorage.setItem(LINE_KEY + '-rnd', String(LINE.randomBest || 0)); } catch (e) {}
+}
+
+// === RANDOM ENDLESS LINE PUZZLES ===
+// Generate a guaranteed-solvable puzzle by performing a randomized DFS that
+// finds a Hamiltonian path of `targetLen` cells on a `rows`x`cols` grid.
+// We then use ONLY the cells visited by the path as the puzzle's mask, with
+// the path's first cell as the start. Solvability is built into the data.
+function _dfsHam(path, visited, target, rows, cols, budget) {
+  if (path.length >= target) return true;
+  if (budget.count-- <= 0) return false;
+  const last = path[path.length - 1];
+  const r = last[0], c = last[1];
+  // Shuffle the four neighbor directions for variety
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  for (let i = dirs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = dirs[i]; dirs[i] = dirs[j]; dirs[j] = tmp;
+  }
+  for (const d of dirs) {
+    const nr = r + d[0], nc = c + d[1];
+    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+    const key = nr * cols + nc;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    path.push([nr, nc]);
+    if (_dfsHam(path, visited, target, rows, cols, budget)) return true;
+    path.pop();
+    visited.delete(key);
+  }
+  return false;
+}
+function generateHamiltonianPath(rows, cols, targetLen) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const sr = Math.floor(Math.random() * rows);
+    const sc = Math.floor(Math.random() * cols);
+    const visited = new Set([sr * cols + sc]);
+    const path = [[sr, sc]];
+    const budget = { count: 12000 };
+    if (_dfsHam(path, visited, targetLen, rows, cols, budget)) return path;
+  }
+  return null;
+}
+
+// Difficulty curve for endless random puzzles
+function lineRandomDifficulty(level) {
+  if (level < 2)  return { rows: 4, cols: 4, target: 12 + level };          // 12, 13
+  if (level < 5)  return { rows: 5, cols: 5, target: 18 + (level - 2) * 2 }; // 18, 20, 22
+  if (level < 9)  return { rows: 6, cols: 6, target: 26 + (level - 5) * 2 }; // 26, 28, 30, 32
+  if (level < 14) return { rows: 7, cols: 7, target: 36 + (level - 9) * 3 }; // 36, 39, 42, 45, 48
+  return { rows: 8, cols: 8, target: Math.min(64, 50 + (level - 14) * 2) };
+}
+
+function startRandomLine() {
+  lineLoadSolved();
+  LINE.randomActive = true;
+  LINE.randomLevel = 0;
+  nextRandomLine();
+}
+function nextRandomLine() {
+  const diff = lineRandomDifficulty(LINE.randomLevel);
+  let path = generateHamiltonianPath(diff.rows, diff.cols, diff.target);
+  // Fallback: shrink target if it failed (shouldn't with these settings on full grids, but just in case)
+  let tries = 0;
+  while (!path && diff.target > 6 && tries < 4) {
+    diff.target -= 2;
+    path = generateHamiltonianPath(diff.rows, diff.cols, diff.target);
+    tries++;
+  }
+  if (!path) { exitLineMode(); return; }
+  // Build the cells mask from the path's coordinates
+  const cells = Array(diff.rows * diff.cols).fill(0);
+  for (const rc of path) cells[rc[0] * diff.cols + rc[1]] = 1;
+  const startIdx = path[0][0] * diff.cols + path[0][1];
+  LINE.level = { cols: diff.cols, rows: diff.rows, start: startIdx, cells, isRandom: true };
+  LINE.path = [startIdx];
+  LINE.won = false;
+  const lineScreen = document.querySelector('.line-screen');
+  lineScreen.classList.remove('show-levels');
+  lineScreen.classList.add('show-play');
+  document.getElementById('line-title').textContent = `ENDLESS · LV ${LINE.randomLevel + 1}`;
+  const info = document.getElementById('line-info');
+  info.classList.remove('win');
+  info.textContent = `${diff.cols}×${diff.rows} grid · ${path.length} cells · BEST LV ${LINE.randomBest || 0}`;
+  renderLineBoard();
+}
+function exitRandomLine() {
+  LINE.randomActive = false;
+}
+
+// === EXTRAS SCREEN ===
+// Tracks where the user came from so the back button on sub-modes (custom,
+// fruit, line, etc.) returns to the right place (extras vs title).
+let _enteredFromExtras = false;
+
+function openExtras() {
+  _enteredFromExtras = true;
+  document.body.dataset.screen = 'extras';
+  refreshBestLabels(); // make sure the sub-screen best labels are up to date
+}
+function closeExtras() {
+  _enteredFromExtras = false;
+  document.body.dataset.screen = 'title';
+  refreshBestLabels();
 }
 
 function openLineLevels() {
@@ -6529,6 +6771,20 @@ function renderLineLevels() {
   head.className = 'line-levels-head';
   head.innerHTML = '<button class="lvl-back" onclick="exitLineMode()" type="button">← MENU</button><h2>LINE PUZZLES</h2><span style="width:60px"></span>';
   wrap.appendChild(head);
+
+  // ENDLESS / RANDOM card (always first)
+  const rndBest = LINE.randomBest || 0;
+  const rnd = document.createElement('button');
+  rnd.type = 'button';
+  rnd.className = 'line-level-card line-random-card';
+  rnd.innerHTML = `
+    <div class="lc-num" style="font-size:14px; letter-spacing:0.15em">∞</div>
+    <div class="lc-mini lc-mini-rand"></div>
+    <div class="lc-tag">${rndBest > 0 ? 'BEST LV ' + rndBest : 'ENDLESS'}</div>
+  `;
+  rnd.onclick = () => startRandomLine();
+  wrap.appendChild(rnd);
+
   // Level cards
   LINE_LEVELS.forEach((lvl, i) => {
     const card = document.createElement('button');
@@ -6555,6 +6811,7 @@ function renderLineLevels() {
 }
 
 function startLineLevel(idx) {
+  LINE.randomActive = false;
   LINE.levelIdx = idx;
   LINE.level = LINE_LEVELS[idx];
   LINE.path = [LINE.level.start];
@@ -6571,6 +6828,7 @@ function startLineLevel(idx) {
 }
 
 function lineBackToLevels() {
+  LINE.randomActive = false;
   const lineScreen = document.querySelector('.line-screen');
   lineScreen.classList.remove('show-play');
   lineScreen.classList.add('show-levels');
@@ -6578,7 +6836,8 @@ function lineBackToLevels() {
 }
 
 function exitLineMode() {
-  document.body.dataset.screen = 'title';
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
+  refreshBestLabels();
 }
 
 function renderLineBoard() {
@@ -6696,12 +6955,24 @@ function handleLinePointer(idx) {
   for (const v of lvl.cells) if (v) onCount++;
   if (LINE.path.length === onCount) {
     LINE.won = true;
-    LINE.solved[LINE.levelIdx] = true;
-    lineSaveSolved();
     const info = document.getElementById('line-info');
     info.classList.add('win');
-    info.textContent = '✓ SOLVED!  Tap LEVELS for the next one.';
-    if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
+    if (lvl.isRandom) {
+      // Endless mode: advance to the next (harder) random puzzle
+      LINE.randomLevel = (LINE.randomLevel || 0) + 1;
+      if (LINE.randomLevel > (LINE.randomBest || 0)) {
+        LINE.randomBest = LINE.randomLevel;
+        lineSaveRandomBest();
+      }
+      info.textContent = `✓ LEVEL ${LINE.randomLevel} CLEARED!  Next…`;
+      if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
+      setTimeout(() => { if (LINE.randomActive) nextRandomLine(); }, 1300);
+    } else {
+      LINE.solved[LINE.levelIdx] = true;
+      lineSaveSolved();
+      info.textContent = '✓ SOLVED!  Tap LEVELS for the next one.';
+      if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
+    }
   }
   renderLineBoard();
 }
