@@ -1567,6 +1567,110 @@
   }
   body.skin-jelly .cell.placing { animation-duration: 460ms; }
 
+  /* CUPCAKE — pastel frosting top with sprinkles */
+  body.skin-cupcake .cell.filled,
+  body.skin-cupcake .pcell:not(.empty) {
+    background:
+      radial-gradient(circle at 22% 22%, rgba(255,255,255,0.65) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 70% 28%, rgba(255,180,210,0.6) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 32% 70%, rgba(255,255,200,0.55) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 78% 76%, rgba(180,255,200,0.55) 0 2px, transparent 2.5px),
+      linear-gradient(180deg,
+        color-mix(in srgb, white 55%, var(--c, var(--accent))) 0%,
+        color-mix(in srgb, white 25%, var(--c, var(--accent))) 45%,
+        color-mix(in srgb, var(--c, var(--accent)) 75%, #5a3520) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -2px 0 rgba(0,0,0,0.18),
+      0 2px 4px rgba(0,0,0,0.22) !important;
+  }
+  /* CANDY — rainbow swirl, hard candy gloss */
+  body.skin-candy .cell.filled,
+  body.skin-candy .pcell:not(.empty) {
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--c, var(--accent)) 65%, white) 0%,
+        var(--c, var(--accent)) 35%,
+        color-mix(in srgb, var(--c, var(--accent)) 65%, #fff) 60%,
+        var(--c, var(--accent)) 100%) !important;
+    background-size: 200% 200% !important;
+    box-shadow:
+      inset 0 2px 2px rgba(255,255,255,0.55),
+      inset 0 -2px 2px rgba(0,0,0,0.18),
+      0 2px 6px rgba(0,0,0,0.2) !important;
+  }
+  /* ICE — frosty pale with crystalline highlight */
+  body.skin-ice .cell.filled,
+  body.skin-ice .pcell:not(.empty) {
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--c, var(--accent)) 30%, #e0f2fe) 0%,
+        color-mix(in srgb, var(--c, var(--accent)) 65%, #bae6fd) 100%) !important;
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.85),
+      inset 0 -2px 3px rgba(56,189,248,0.35),
+      inset 0 0 0 1px rgba(186,230,253,0.5),
+      0 1px 2px rgba(56,189,248,0.25) !important;
+  }
+  /* GALAXY — dark with tiny twinkling stars */
+  body.skin-galaxy .cell.filled,
+  body.skin-galaxy .pcell:not(.empty) {
+    background:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,0.9) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 70% 40%, rgba(255,255,255,0.7) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 50% 75%, rgba(255,255,255,0.85) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 18% 70%, rgba(255,255,255,0.5) 0 0.5px, transparent 1px),
+      radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--c, var(--accent)) 70%, #1a0a3a) 0%, #0a0820 80%) !important;
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--c, var(--accent)) 40%, transparent),
+      inset 0 -2px 6px rgba(0,0,0,0.5),
+      0 2px 6px rgba(20,0,40,0.35) !important;
+  }
+  /* GOLD — metallic gradient with shine */
+  body.skin-gold .cell.filled,
+  body.skin-gold .pcell:not(.empty) {
+    background:
+      linear-gradient(135deg,
+        #fff4b8 0%,
+        #ffd93b 20%,
+        #c98a1a 50%,
+        #ffd93b 75%,
+        #fff4b8 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.8),
+      inset 0 -2px 2px rgba(120,80,10,0.55),
+      0 2px 8px rgba(201,138,26,0.4) !important;
+  }
+  /* BUBBLE — translucent, big reflective highlight */
+  body.skin-bubble .cell.filled,
+  body.skin-bubble .pcell:not(.empty) {
+    background:
+      radial-gradient(circle at 28% 22%, rgba(255,255,255,0.85) 0%, transparent 28%),
+      radial-gradient(circle at 75% 75%, rgba(255,255,255,0.4) 0%, transparent 35%),
+      radial-gradient(circle at 50% 50%,
+        color-mix(in srgb, var(--c, var(--accent)) 40%, transparent) 0%,
+        color-mix(in srgb, var(--c, var(--accent)) 65%, transparent) 70%) !important;
+    box-shadow:
+      inset 0 0 0 1.5px color-mix(in srgb, var(--c, var(--accent)) 70%, white),
+      inset 0 -3px 6px rgba(255,255,255,0.3),
+      0 2px 6px color-mix(in srgb, var(--c, var(--accent)) 30%, transparent) !important;
+  }
+  /* RAINBOW (secret) — animated hue-shifted gradient */
+  body.skin-rainbow .cell.filled,
+  body.skin-rainbow .pcell:not(.empty) {
+    background: linear-gradient(135deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f) !important;
+    background-size: 400% 400% !important;
+    animation: rainbow-shift 4s linear infinite;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.45),
+      inset 0 -2px 2px rgba(0,0,0,0.22),
+      0 2px 6px rgba(0,0,0,0.22) !important;
+  }
+  @keyframes rainbow-shift {
+    0%   { background-position: 0%   50%; }
+    100% { background-position: 400% 50%; }
+  }
+
   /* Skin picker (in settings modal) */
   .skin-picker {
     display: grid;
@@ -1627,6 +1731,113 @@
     background: radial-gradient(circle at 35% 25%, color-mix(in srgb, white 55%, var(--c)) 0%, var(--c) 55%, color-mix(in srgb, black 18%, var(--c)) 100%);
     box-shadow: inset 0 -4px 5px rgba(0,0,0,0.28), inset 0 3px 3px rgba(255,255,255,0.55);
   }
+  .skin-card[data-skin="cupcake"] .skin-preview {
+    background:
+      radial-gradient(circle at 22% 22%, rgba(255,255,255,0.65) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 70% 28%, rgba(255,180,210,0.6) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 32% 70%, rgba(255,255,200,0.55) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 78% 76%, rgba(180,255,200,0.55) 0 2px, transparent 2.5px),
+      linear-gradient(180deg, color-mix(in srgb, white 55%, var(--c)) 0%, color-mix(in srgb, var(--c) 75%, #5a3520) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,0,0,0.18);
+  }
+  .skin-card[data-skin="candy"] .skin-preview {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 65%, white) 0%, var(--c) 35%, color-mix(in srgb, var(--c) 65%, #fff) 60%, var(--c) 100%);
+    box-shadow: inset 0 2px 2px rgba(255,255,255,0.55), inset 0 -2px 2px rgba(0,0,0,0.18);
+  }
+  .skin-card[data-skin="ice"] .skin-preview {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 30%, #e0f2fe) 0%, color-mix(in srgb, var(--c) 65%, #bae6fd) 100%);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.85), inset 0 -2px 3px rgba(56,189,248,0.35);
+  }
+  .skin-card[data-skin="galaxy"] .skin-preview {
+    background:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,0.9) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 70% 40%, rgba(255,255,255,0.7) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 50% 75%, rgba(255,255,255,0.85) 0 1px, transparent 1.5px),
+      radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--c) 70%, #1a0a3a) 0%, #0a0820 80%);
+  }
+  .skin-card[data-skin="gold"] .skin-preview {
+    background: linear-gradient(135deg, #fff4b8 0%, #ffd93b 20%, #c98a1a 50%, #ffd93b 75%, #fff4b8 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -2px 2px rgba(120,80,10,0.55);
+  }
+  .skin-card[data-skin="bubble"] .skin-preview {
+    background:
+      radial-gradient(circle at 28% 22%, rgba(255,255,255,0.85) 0%, transparent 28%),
+      radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--c) 40%, transparent) 0%, color-mix(in srgb, var(--c) 65%, transparent) 70%);
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, white);
+  }
+  .skin-card[data-skin="rainbow"] .skin-preview {
+    background: linear-gradient(135deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f);
+    background-size: 400% 400%;
+    animation: rainbow-shift 4s linear infinite;
+  }
+  /* Locked skins look grayed out and unclickable */
+  .skin-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .skin-card.locked .skin-preview {
+    background: rgba(255,255,255,0.08) !important;
+    box-shadow: none !important;
+  }
+  .skin-card.locked::after {
+    content: '🔒';
+    position: absolute;
+    transform: translate(0, -38px);
+    font-size: 18px;
+  }
+  .skin-card { position: relative; }
+
+  /* === SECRET CODE NUMPAD === */
+  .code-display {
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 44px;
+    letter-spacing: 0.32em;
+    color: var(--accent);
+    padding: 14px 0;
+    background: rgba(255,184,77,0.06);
+    border: 1px solid rgba(255,184,77,0.25);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .code-display.bad { animation: code-shake 0.4s ease; color: var(--hard); border-color: rgba(255,95,95,0.45); background: rgba(255,95,95,0.06); }
+  .code-display.good { color: var(--easy); border-color: rgba(81,207,102,0.5); background: rgba(81,207,102,0.08); }
+  @keyframes code-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(4px); }
+  }
+  .code-numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .code-key {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    padding: 14px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 80ms ease, background 160ms ease;
+  }
+  .code-key:active { transform: scale(0.94); background: rgba(255,184,77,0.18); }
+  .code-key.del { color: var(--hard); font-size: 18px; }
+  .code-message {
+    margin-top: 10px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+    min-height: 16px;
+  }
+  .code-message.good { color: var(--easy); font-weight: 700; }
+  .code-message.bad { color: var(--hard); font-weight: 700; }
 
   /* === ADVENTURE LEVEL SELECT === */
   .adventure-screen {
@@ -2011,6 +2222,15 @@
     transform: translate(0,0);
     will-change: transform;
     pointer-events: none;
+  }
+  /* Make absolutely SURE no UI overlay inside the container steals taps */
+  .fruit-preview, .fruit-preview *,
+  .fruit-preview-name, .fruit-preview-name *,
+  .fruit-guide, .fruit-guide *,
+  .fruit-next-display, .fruit-next-display *,
+  .fruit-danger, .fruit-danger *,
+  .fruit-fruit, .fruit-fruit * {
+    pointer-events: none !important;
   }
   .fruit-fruit .fruit-svg {
     width: 100%;
@@ -4022,6 +4242,7 @@
         <div class="setting-link" data-open="stats-modal">📊 View statistics</div>
         <div class="setting-link" data-open="ach-modal">🏆 Achievements <span class="ach-count" id="ach-count">0/0</span></div>
         <div class="setting-link" data-open="tutorial-modal">📖 How to play</div>
+        <div class="setting-link" data-open="code-modal">🔐 Secret code</div>
         <div class="setting-link danger" id="reset-data">⚠️ Reset all data</div>
       </div>
     </div>
@@ -4046,6 +4267,22 @@
         <button class="panel-close" data-close="ach-modal" type="button">✕</button>
       </div>
       <div class="panel-body" id="ach-body"></div>
+    </div>
+  </div>
+
+  <!-- Secret code modal -->
+  <div class="panel-modal" id="code-modal">
+    <div class="panel-card">
+      <div class="panel-head">
+        <h2>SECRET CODE</h2>
+        <button class="panel-close" data-close="code-modal" type="button">✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="code-message" style="text-align:center;margin-bottom:8px">Enter a 4-digit secret code.</div>
+        <div class="code-display" id="code-display">_ _ _ _</div>
+        <div class="code-numpad" id="code-numpad"></div>
+        <div class="code-message" id="code-message"></div>
+      </div>
     </div>
   </div>
 
@@ -4757,16 +4994,35 @@ document.addEventListener('visibilitychange', () => {
 
 // === BLOCK SKINS ===
 const SKINS = [
-  { id: 'default', name: 'Default' },
-  { id: 'glass',   name: 'Glass'   },
-  { id: 'wood',    name: 'Wood'    },
-  { id: 'neon',    name: 'Neon'    },
-  { id: 'pixel',   name: 'Pixel'   },
-  { id: 'jelly',   name: 'Jelly'   },
+  { id: 'default',  name: 'Default'  },
+  { id: 'glass',    name: 'Glass'    },
+  { id: 'wood',     name: 'Wood'     },
+  { id: 'neon',     name: 'Neon'     },
+  { id: 'pixel',    name: 'Pixel'    },
+  { id: 'jelly',    name: 'Jelly'    },
+  { id: 'cupcake',  name: 'Cupcake'  },
+  { id: 'candy',    name: 'Candy'    },
+  { id: 'ice',      name: 'Ice'      },
+  { id: 'galaxy',   name: 'Galaxy'   },
+  { id: 'gold',     name: 'Gold'     },
+  { id: 'bubble',   name: 'Bubble'   },
+  // Hidden until the player enters the secret code in settings
+  { id: 'rainbow',  name: 'Rainbow ✨', secret: true },
 ];
 let activeSkin = 'default';
+let unlockedSecrets = [];   // array of unlocked skin ids (e.g., ['rainbow'])
 try { activeSkin = localStorage.getItem('issa-blocks-skin-v1') || 'default'; } catch (e) {}
+try {
+  const r = localStorage.getItem('issa-blocks-secrets-v1');
+  if (r) unlockedSecrets = JSON.parse(r) || [];
+} catch (e) { unlockedSecrets = []; }
+function isSkinUnlocked(skin) {
+  return !skin.secret || unlockedSecrets.includes(skin.id);
+}
 function setSkin(id) {
+  // Don't allow setting a locked skin
+  const skin = SKINS.find(s => s.id === id);
+  if (!skin || !isSkinUnlocked(skin)) return;
   activeSkin = id;
   try { localStorage.setItem('issa-blocks-skin-v1', id); } catch (e) {}
   SKINS.forEach(s => document.body.classList.toggle('skin-' + s.id, s.id === id));
@@ -4774,6 +5030,18 @@ function setSkin(id) {
 function applySkin() {
   SKINS.forEach(s => document.body.classList.toggle('skin-' + s.id, s.id === activeSkin));
 }
+function unlockSkin(id) {
+  if (!unlockedSecrets.includes(id)) {
+    unlockedSecrets.push(id);
+    try { localStorage.setItem('issa-blocks-secrets-v1', JSON.stringify(unlockedSecrets)); } catch (e) {}
+  }
+}
+
+// === SECRET CODES ===
+// Map of code -> { id, message }
+const SECRET_CODES = {
+  '4876': { unlock: 'rainbow', message: '🌈 RAINBOW SKIN UNLOCKED!' },
+};
 
 // === VIBRATION SETTING ===
 let vibrationEnabled = true;
@@ -7015,14 +7283,20 @@ function fruitDrop() {
 // === Input ===
 let _fruitPointerHandler = null;
 let _fruitDownHandler = null;
+let _fruitReleaseHandler = null;
 function fruitAttachInput() {
   const cont = document.getElementById('fruit-container');
   if (!cont) return;
+  // Always detach any previous listeners first so re-entering fruit mode
+  // doesn't stack multiple handlers (which used to spawn N fruits per tap).
+  fruitDetachInput();
+
   _fruitPointerHandler = (e) => {
     if (e.type !== 'pointermove') e.preventDefault();
+    fruitMeasureContainer();
     const rect = cont.getBoundingClientRect();
+    if (rect.width < 30) return;     // not laid out yet; ignore
     const x = (e.clientX - rect.left) / rect.width;
-    // Clamp so the fruit fits inside walls
     const t = FRUIT_TIERS[FRUIT.nextTier];
     const margin = t ? t.r : 0.05;
     FRUIT.dropX = Math.max(margin, Math.min(1 - margin, x));
@@ -7034,25 +7308,32 @@ function fruitAttachInput() {
   };
   _fruitDownHandler = (e) => {
     if (e.target.closest('.fruit-game-over')) return;
+    if (e.target.closest('.fruit-back'))      return;
+    try { cont.setPointerCapture(e.pointerId); } catch (err) {}
     _fruitPointerHandler(e);
-    // Drop on release (or tap)
-    const release = (re) => {
-      cont.removeEventListener('pointerup', release);
-      cont.removeEventListener('pointercancel', release);
-      fruitDrop();
-    };
-    cont.addEventListener('pointerup', release);
-    cont.addEventListener('pointercancel', release);
   };
-  cont.addEventListener('pointerdown', _fruitDownHandler);
-  cont.addEventListener('pointermove', _fruitPointerHandler);
+  // Drop fires on release of the same pointer, regardless of where they end up
+  _fruitReleaseHandler = (e) => {
+    if (e.target.closest('.fruit-game-over')) return;
+    fruitDrop();
+  };
+  cont.addEventListener('pointerdown',   _fruitDownHandler,    { passive: false });
+  cont.addEventListener('pointermove',   _fruitPointerHandler, { passive: false });
+  cont.addEventListener('pointerup',     _fruitReleaseHandler);
+  cont.addEventListener('pointercancel', _fruitReleaseHandler);
 }
 function fruitDetachInput() {
   const cont = document.getElementById('fruit-container');
   if (!cont) return;
-  if (_fruitDownHandler) cont.removeEventListener('pointerdown', _fruitDownHandler);
-  if (_fruitPointerHandler) cont.removeEventListener('pointermove', _fruitPointerHandler);
-  _fruitDownHandler = null; _fruitPointerHandler = null;
+  if (_fruitDownHandler)    cont.removeEventListener('pointerdown',   _fruitDownHandler);
+  if (_fruitPointerHandler) cont.removeEventListener('pointermove',   _fruitPointerHandler);
+  if (_fruitReleaseHandler) {
+    cont.removeEventListener('pointerup',     _fruitReleaseHandler);
+    cont.removeEventListener('pointercancel', _fruitReleaseHandler);
+  }
+  _fruitDownHandler = null;
+  _fruitPointerHandler = null;
+  _fruitReleaseHandler = null;
 }
 
 // === Physics step ===
@@ -7837,21 +8118,84 @@ window.addEventListener('load', () => {
     if (!wrap) return;
     wrap.innerHTML = '';
     for (const s of SKINS) {
+      const unlocked = isSkinUnlocked(s);
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'skin-card' + (s.id === activeSkin ? ' active' : '');
+      card.className = 'skin-card'
+        + (s.id === activeSkin ? ' active' : '')
+        + (unlocked ? '' : ' locked');
       card.dataset.skin = s.id;
-      card.innerHTML = `<div class="skin-preview"></div><div>${s.name.toUpperCase()}</div>`;
-      card.onclick = () => {
-        setSkin(s.id);
-        renderSkinPicker();
-        // Repaint the grid + tray so the change is visible immediately
-        if (typeof paintGrid === 'function') paintGrid();
-        if (typeof renderTray === 'function' && Array.isArray(tray)) renderTray();
-      };
+      card.innerHTML = `<div class="skin-preview"></div><div>${unlocked ? s.name.toUpperCase() : '???'}</div>`;
+      if (unlocked) {
+        card.onclick = () => {
+          setSkin(s.id);
+          renderSkinPicker();
+          if (typeof paintGrid === 'function') paintGrid();
+          if (typeof renderTray === 'function' && Array.isArray(tray)) renderTray();
+        };
+      }
       wrap.appendChild(card);
     }
   }
+
+  // === SECRET CODE NUMPAD ===
+  let _codeEntered = '';
+  function buildCodeNumpad() {
+    const pad = document.getElementById('code-numpad');
+    if (!pad || pad.children.length) return;
+    const labels = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+    labels.forEach(lbl => {
+      const k = document.createElement('button');
+      k.type = 'button';
+      if (lbl === '') { k.style.visibility = 'hidden'; pad.appendChild(k); return; }
+      k.className = 'code-key' + (lbl === '⌫' ? ' del' : '');
+      k.textContent = lbl;
+      k.onclick = () => onCodeKey(lbl);
+      pad.appendChild(k);
+    });
+  }
+  function refreshCodeDisplay() {
+    const d = document.getElementById('code-display');
+    const digits = _codeEntered.split('');
+    while (digits.length < 4) digits.push('_');
+    d.textContent = digits.join(' ');
+    d.classList.remove('good', 'bad');
+  }
+  function onCodeKey(lbl) {
+    const d = document.getElementById('code-display');
+    const msg = document.getElementById('code-message');
+    msg.textContent = '';
+    msg.classList.remove('good','bad');
+    if (lbl === '⌫') {
+      _codeEntered = _codeEntered.slice(0, -1);
+      refreshCodeDisplay();
+      return;
+    }
+    if (_codeEntered.length >= 4) return;
+    _codeEntered += lbl;
+    refreshCodeDisplay();
+    if (_codeEntered.length === 4) {
+      const hit = SECRET_CODES[_codeEntered];
+      if (hit) {
+        d.classList.add('good');
+        msg.textContent = hit.message;
+        msg.classList.add('good');
+        unlockSkin(hit.unlock);
+        if (typeof SFX !== 'undefined' && SFX.newBest) SFX.newBest();
+        // Refresh skin picker if it's visible
+        renderSkinPicker();
+        setTimeout(() => { _codeEntered = ''; refreshCodeDisplay(); }, 1800);
+      } else {
+        d.classList.add('bad');
+        msg.textContent = 'INVALID CODE';
+        msg.classList.add('bad');
+        if (typeof SFX !== 'undefined' && SFX.invalid) SFX.invalid();
+        setTimeout(() => { _codeEntered = ''; refreshCodeDisplay(); }, 800);
+      }
+    }
+  }
+  buildCodeNumpad();
+  refreshCodeDisplay();
 
   // Toggle rows: sfx / music / vibration
   function syncSettingsToggles() {
