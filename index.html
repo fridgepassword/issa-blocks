@@ -109,8 +109,17 @@
   body[data-screen="extras"]  .game-screen,
   body[data-screen="extras"]  .custom-config,
   body[data-screen="extras"]  .fruit-screen,
-  body[data-screen="extras"]  .line-screen { display: none; }
+  body[data-screen="extras"]  .line-screen,
+  body[data-screen="extras"]  .adventure-screen { display: none; }
   body[data-screen="extras"]  .extras-screen { display: flex; }
+  .adventure-screen { display: none; }
+  body[data-screen="adventure"] .title-screen,
+  body[data-screen="adventure"] .game-screen,
+  body[data-screen="adventure"] .custom-config,
+  body[data-screen="adventure"] .fruit-screen,
+  body[data-screen="adventure"] .line-screen,
+  body[data-screen="adventure"] .extras-screen { display: none; }
+  body[data-screen="adventure"] .adventure-screen { display: flex; }
   html.cc-scroll { overflow-y: auto !important; height: auto !important; }
 
   /* === TITLE SCREEN === */
@@ -1496,6 +1505,141 @@
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 
+  /* === ADVENTURE LEVEL SELECT === */
+  .adventure-screen {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    gap: 14px;
+    padding: 8px 4px 14px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .adv-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .adv-head h1 {
+    flex: 1;
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+  }
+  .adv-back {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding: 7px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .adv-levels {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 4px 4px;
+  }
+  .adv-level-card {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 100ms ease, border-color 160ms ease, background 160ms ease;
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+  }
+  .adv-level-card:active { transform: scale(0.98); }
+  .adv-level-card.locked { opacity: 0.4; pointer-events: none; }
+  .adv-level-card.solved {
+    border-color: rgba(81,207,102,0.45);
+    background: linear-gradient(180deg, rgba(81,207,102,0.08), rgba(81,207,102,0.02));
+  }
+  .adv-level-num {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,184,77,0.3), rgba(255,184,77,0.05));
+    display: grid;
+    place-items: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+  }
+  .adv-level-card.solved .adv-level-num {
+    background: radial-gradient(circle at 30% 30%, rgba(81,207,102,0.4), rgba(81,207,102,0.05));
+    color: var(--easy);
+  }
+  .adv-level-card.locked .adv-level-num { color: var(--dim); }
+  .adv-level-info { line-height: 1.2; min-width: 0; }
+  .adv-level-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .adv-level-desc {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+  .adv-level-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+  }
+  .adv-level-card.solved .adv-level-tag { color: var(--easy); }
+
+  /* Mode card colors for new modes */
+  .mode-card[data-mode="timeattack"] .mode-name {
+    background: linear-gradient(135deg, #4dd0e1, #5c7cfa);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="moves"] .mode-name {
+    background: linear-gradient(135deg, #ff9f43, #ff5f5f);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="adventure"] .mode-name {
+    background: linear-gradient(135deg, #51cf66, #ffd93b);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="timeattack"]:hover {
+    border-color: rgba(77,208,225,0.4);
+    background: linear-gradient(180deg, rgba(77,208,225,0.08), rgba(77,208,225,0.02));
+  }
+  .mode-card[data-mode="moves"]:hover {
+    border-color: rgba(255,159,67,0.4);
+    background: linear-gradient(180deg, rgba(255,159,67,0.08), rgba(255,159,67,0.02));
+  }
+  .mode-card[data-mode="adventure"]:hover {
+    border-color: rgba(81,207,102,0.4);
+    background: linear-gradient(180deg, rgba(81,207,102,0.08), rgba(81,207,102,0.02));
+  }
+
   /* === EXTRAS SCREEN === */
   .extras-screen {
     flex-direction: column;
@@ -1666,23 +1810,76 @@
   }
   .fruit-preview {
     position: absolute;
-    top: 14px;
+    top: 16px;
     left: 0;
     transform: translate(-50%, 0);
-    transition: left 80ms ease-out;
+    transition: left 60ms ease-out;
+    pointer-events: none;
+    z-index: 3;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.4));
+  }
+  .fruit-preview-name {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.32em;
+    color: rgba(255,255,255,0.7);
+    z-index: 4;
+    pointer-events: none;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+  .fruit-guide {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 0;
+    border-left: 2px dashed rgba(255,255,255,0.25);
+    transform: translateX(-1px);
+    transition: left 60ms ease-out;
     pointer-events: none;
     z-index: 2;
   }
   .fruit-next-display {
     position: absolute;
-    top: 10px;
-    right: 14px;
+    top: 6px;
+    right: 10px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
     z-index: 3;
     pointer-events: none;
   }
+  .fruit-next-display .next-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.55);
+  }
+  .fruit-next-display .next-slot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: visible;
+  }
+  .fruit-next-display .next-slot .fruit-fruit {
+    position: relative !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .fruit-sprout { transform-origin: 50% 6px; }
 
   .fruit-fruit {
     position: absolute;
@@ -3370,7 +3567,34 @@
         <div class="mode-desc">Draw one path through every cell. No crossing, no shortcuts.</div>
         <div class="mode-best">LVLS<b id="best-line">0</b></div>
       </button>
+      <button class="mode-card" data-mode="timeattack" onclick="startGame('timeattack')">
+        <div class="mode-name">TIME ATTACK</div>
+        <div class="mode-desc">60 seconds. Score as much as you can before the clock runs out.</div>
+        <div class="mode-best">BEST<b id="best-timeattack">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="moves" onclick="startGame('moves')">
+        <div class="mode-name">25 MOVES</div>
+        <div class="mode-desc">Only 25 pieces. Make every placement count.</div>
+        <div class="mode-best">BEST<b id="best-moves">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="adventure" onclick="openAdventure()">
+        <div class="mode-name">ADVENTURE</div>
+        <div class="mode-desc">Hit each level's goal under a piece limit. Unlocks one at a time.</div>
+        <div class="mode-best">LVL<b id="best-adventure">0</b></div>
+      </button>
     </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- ADVENTURE LEVEL SELECT                        -->
+  <!-- ============================================ -->
+  <div class="adventure-screen">
+    <div class="adv-head">
+      <button class="adv-back" type="button" onclick="closeAdventure()">← MENU</button>
+      <h1>ADVENTURE</h1>
+      <span style="width:60px"></span>
+    </div>
+    <div class="adv-levels" id="adv-levels"></div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -3454,8 +3678,13 @@
     </div>
     <div class="fruit-container" id="fruit-container">
       <div class="fruit-danger" id="fruit-danger"></div>
+      <div class="fruit-guide" id="fruit-guide"></div>
       <div class="fruit-preview" id="fruit-preview"></div>
-      <div class="fruit-next-display" id="fruit-next-display"></div>
+      <div class="fruit-preview-name" id="fruit-preview-name">Blueberry</div>
+      <div class="fruit-next-display" id="fruit-next-display">
+        <span class="next-label">NEXT</span>
+        <span class="next-slot" id="fruit-next-slot"></span>
+      </div>
       <div class="fruit-game-over" id="fruit-game-over">
         <h2>JUICED</h2>
         <div class="fgo-score">Score: <b id="fgo-score">0</b></div>
@@ -3931,7 +4160,49 @@ const MODES = {
     timed: false,
     target: null,
   },
+  // TIME ATTACK: 60s countdown, score-as-many-as-you-can
+  timeattack: {
+    name: 'TIME ATTACK',
+    pool: PIECES,
+    multiplier: 1,
+    timed: true,
+    countdown: 60,    // seconds
+    target: null,
+  },
+  // MOVES: fixed-piece run, no timer
+  moves: {
+    name: 'MOVES',
+    pool: PIECES,
+    multiplier: 1,
+    timed: false,
+    movesLimit: 25,
+    target: null,
+  },
+  // ADVENTURE: level-based with objectives (config injected at runtime)
+  adventure: {
+    name: 'ADVENTURE',
+    pool: PIECES,
+    multiplier: 1,
+    timed: false,
+    target: null,
+  },
 };
+
+// === ADVENTURE MODE LEVEL DATA ===
+// Each level has a goal + optional moves cap. The mode shows "GOAL" and
+// "MOVES" stats; reaching goal = win, hitting moves cap = lose.
+const ADVENTURE_LEVELS = [
+  { id: 1,  name: 'WARM UP',      goalType: 'lines', goalValue: 3,  moves: 0,  desc: 'Clear 3 lines'                 },
+  { id: 2,  name: 'OPENING',      goalType: 'score', goalValue: 200, moves: 0, desc: 'Score 200'                     },
+  { id: 3,  name: 'TIGHT FIT',    goalType: 'lines', goalValue: 5,  moves: 15, desc: 'Clear 5 lines in 15 moves'     },
+  { id: 4,  name: 'COMBO TIME',   goalType: 'combo', goalValue: 2,  moves: 20, desc: 'Clear 2 lines at once'         },
+  { id: 5,  name: 'SCORE 500',    goalType: 'score', goalValue: 500, moves: 18, desc: 'Score 500 in 18 moves'        },
+  { id: 6,  name: 'STREAK',       goalType: 'streak', goalValue: 3, moves: 25, desc: 'Hit a 3× streak'               },
+  { id: 7,  name: 'CLEAN 10',     goalType: 'lines', goalValue: 10, moves: 25, desc: 'Clear 10 lines in 25 moves'    },
+  { id: 8,  name: 'SCORE 1000',   goalType: 'score', goalValue: 1000, moves: 25, desc: 'Score 1,000 in 25 moves'     },
+  { id: 9,  name: 'TRIPLE CLEAR', goalType: 'combo', goalValue: 3, moves: 30,  desc: 'Clear 3 lines at once'         },
+  { id: 10, name: 'GRAND',        goalType: 'score', goalValue: 2000, moves: 30, desc: 'Score 2,000 in 30 moves'     },
+];
 
 // === PIECE CATEGORIES (for custom mode pool selection) ===
 const PIECE_CATEGORIES = {
@@ -4136,6 +4407,14 @@ function mulberry32(seed) {
   };
 }
 
+// Time Attack / Moves / Adventure runtime state
+let movesUsed = 0;         // pieces placed this run (for Moves + Adventure)
+let advLevel = null;       // currently-active adventure level (or null)
+let advSolved = [];        // bool per level
+let timeAttackBest = 0;
+let movesModeBest = 0;
+let advBest = 0;           // highest level beaten
+
 // Custom mode runtime state
 let traySize = 3;          // configurable in custom mode (2..5)
 let nextClearMult = 1;     // bumped to ×3 by multiplier piece for next clear
@@ -4164,10 +4443,29 @@ function loadBests() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, custom: 0, ...parsed };
+        bests = { classic: 0, alou: 0, sprint: null, hardcore: 0, custom: 0,
+                  timeattack: 0, moves: 0, ...parsed };
+        timeAttackBest = bests.timeattack || 0;
+        movesModeBest  = bests.moves || 0;
       }
     }
   } catch (e) {}
+  // Load adventure-level progression separately
+  try {
+    const r = localStorage.getItem('issa-blocks-adv-v1');
+    if (r) {
+      const p = JSON.parse(r);
+      if (Array.isArray(p)) advSolved = p;
+      while (advSolved.length < ADVENTURE_LEVELS.length) advSolved.push(false);
+      advBest = advSolved.filter(Boolean).length;
+    }
+  } catch (e) {}
+  if (!advSolved.length) {
+    advSolved = Array(ADVENTURE_LEVELS.length).fill(false);
+  }
+}
+function saveAdvSolved() {
+  try { localStorage.setItem('issa-blocks-adv-v1', JSON.stringify(advSolved)); } catch (e) {}
 }
 function saveBests() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bests)); }
@@ -4394,6 +4692,12 @@ function refreshBestLabels() {
   document.getElementById('best-custom').textContent   = bests.custom ?? 0;
   document.getElementById('best-sprint').textContent =
     (bests.sprint != null) ? formatTime(bests.sprint) : '—';
+  const ta = document.getElementById('best-timeattack');
+  if (ta) ta.textContent = bests.timeattack || 0;
+  const mv = document.getElementById('best-moves');
+  if (mv) mv.textContent = bests.moves || 0;
+  const adv = document.getElementById('best-adventure');
+  if (adv) adv.textContent = advBest + '/' + ADVENTURE_LEVELS.length;
   const dailyEl = document.getElementById('best-daily');
   if (dailyEl) {
     const today = todayStr();
@@ -4436,11 +4740,56 @@ function startGame(modeName) {
   pill.textContent = mode.name;
   pill.className = 'mode-pill ' + modeName;
 
-  document.getElementById('left-label').textContent = mode.timed ? 'TIME' : 'BEST';
+  // Pick the right left-stat label per mode
+  let leftLbl = 'BEST';
+  if (mode.timed) leftLbl = 'TIME';
+  else if (mode.movesLimit) leftLbl = 'MOVES';
+  else if (modeName === 'adventure' && advLevel) leftLbl = 'MOVES';
+  document.getElementById('left-label').textContent = leftLbl;
 
   document.getElementById('overlay').classList.remove('show');
   showScreen('game');
   initGame();
+
+  // After initGame, prime mode-specific UI
+  if (mode.countdown) {
+    // Time Attack: show countdown immediately and start the timer at first placement
+    document.getElementById('left-stat').textContent = formatTime(mode.countdown);
+  } else if (mode.movesLimit) {
+    document.getElementById('left-stat').textContent = mode.movesLimit;
+  } else if (modeName === 'adventure' && advLevel) {
+    document.getElementById('left-stat').textContent =
+      advLevel.moves > 0 ? advLevel.moves : '∞';
+    // Show adventure goal as a sub-target indicator
+    const tgt = document.getElementById('sprint-target');
+    if (tgt) tgt.textContent = advGoalText(advLevel);
+  }
+}
+
+function advGoalText(lvl) {
+  if (!lvl) return '';
+  if (lvl.goalType === 'lines')  return `LINES 0/${lvl.goalValue}`;
+  if (lvl.goalType === 'score')  return `SCORE 0/${lvl.goalValue}`;
+  if (lvl.goalType === 'combo')  return `COMBO ${lvl.goalValue}+`;
+  if (lvl.goalType === 'streak') return `STREAK ${lvl.goalValue}+`;
+  return '';
+}
+function advUpdateProgress() {
+  if (currentMode !== 'adventure' || !advLevel) return;
+  const tgt = document.getElementById('sprint-target');
+  if (!tgt) return;
+  if (advLevel.goalType === 'lines')      tgt.textContent = `LINES ${sprintLines}/${advLevel.goalValue}`;
+  else if (advLevel.goalType === 'score') tgt.textContent = `SCORE ${score}/${advLevel.goalValue}`;
+  else if (advLevel.goalType === 'combo') tgt.textContent = `COMBO ${stats.highestCombo || 0} (need ${advLevel.goalValue})`;
+  else if (advLevel.goalType === 'streak') tgt.textContent = `STREAK ${streak}/${advLevel.goalValue}`;
+}
+function advCheckWin(lastClearLines) {
+  if (currentMode !== 'adventure' || !advLevel) return false;
+  if (advLevel.goalType === 'lines'  && sprintLines >= advLevel.goalValue) return true;
+  if (advLevel.goalType === 'score'  && score       >= advLevel.goalValue) return true;
+  if (advLevel.goalType === 'combo'  && lastClearLines >= advLevel.goalValue) return true;
+  if (advLevel.goalType === 'streak' && streak      >= advLevel.goalValue) return true;
+  return false;
 }
 
 function goToMenu() {
@@ -4452,8 +4801,13 @@ function goToMenu() {
   // Daily / any seeded mode: clear the deterministic RNG
   if (currentMode === 'daily') exitDaily();
   activeRng = null;
-  // Return to extras if we got here via the extras menu, else title
-  if (_enteredFromExtras) {
+  // Adventure: back to level select; otherwise extras (if came from there) or title
+  if (currentMode === 'adventure') {
+    advLevel = null;
+    document.body.dataset.screen = 'adventure';
+    renderAdventureLevels();
+    refreshBestLabels();
+  } else if (_enteredFromExtras) {
     document.body.dataset.screen = 'extras';
     refreshBestLabels();
   } else {
@@ -4475,6 +4829,7 @@ function initGame() {
   grid = emptyGrid();
   score = 0;
   streak = 0;
+  movesUsed = 0;
   updateComboBadge();
   milestonesHitThisRun = new Set();
   nextClearMult = 1;
@@ -4583,14 +4938,26 @@ function updateLeftStat(immediate = false) {
   }
 }
 
-// === SPRINT TIMER ===
+// === SPRINT TIMER (also used for Time Attack countdown) ===
 function startSprintTimer() {
   sprintStartMs = performance.now();
   if (sprintTimerId) cancelAnimationFrame(sprintTimerId);
+  const mode = MODES[currentMode];
+  const isCountdown = !!mode.countdown;
   const tick = () => {
     if (!MODES[currentMode].timed || sprintWon) return;
     const elapsed = (performance.now() - sprintStartMs) / 1000;
-    document.getElementById('left-stat').textContent = formatTime(elapsed);
+    if (isCountdown) {
+      const remaining = Math.max(0, MODES[currentMode].countdown - elapsed);
+      document.getElementById('left-stat').textContent = formatTime(remaining);
+      if (remaining <= 0) {
+        stopSprintTimer();
+        showGameOver(false);     // time's up
+        return;
+      }
+    } else {
+      document.getElementById('left-stat').textContent = formatTime(elapsed);
+    }
     sprintTimerId = requestAnimationFrame(tick);
   };
   sprintTimerId = requestAnimationFrame(tick);
@@ -5020,6 +5387,15 @@ function placePiece(source, gx, gy) {
   stats.piecesPlaced += 1;
   stats.totalScore += placementScore;
   if (piece.special === 'bomb') stats.bombsDetonated += 1;
+  // === Track moves used (for Moves mode + Adventure) ===
+  movesUsed += 1;
+  if (mode.movesLimit) {
+    const remaining = Math.max(0, mode.movesLimit - movesUsed);
+    document.getElementById('left-stat').textContent = remaining;
+  } else if (currentMode === 'adventure' && advLevel && advLevel.moves > 0) {
+    const remaining = Math.max(0, advLevel.moves - movesUsed);
+    document.getElementById('left-stat').textContent = remaining;
+  }
 
   paintGrid();
 
@@ -5147,6 +5523,31 @@ function placePiece(source, gx, gy) {
 
 function afterMove() {
   const mode = MODES[currentMode];
+
+  // === Adventure mode: live goal display + win/lose detection ===
+  if (currentMode === 'adventure' && advLevel) {
+    advUpdateProgress();
+    if (advCheckWin(/*lastClearLines*/ 0)) {
+      // Goal met — mark solved, show overlay
+      if (!advSolved[advLevel.idx]) {
+        advSolved[advLevel.idx] = true;
+        saveAdvSolved();
+        advBest = advSolved.filter(Boolean).length;
+      }
+      showGameOver(true);
+      return;
+    }
+    if (advLevel.moves > 0 && movesUsed >= advLevel.moves) {
+      showGameOver(false);  // out of moves
+      return;
+    }
+  }
+
+  // === Moves mode: end run when piece budget hits zero ===
+  if (mode.movesLimit && movesUsed >= mode.movesLimit) {
+    showGameOver(false);
+    return;
+  }
   if (mode.timed && sprintLines >= mode.target && !sprintWon) {
     sprintWon = true;
     stopSprintTimer();
@@ -5372,6 +5773,39 @@ function showGameOver(isWin) {
     title.textContent = score === 0 ? 'OOF' : 'NICE RUN';
     mpScores[mpCurrentPlayer] = score;
     isNewBest = false;
+  } else if (currentMode === 'timeattack') {
+    label.textContent = "TIME'S UP";
+    final.textContent = score;
+    if (score > (bests.timeattack || 0)) {
+      bests.timeattack = score;
+      saveBests();
+      isNewBest = true;
+    }
+    meta.textContent = `Best: ${bests.timeattack || 0}`;
+    title.textContent = score === 0 ? 'OOF' : (isNewBest ? 'NEW BEST' : 'NICE');
+  } else if (currentMode === 'moves') {
+    label.textContent = 'OUT OF MOVES';
+    final.textContent = score;
+    if (score > (bests.moves || 0)) {
+      bests.moves = score;
+      saveBests();
+      isNewBest = true;
+    }
+    meta.textContent = `Best: ${bests.moves || 0}`;
+    title.textContent = score === 0 ? 'OOF' : (isNewBest ? 'NEW BEST' : 'NICE');
+  } else if (currentMode === 'adventure' && advLevel) {
+    if (isWin) {
+      label.textContent = `LEVEL ${advLevel.id} CLEARED`;
+      title.textContent = 'GG';
+      final.textContent = score;
+      meta.textContent = `${advLevel.name} — ${advLevel.desc}`;
+      isNewBest = !advSolved[advLevel.idx] ? false : isNewBest;
+    } else {
+      label.textContent = 'OUT OF MOVES';
+      title.textContent = 'OOF';
+      final.textContent = score;
+      meta.textContent = `${advLevel.name} — try again`;
+    }
   } else if (currentMode === 'daily') {
     // Daily Challenge — separate best stored on stats.daily, resets each day
     label.textContent = 'DAILY CHALLENGE';
@@ -6102,21 +6536,43 @@ function mpExit() {
 // === FRUIT DROP (SUIKA-STYLE) MODE ==============================
 // =================================================================
 
-// Tier definitions — radii in viewport units (0..1 of container width)
+// Tier definitions — 11 distinct fruits with unique colors + per-fruit
+// features (leaves, stems, textures). r is normalized to container width.
 const FRUIT_TIERS = [
-  { r: 0.040, color: ['#e9d5ff','#a855f7','#6b21a8'], faceColor: '#2a0a4a' }, // 1: grape
-  { r: 0.052, color: ['#fecaca','#ef4444','#7f1d1d'], faceColor: '#3a0000' }, // 2: cherry
-  { r: 0.064, color: ['#fbcfe8','#ec4899','#831843'], faceColor: '#3a0024' }, // 3: berry
-  { r: 0.078, color: ['#ddd6fe','#7c3aed','#3b0764'], faceColor: '#1a0033' }, // 4: plum
-  { r: 0.094, color: ['#fed7aa','#f97316','#7c2d12'], faceColor: '#3a1a00' }, // 5: tangerine
-  { r: 0.112, color: ['#fef08a','#eab308','#713f12'], faceColor: '#3a2a00' }, // 6: lemon
-  { r: 0.132, color: ['#fecaca','#dc2626','#7f1d1d'], faceColor: '#3a0000' }, // 7: apple
-  { r: 0.152, color: ['#d9f99d','#84cc16','#365314'], faceColor: '#1a3300' }, // 8: pear
-  { r: 0.176, color: ['#fef3c7','#f59e0b','#78350f'], faceColor: '#3a2a00' }, // 9: pineapple
-  { r: 0.204, color: ['#a7f3d0','#10b981','#064e3b'], faceColor: '#003a24' }, // 10: melon
-  { r: 0.232, color: ['#bbf7d0','#16a34a','#14532d'], faceColor: '#003a14' }, // 11: watermelon (max)
+  // 1: BLUEBERRY — deep blue
+  { name: 'Blueberry',  r: 0.040, body: ['#bfdbfe','#3b82f6','#1e3a8a'], face: '#1a1a3a',
+    leaf: '#16a34a', sprout: 'crown' },
+  // 2: CHERRY — bright red w/ stem
+  { name: 'Cherry',     r: 0.052, body: ['#fecaca','#ef4444','#7f1d1d'], face: '#3a0000',
+    leaf: '#16a34a', sprout: 'stem' },
+  // 3: STRAWBERRY — pink w/ visible seeds
+  { name: 'Strawberry', r: 0.064, body: ['#fda4af','#f43f5e','#9f1239'], face: '#3a0011',
+    leaf: '#16a34a', sprout: 'leaves', texture: 'seeds' },
+  // 4: TANGERINE — orange w/ leaf
+  { name: 'Tangerine',  r: 0.078, body: ['#fed7aa','#f97316','#7c2d12'], face: '#3a1a00',
+    leaf: '#15803d', sprout: 'leaf' },
+  // 5: LEMON — yellow oval w/ leaf
+  { name: 'Lemon',      r: 0.094, body: ['#fef08a','#facc15','#854d0e'], face: '#3a2a00',
+    leaf: '#16a34a', sprout: 'leaf' },
+  // 6: LIME — lime green
+  { name: 'Lime',       r: 0.112, body: ['#d9f99d','#84cc16','#365314'], face: '#1a3300',
+    leaf: '#16a34a', sprout: 'leaf' },
+  // 7: APPLE — apple red w/ stem + leaf
+  { name: 'Apple',      r: 0.132, body: ['#fecaca','#dc2626','#7f1d1d'], face: '#3a0000',
+    leaf: '#15803d', sprout: 'apple' },
+  // 8: PEACH — peach w/ crease
+  { name: 'Peach',      r: 0.152, body: ['#fed7aa','#fb923c','#9a3412'], face: '#3a1a00',
+    leaf: '#16a34a', sprout: 'leaf', texture: 'crease' },
+  // 9: PINEAPPLE — golden w/ pineapple top + hatching
+  { name: 'Pineapple',  r: 0.176, body: ['#fef3c7','#eab308','#854d0e'], face: '#3a2a00',
+    leaf: '#15803d', sprout: 'pineapple', texture: 'hatch' },
+  // 10: HONEYDEW — pale green
+  { name: 'Honeydew',   r: 0.204, body: ['#ecfccb','#a3e635','#3f6212'], face: '#1a3300',
+    leaf: '#15803d', sprout: 'leaf' },
+  // 11: WATERMELON — dark green w/ stripes (max!)
+  { name: 'Watermelon', r: 0.232, body: ['#86efac','#16a34a','#14532d'], face: '#003a14',
+    leaf: '#15803d', sprout: 'stem', texture: 'stripes' },
 ];
-const FRUIT_NAMES = ['Grape','Cherry','Berry','Plum','Tangerine','Lemon','Apple','Pear','Pineapple','Melon','Watermelon'];
 
 const FRUIT = {
   active: false,
@@ -6144,28 +6600,103 @@ function fruitSaveBest() {
   try { localStorage.setItem(FRUIT_KEY, String(FRUIT.best)); } catch (e) {}
 }
 
-// Build an SVG fruit face (eyes + smile) once and clone per fruit
+// Build a fruit element. Each fruit has a unique sprout (leaf / stem /
+// pineapple-top / etc.) and optional texture overlay (seeds, hatching,
+// stripes, crease) for visual variety per tier.
 function makeFruitEl(tier) {
   const t = FRUIT_TIERS[tier];
   const el = document.createElement('div');
-  el.className = 'fruit-fruit spawning';
-  el.style.background = `radial-gradient(circle at 30% 25%, ${t.color[0]}, ${t.color[1]} 55%, ${t.color[2]})`;
-  el.style.boxShadow = `inset 0 -6px 12px rgba(0,0,0,0.18), 0 4px 14px rgba(0,0,0,0.35)`;
-  // Inner SVG face — eyes + smile, scaled to the fruit
+  el.className = 'fruit-fruit spawning fruit-' + (t.name || '').toLowerCase();
+  el.style.background = `radial-gradient(circle at 30% 25%, ${t.body[0]}, ${t.body[1]} 55%, ${t.body[2]})`;
+  el.style.boxShadow = `inset 0 -6px 12px rgba(0,0,0,0.20), inset 0 4px 8px rgba(255,255,255,0.18), 0 4px 14px rgba(0,0,0,0.35)`;
+
+  // Per-fruit sprout (leaf/stem/etc.) drawn as SVG above the body
+  let sprout = '';
+  if (t.sprout === 'stem') {
+    sprout = `<g class="fruit-sprout">
+      <path d="M 50 6 Q 55 -5 62 -2" stroke="#4a3520" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M 60 -3 Q 70 -8 75 0 Q 70 5 60 3 Z" fill="${t.leaf}"/>
+    </g>`;
+  } else if (t.sprout === 'leaf') {
+    sprout = `<g class="fruit-sprout">
+      <path d="M 50 4 Q 64 -10 76 -2 Q 68 8 52 8 Z" fill="${t.leaf}"/>
+      <path d="M 50 4 Q 60 0 72 0" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"/>
+    </g>`;
+  } else if (t.sprout === 'apple') {
+    sprout = `<g class="fruit-sprout">
+      <rect x="48" y="-4" width="4" height="10" rx="1.5" fill="#4a3520"/>
+      <path d="M 52 -2 Q 66 -10 76 -2 Q 68 6 52 4 Z" fill="${t.leaf}"/>
+    </g>`;
+  } else if (t.sprout === 'leaves') {
+    sprout = `<g class="fruit-sprout">
+      <path d="M 50 4 Q 38 -8 30 0 Q 38 8 50 8 Z" fill="${t.leaf}"/>
+      <path d="M 50 4 Q 62 -8 70 0 Q 62 8 50 8 Z" fill="${t.leaf}"/>
+      <path d="M 50 0 Q 50 -8 50 -2" stroke="${t.leaf}" stroke-width="2" fill="none"/>
+    </g>`;
+  } else if (t.sprout === 'crown') {
+    sprout = `<g class="fruit-sprout">
+      <circle cx="50" cy="6" r="3" fill="${t.leaf}"/>
+      <path d="M 50 6 L 46 12 L 50 14 L 54 12 Z" fill="${t.leaf}"/>
+    </g>`;
+  } else if (t.sprout === 'pineapple') {
+    sprout = `<g class="fruit-sprout">
+      <path d="M 50 6 L 42 -12 L 50 -6 L 58 -12 Z" fill="${t.leaf}"/>
+      <path d="M 50 6 L 36 -4 L 44 0 Z" fill="${t.leaf}" opacity="0.85"/>
+      <path d="M 50 6 L 64 -4 L 56 0 Z" fill="${t.leaf}" opacity="0.85"/>
+      <path d="M 50 6 L 50 -16" stroke="${t.leaf}" stroke-width="2"/>
+    </g>`;
+  }
+
+  // Optional textures painted on top of the body
+  let texture = '';
+  if (t.texture === 'seeds') {
+    // Tiny yellow seed dots across the body
+    const seeds = [
+      [30,30],[44,28],[58,32],[70,30],[36,42],[52,40],[66,44],
+      [30,56],[44,58],[58,56],[70,58],[40,72],[56,72]
+    ];
+    texture = seeds.map(([x,y]) =>
+      `<ellipse cx="${x}" cy="${y}" rx="1.6" ry="2.4" fill="#fef9c3" opacity="0.85" transform="rotate(${(x+y)%30 - 15} ${x} ${y})"/>`
+    ).join('');
+  } else if (t.texture === 'hatch') {
+    // Crosshatch lines for pineapple
+    texture = `
+      <g stroke="rgba(0,0,0,0.18)" stroke-width="1" fill="none">
+        <path d="M 22 30 L 78 30 M 22 50 L 78 50 M 22 70 L 78 70"/>
+        <path d="M 30 22 L 30 78 M 50 22 L 50 78 M 70 22 L 70 78"/>
+      </g>`;
+  } else if (t.texture === 'stripes') {
+    // Curved watermelon stripes
+    texture = `
+      <g fill="none" stroke="rgba(0,0,0,0.30)" stroke-width="2.5" stroke-linecap="round">
+        <path d="M 18 38 Q 50 26 82 38"/>
+        <path d="M 14 50 Q 50 38 86 50"/>
+        <path d="M 18 62 Q 50 50 82 62"/>
+        <path d="M 24 74 Q 50 64 76 74"/>
+      </g>`;
+  } else if (t.texture === 'crease') {
+    // Peach center crease
+    texture = `<path d="M 50 14 Q 44 50 50 86" stroke="rgba(0,0,0,0.22)" stroke-width="2" fill="none"/>`;
+  }
+
+  const blink1 = (Math.random()*4).toFixed(2);
+  const blink2 = (Math.random()*4).toFixed(2);
   el.innerHTML = `
-    <svg viewBox="0 0 100 100" class="fruit-svg" preserveAspectRatio="xMidYMid meet">
-      <g class="eye-shape" style="--eye-cx:35%;--eye-cy:42%;animation-delay:${(Math.random()*4).toFixed(2)}s">
-        <ellipse cx="35" cy="42" rx="7" ry="9" fill="white"/>
-        <circle cx="36" cy="44" r="3.5" fill="${t.faceColor}"/>
-        <circle cx="34.5" cy="40" r="1.2" fill="white"/>
+    <svg viewBox="-8 -16 116 116" class="fruit-svg" preserveAspectRatio="xMidYMid meet">
+      ${sprout}
+      ${texture}
+      <g class="eye-shape" style="--eye-cx:35%;--eye-cy:46%;animation-delay:${blink1}s">
+        <ellipse cx="35" cy="46" rx="7" ry="9" fill="white"/>
+        <circle cx="36" cy="48" r="3.5" fill="${t.face}"/>
+        <circle cx="34.5" cy="44" r="1.2" fill="white"/>
       </g>
-      <g class="eye-shape" style="--eye-cx:65%;--eye-cy:42%;animation-delay:${(Math.random()*4).toFixed(2)}s">
-        <ellipse cx="65" cy="42" rx="7" ry="9" fill="white"/>
-        <circle cx="66" cy="44" r="3.5" fill="${t.faceColor}"/>
-        <circle cx="64.5" cy="40" r="1.2" fill="white"/>
+      <g class="eye-shape" style="--eye-cx:65%;--eye-cy:46%;animation-delay:${blink2}s">
+        <ellipse cx="65" cy="46" rx="7" ry="9" fill="white"/>
+        <circle cx="66" cy="48" r="3.5" fill="${t.face}"/>
+        <circle cx="64.5" cy="44" r="1.2" fill="white"/>
       </g>
-      <path d="M 35 64 Q 50 76 65 64" stroke="${t.faceColor}" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-      <path d="M 42 64 Q 50 70 58 64" stroke="rgba(255,255,255,0.5)" stroke-width="2" fill="none" stroke-linecap="round" transform="translate(0,1)"/>
+      <path d="M 35 66 Q 50 78 65 66" stroke="${t.face}" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M 42 66 Q 50 72 58 66" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" fill="none" stroke-linecap="round" transform="translate(0,1)"/>
     </svg>
   `;
   return el;
@@ -6241,30 +6772,35 @@ function fruitChooseNextTier() {
 }
 
 function fruitUpdatePreview() {
-  // Preview at top — also next-display in the corner
   const prev = document.getElementById('fruit-preview');
-  const nextDisp = document.getElementById('fruit-next-display');
+  const guide = document.getElementById('fruit-guide');
+  const nameEl = document.getElementById('fruit-preview-name');
+  const nextSlot = document.getElementById('fruit-next-slot');
+  if (!prev || !guide || !nameEl) return;
   const tier = FRUIT.nextTier;
   const t = FRUIT_TIERS[tier];
   const px = FRUIT.containerW * t.r * 2;
+  // Drop-preview ghost: clearly visible, slightly translucent so the danger
+  // line / next-display behind it stay readable
   prev.innerHTML = '';
   const ghost = makeFruitEl(tier);
   ghost.classList.remove('spawning');
   ghost.style.width = px + 'px';
   ghost.style.height = px + 'px';
-  ghost.style.opacity = 0.55;
+  ghost.style.opacity = 0.75;
   ghost.style.left = '-' + (px/2) + 'px';
   prev.appendChild(ghost);
-  prev.style.left = (FRUIT.dropX * FRUIT.containerW) + 'px';
-  // Next display (just a small icon)
-  nextDisp.innerHTML = '';
-  const mini = makeFruitEl(tier);
-  mini.classList.remove('spawning');
-  const ms = 22;
-  mini.style.width = ms + 'px';
-  mini.style.height = ms + 'px';
-  mini.style.position = 'relative';
-  nextDisp.appendChild(mini);
+  const xPx = FRUIT.dropX * FRUIT.containerW;
+  prev.style.left = xPx + 'px';
+  guide.style.left = xPx + 'px';
+  nameEl.textContent = t.name;
+  // "Next" slot in the top-right
+  if (nextSlot) {
+    nextSlot.innerHTML = '';
+    const mini = makeFruitEl(tier);
+    mini.classList.remove('spawning');
+    nextSlot.appendChild(mini);
+  }
 }
 
 function fruitRenderLadder() {
@@ -6340,9 +6876,15 @@ function fruitAttachInput() {
     if (e.type !== 'pointermove') e.preventDefault();
     const rect = cont.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
-    FRUIT.dropX = Math.max(0.05, Math.min(0.95, x));
+    // Clamp so the fruit fits inside walls
+    const t = FRUIT_TIERS[FRUIT.nextTier];
+    const margin = t ? t.r : 0.05;
+    FRUIT.dropX = Math.max(margin, Math.min(1 - margin, x));
+    const xPx = FRUIT.dropX * FRUIT.containerW;
     const prev = document.getElementById('fruit-preview');
-    if (prev) prev.style.left = (FRUIT.dropX * FRUIT.containerW) + 'px';
+    const guide = document.getElementById('fruit-guide');
+    if (prev)  prev.style.left  = xPx + 'px';
+    if (guide) guide.style.left = xPx + 'px';
   };
   _fruitDownHandler = (e) => {
     if (e.target.closest('.fruit-game-over')) return;
@@ -6752,6 +7294,43 @@ function closeExtras() {
   _enteredFromExtras = false;
   document.body.dataset.screen = 'title';
   refreshBestLabels();
+}
+
+// === ADVENTURE LEVEL SELECT ===
+function openAdventure() {
+  document.body.dataset.screen = 'adventure';
+  renderAdventureLevels();
+}
+function closeAdventure() {
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
+  refreshBestLabels();
+}
+function renderAdventureLevels() {
+  const wrap = document.getElementById('adv-levels');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  ADVENTURE_LEVELS.forEach((lvl, i) => {
+    const solved   = advSolved[i];
+    const unlocked = i === 0 || advSolved[i - 1];
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'adv-level-card' + (solved ? ' solved' : '') + (unlocked ? '' : ' locked');
+    const movesTag = lvl.moves > 0 ? `${lvl.moves} MOVES` : 'UNLIMITED';
+    card.innerHTML = `
+      <div class="adv-level-num">${solved ? '✓' : lvl.id}</div>
+      <div class="adv-level-info">
+        <div class="adv-level-name">${lvl.name}</div>
+        <div class="adv-level-desc">${lvl.desc}</div>
+      </div>
+      <div class="adv-level-tag">${movesTag}</div>
+    `;
+    if (unlocked) card.onclick = () => startAdventureLevel(i);
+    wrap.appendChild(card);
+  });
+}
+function startAdventureLevel(idx) {
+  advLevel = { ...ADVENTURE_LEVELS[idx], idx };
+  startGame('adventure');
 }
 
 function openLineLevels() {
