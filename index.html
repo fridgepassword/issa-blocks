@@ -1604,6 +1604,84 @@
   }
   body.mz-super { padding-bottom: max(36px, calc(env(safe-area-inset-bottom) + 24px)) !important; }
 
+  /* === UNICORN MODE (secret 1806) === */
+  body.unicorn-mode {
+    --accent: #ff9ff3;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% 0%,   rgba(255,159,243,0.35), transparent 65%),
+      radial-gradient(ellipse 90% 55% at 50% 100%, rgba(155,213,255,0.30), transparent 65%),
+      radial-gradient(ellipse 60% 40% at 12% 50%,  rgba(184,255,236,0.20), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 88% 60%,  rgba(255,217,163,0.18), transparent 70%),
+      linear-gradient(180deg, #2a1438 0%, #1a0a26 100%) !important;
+  }
+  body.unicorn-mode .wordmark,
+  body.unicorn-mode .wordmark span,
+  body.unicorn-mode .wordmark .dot {
+    background: linear-gradient(135deg, #ff9ff3, #c89bff, #9bd5ff, #b8ffec, #ffd9a3, #ff9ff3);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    animation: rainbow-shift 5s linear infinite;
+  }
+  body.unicorn-mode .cell.filled,
+  body.unicorn-mode .pcell:not(.empty) {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, white 55%, var(--c, var(--accent))) 0%,
+      var(--c, var(--accent)) 45%,
+      color-mix(in srgb, #c89bff 45%, var(--c, var(--accent))) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      inset 0 -2px 0 rgba(0,0,0,0.15),
+      0 2px 10px rgba(255,159,243,0.35) !important;
+  }
+  body.unicorn-mode .board {
+    box-shadow:
+      0 0 0 1px rgba(255,159,243,0.25),
+      0 30px 60px -20px rgba(155,87,200,0.5),
+      inset 0 0 80px rgba(255,159,243,0.08) !important;
+  }
+  body.unicorn-mode::before {
+    content: '✨ 🦄 ✨ ⭐ ✨ 🦄 ✨';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    font-size: 16px;
+    letter-spacing: 4em;
+    line-height: 18;
+    text-align: center;
+    opacity: 0.18;
+    overflow: hidden;
+    user-select: none;
+    animation: unicorn-float 22s linear infinite;
+  }
+  @keyframes unicorn-float {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-40px); }
+  }
+
+  /* === GOD MODE marker — small badge on title screen === */
+  body.god-mode .title-screen::after {
+    content: '⚡ GOD MODE';
+    position: fixed;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #ff5f5f);
+    color: #1a0a00;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    z-index: 480;
+    box-shadow: 0 6px 18px rgba(255,184,77,0.45);
+    pointer-events: none;
+  }
+
   /* === BLOCK SKINS (visual variants for placed cells + tray pieces) === */
   /* GLASS — translucent frosted look with strong highlight */
   body.skin-glass .cell.filled,
@@ -1754,16 +1832,93 @@
       inset 0 -3px 6px rgba(255,255,255,0.3),
       0 2px 6px color-mix(in srgb, var(--c, var(--accent)) 30%, transparent) !important;
   }
-  /* RAINBOW (secret) — animated hue-shifted gradient */
+  /* MARBLE — polished stone with veins */
+  body.skin-marble .cell.filled,
+  body.skin-marble .pcell:not(.empty) {
+    background:
+      repeating-linear-gradient(135deg, transparent 0 11px, rgba(0,0,0,0.12) 11px 12px),
+      repeating-linear-gradient(45deg,  transparent 0 17px, rgba(255,255,255,0.16) 17px 18px),
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--c, var(--accent)) 35%, #f5f3ed) 0%,
+        color-mix(in srgb, var(--c, var(--accent)) 60%, #d8d3c4) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.45),
+      inset 0 -2px 0 rgba(0,0,0,0.18),
+      0 1px 3px rgba(0,0,0,0.22) !important;
+  }
+  /* CLOUD — fluffy white with soft blue shadow */
+  body.skin-cloud .cell.filled,
+  body.skin-cloud .pcell:not(.empty) {
+    background:
+      radial-gradient(circle at 30% 30%, #ffffff 0%, rgba(255,255,255,0.85) 28%, transparent 55%),
+      radial-gradient(circle at 70% 65%, rgba(255,255,255,0.75) 0%, transparent 45%),
+      color-mix(in srgb, var(--c, var(--accent)) 22%, #f0f4fa) !important;
+    box-shadow:
+      inset 0 -3px 4px rgba(140,160,200,0.30),
+      inset 0 2px 2px rgba(255,255,255,0.70),
+      0 2px 6px rgba(140,160,200,0.32) !important;
+  }
+  /* BRICK — masonry pattern */
+  body.skin-brick .cell.filled,
+  body.skin-brick .pcell:not(.empty) {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 6px, rgba(0,0,0,0.40) 6px 7px),
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--c, var(--accent)) 65%, #8b3a2a) 0%,
+        color-mix(in srgb, var(--c, var(--accent)) 55%, #5e2618) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.22),
+      inset 0 -2px 0 rgba(0,0,0,0.45),
+      0 1px 2px rgba(0,0,0,0.3) !important;
+  }
+  /* PLASTIC — toy block sheen */
+  body.skin-plastic .cell.filled,
+  body.skin-plastic .pcell:not(.empty) {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, white 50%, var(--c, var(--accent))) 0%,
+        var(--c, var(--accent)) 35%,
+        color-mix(in srgb, black 14%, var(--c, var(--accent))) 100%) !important;
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,0.55),
+      inset 0 -3px 4px rgba(0,0,0,0.30),
+      inset 0 0 0 1px rgba(0,0,0,0.18),
+      0 2px 4px rgba(0,0,0,0.28) !important;
+  }
+  /* METAL — brushed chrome with vertical highlight band */
+  body.skin-metal .cell.filled,
+  body.skin-metal .pcell:not(.empty) {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, white 38%, var(--c, var(--accent))) 0%,
+        color-mix(in srgb, #c0c8d2 55%, var(--c, var(--accent))) 28%,
+        color-mix(in srgb, #6a7080 45%, var(--c, var(--accent))) 58%,
+        color-mix(in srgb, #c0c8d2 35%, var(--c, var(--accent))) 88%,
+        color-mix(in srgb, white 28%, var(--c, var(--accent))) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.75),
+      inset 0 -2px 1px rgba(0,0,0,0.45),
+      0 2px 4px rgba(0,0,0,0.32) !important;
+  }
+
+  /* RAINBOW (secret) — animated hue-shifted gradient. The base rule sets
+     just rainbow-shift; placing cells get a composed pair of animations
+     (place + rainbow-shift) so the rainbow doesn't pause mid-placement. */
   body.skin-rainbow .cell.filled,
   body.skin-rainbow .pcell:not(.empty) {
     background: linear-gradient(135deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f) !important;
     background-size: 400% 400% !important;
-    animation: rainbow-shift 4s linear infinite;
+    animation: rainbow-shift 4s linear infinite !important;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.45),
       inset 0 -2px 2px rgba(0,0,0,0.22),
       0 2px 6px rgba(0,0,0,0.22) !important;
+  }
+  /* Compose the place-bounce + rainbow-shift so rainbow keeps cycling */
+  body.skin-rainbow .cell.filled.placing {
+    animation:
+      place 300ms cubic-bezier(.34, 1.5, .5, 1) backwards,
+      rainbow-shift 4s linear infinite !important;
   }
   @keyframes rainbow-shift {
     0%   { background-position: 0%   50%; }
@@ -1863,6 +2018,39 @@
       radial-gradient(circle at 28% 22%, rgba(255,255,255,0.85) 0%, transparent 28%),
       radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--c) 40%, transparent) 0%, color-mix(in srgb, var(--c) 65%, transparent) 70%);
     box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, white);
+  }
+  .skin-card[data-skin="marble"] .skin-preview {
+    background:
+      repeating-linear-gradient(135deg, transparent 0 7px, rgba(0,0,0,0.12) 7px 8px),
+      repeating-linear-gradient(45deg, transparent 0 11px, rgba(255,255,255,0.18) 11px 12px),
+      linear-gradient(135deg, color-mix(in srgb, var(--c) 35%, #f5f3ed), color-mix(in srgb, var(--c) 60%, #d8d3c4));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.18);
+  }
+  .skin-card[data-skin="cloud"] .skin-preview {
+    background:
+      radial-gradient(circle at 30% 30%, white, rgba(255,255,255,0.85) 28%, transparent 55%),
+      radial-gradient(circle at 70% 65%, rgba(255,255,255,0.7), transparent 45%),
+      color-mix(in srgb, var(--c) 22%, #f0f4fa);
+    box-shadow: inset 0 -3px 4px rgba(140,160,200,0.30), inset 0 2px 2px rgba(255,255,255,0.7);
+  }
+  .skin-card[data-skin="brick"] .skin-preview {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 4px, rgba(0,0,0,0.4) 4px 5px),
+      linear-gradient(180deg, color-mix(in srgb, var(--c) 65%, #8b3a2a), color-mix(in srgb, var(--c) 55%, #5e2618));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -2px 0 rgba(0,0,0,0.45);
+  }
+  .skin-card[data-skin="plastic"] .skin-preview {
+    background: linear-gradient(180deg, color-mix(in srgb, white 50%, var(--c)), var(--c) 35%, color-mix(in srgb, black 14%, var(--c)));
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -3px 4px rgba(0,0,0,0.30), inset 0 0 0 1px rgba(0,0,0,0.18);
+  }
+  .skin-card[data-skin="metal"] .skin-preview {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, white 38%, var(--c)) 0%,
+      color-mix(in srgb, #c0c8d2 55%, var(--c)) 28%,
+      color-mix(in srgb, #6a7080 45%, var(--c)) 58%,
+      color-mix(in srgb, #c0c8d2 35%, var(--c)) 88%,
+      color-mix(in srgb, white 28%, var(--c)) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), inset 0 -2px 1px rgba(0,0,0,0.45);
   }
   .skin-card[data-skin="rainbow"] .skin-preview {
     background: linear-gradient(135deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f);
@@ -2228,7 +2416,9 @@
       0 0 0 1px rgba(255,255,255,0.05),
       0 30px 60px -20px rgba(0,0,0,0.6),
       inset 0 0 80px rgba(0,0,0,0.4);
-    overflow: hidden;
+    /* clip-path lets fruits poke ~24px past the bottom edge ("half the
+       fruit is showing") while still clipping every other edge. */
+    clip-path: inset(0 0 -24px 0);
     touch-action: none;
     user-select: none;
   }
@@ -5128,6 +5318,11 @@ const SKINS = [
   { id: 'galaxy',   name: 'Galaxy'   },
   { id: 'gold',     name: 'Gold'     },
   { id: 'bubble',   name: 'Bubble'   },
+  { id: 'marble',   name: 'Marble'   },
+  { id: 'cloud',    name: 'Cloud'    },
+  { id: 'brick',    name: 'Brick'    },
+  { id: 'plastic',  name: 'Plastic'  },
+  { id: 'metal',    name: 'Metal'    },
   // Hidden until the player enters the secret code in settings
   { id: 'rainbow',  name: 'Rainbow ✨', secret: true },
 ];
@@ -5160,10 +5355,38 @@ function unlockSkin(id) {
 }
 
 // === SECRET CODES ===
-// Map of code -> { id, message }
+// Each code declares a `type` (skin / unicorn / god) and a message. The
+// numpad handler dispatches based on type.
 const SECRET_CODES = {
-  '4876': { unlock: 'rainbow', message: '🌈 RAINBOW SKIN UNLOCKED!' },
+  '4876': { type: 'skin', unlock: 'rainbow', message: '🌈 RAINBOW SKIN UNLOCKED!' },
+  '1806': { type: 'unicorn',                 message: '🦄 UNICORN MODE!' },
+  '5456': { type: 'god',                     message: '⚡ GOD MODE ACTIVATED' },
 };
+
+// === UNICORN THEME (persistent toggle) ===
+let unicornMode = false;
+try { unicornMode = localStorage.getItem('issa-blocks-unicorn') === '1'; } catch (e) {}
+function setUnicornMode(on) {
+  unicornMode = on;
+  try { localStorage.setItem('issa-blocks-unicorn', on ? '1' : '0'); } catch (e) {}
+  document.body.classList.toggle('unicorn-mode', on);
+}
+function applyUnicornMode() {
+  document.body.classList.toggle('unicorn-mode', unicornMode);
+}
+
+// === GOD MODE (persistent toggle) — bypass overlap, no game over,
+// any-tier merge in fruit drop ===
+let godMode = false;
+try { godMode = localStorage.getItem('issa-blocks-god') === '1'; } catch (e) {}
+function setGodMode(on) {
+  godMode = on;
+  try { localStorage.setItem('issa-blocks-god', on ? '1' : '0'); } catch (e) {}
+  document.body.classList.toggle('god-mode', on);
+}
+function applyGodMode() {
+  document.body.classList.toggle('god-mode', godMode);
+}
 
 // === VIBRATION SETTING ===
 let vibrationEnabled = true;
@@ -5861,6 +6084,8 @@ function canPlace(piece, gx, gy) {
   for (const [dx, dy] of piece.cells) {
     const x = gx + dx, y = gy + dy;
     if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
+    // God mode: allow placing on top of existing cells (skip overlap check).
+    if (godMode) continue;
     if (grid[y][x]) return false;
   }
   return true;
@@ -5872,6 +6097,8 @@ function canPlaceAnywhere(piece) {
   return false;
 }
 function isGameOver() {
+  // God mode: invincible — no game over, ever.
+  if (godMode) return false;
   // Custom mode with Zen toggle: never game over — pieces will keep refilling
   // (we'll auto-clear the tray if everything is unplaceable).
   if (currentMode === 'custom' && customConfig.features.zen) return false;
@@ -7415,6 +7642,9 @@ function fruitSpawn(tier, normX, normY, fromDrop) {
     vx: 0, vy: fromDrop ? 0 : 0,
     el,
     settled: false,
+    // 18% of fruits will visually poke through the bottom by up to half
+    // their radius — gives the pile a more organic, jumbled feel.
+    sinkOffset: Math.random() < 0.18 ? Math.random() * r * 0.5 : 0,
   };
   FRUIT.fruits.push(f);
   fruitPaintOne(f);
@@ -7523,7 +7753,14 @@ function fruitStep(now) {
     for (const f of FRUIT.fruits) {
       if (f.x - f.r < 0) { f.x = f.r; f.vx *= -0.45; }
       if (f.x + f.r > W) { f.x = W - f.r; f.vx *= -0.45; }
-      if (f.y + f.r > H) { f.y = H - f.r; f.vy *= -0.3; if (Math.abs(f.vy) < 0.5) f.vy = 0; }
+      // Floor: settle position respects sinkOffset so some fruits poke
+      // slightly below the bottom edge of the container for variety.
+      const off = f.sinkOffset || 0;
+      if (f.y + f.r - off > H) {
+        f.y = H - f.r + off;
+        f.vy *= -0.3;
+        if (Math.abs(f.vy) < 0.5) f.vy = 0;
+      }
     }
     // Pair collisions (a few passes for stability)
     for (let pass = 0; pass < 3; pass++) {
@@ -7559,17 +7796,19 @@ function fruitStep(now) {
     }
     // Merge detection
     fruitCheckMerges();
-    // Game over: a stationary fruit's center sits above the danger line
-    const dangerY = H * 0.13;
+    // Game over: a fruit's center sits above the danger line (easier loss
+    // — used to need to be near-stationary AND deeper, now ANY fruit at
+    // that height for 900ms ends the run, unless god mode is on).
+    const dangerY = H * 0.18;
     let inDanger = false;
-    for (const f of FRUIT.fruits) {
-      if (f.y < dangerY && Math.abs(f.vy) < 1.4 && Math.abs(f.vx) < 1.4) {
-        inDanger = true; break;
+    if (!godMode) {
+      for (const f of FRUIT.fruits) {
+        if (f.y < dangerY && Math.abs(f.vy) < 2.4) { inDanger = true; break; }
       }
     }
     if (inDanger) {
       if (FRUIT.dangerStartMs === 0) FRUIT.dangerStartMs = now;
-      else if (now - FRUIT.dangerStartMs > 1800) fruitDoGameOver();
+      else if (now - FRUIT.dangerStartMs > 900) fruitDoGameOver();
     } else {
       FRUIT.dangerStartMs = 0;
     }
@@ -7585,7 +7824,10 @@ function fruitCheckMerges() {
     if (a.tier >= FRUIT_TIERS.length - 1) continue;
     for (let j = i + 1; j < FRUIT.fruits.length; j++) {
       const b = FRUIT.fruits[j];
-      if (a.tier !== b.tier) continue;
+      // Normally fruits only merge if they're the same tier; god mode
+      // lets any pair merge into the (larger tier) + 1.
+      if (!godMode && a.tier !== b.tier) continue;
+      if (godMode && b.tier >= FRUIT_TIERS.length - 1 && a.tier >= FRUIT_TIERS.length - 1) continue;
       const dx = b.x - a.x, dy = b.y - a.y;
       const d2 = dx*dx + dy*dy;
       const touchD = (a.r + b.r) * 1.02;
@@ -7593,7 +7835,7 @@ function fruitCheckMerges() {
         // Merge!
         const mx = (a.x + b.x) / 2;
         const my = (a.y + b.y) / 2;
-        const newTier = a.tier + 1;
+        const newTier = Math.min(FRUIT_TIERS.length - 1, Math.max(a.tier, b.tier) + 1);
         // Remove via animation
         a.el.classList.add('merging');
         b.el.classList.add('merging');
@@ -8226,6 +8468,8 @@ window.addEventListener('load', () => {
   loadCustomConfig();
   applySkin();
   applyBigButtons();
+  applyUnicornMode();
+  applyGodMode();
   refreshBestLabels();
   showScreen('title');
 
@@ -8375,25 +8619,35 @@ window.addEventListener('load', () => {
       const hit = SECRET_CODES[_codeEntered];
       if (hit) {
         d.classList.add('good');
-        msg.textContent = hit.message;
+        let displayMsg = hit.message;
+        // Dispatch by code type
+        if (hit.type === 'skin') {
+          unlockSkin(hit.unlock);
+        } else if (hit.type === 'unicorn') {
+          const wasOn = unicornMode;
+          setUnicornMode(!wasOn);
+          displayMsg = wasOn ? '🦄 UNICORN MODE OFF' : '🦄 UNICORN MODE ACTIVATED!';
+        } else if (hit.type === 'god') {
+          const wasOn = godMode;
+          setGodMode(!wasOn);
+          displayMsg = wasOn ? '⚡ GOD MODE OFF' : '⚡ GOD MODE ON — INFINITE POWER';
+        }
+        msg.textContent = displayMsg;
         msg.classList.add('good');
-        unlockSkin(hit.unlock);
-        // Award the Egg Hunter achievement + persist
+        // Award the Egg Hunter achievement + persist (once, across all codes)
         if (!Array.isArray(stats.achievements)) stats.achievements = [];
         if (!stats.achievements.includes('easter_egg')) {
           stats.achievements.push('easter_egg');
           saveStats();
+          setTimeout(() => {
+            const ach = ACHIEVEMENTS.find(a => a.id === 'easter_egg');
+            if (ach) showAchievementPopup(ach);
+          }, 400);
         }
-        // Confetti burst — uses the same particle system as sprint celebrations
         codeConfetti();
         if (typeof SFX !== 'undefined' && SFX.newBest) SFX.newBest();
-        // Refresh skin picker if it's visible
+        // Refresh skin picker if it's visible (rainbow may have just unlocked)
         renderSkinPicker();
-        // Show the achievement popup right after
-        setTimeout(() => {
-          const ach = ACHIEVEMENTS.find(a => a.id === 'easter_egg');
-          if (ach) showAchievementPopup(ach);
-        }, 400);
         setTimeout(() => { _codeEntered = ''; refreshCodeDisplay(); }, 2200);
       } else {
         d.classList.add('bad');
