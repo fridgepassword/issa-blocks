@@ -3551,6 +3551,7 @@
   }
 
   /* Settings rows */
+  .setting-row.hidden { display: none !important; }
   .setting-row {
     display: flex;
     align-items: center;
@@ -4547,6 +4548,16 @@
           <div class="setting-name">🔍 Big buttons</div>
           <div class="setting-switch"></div>
         </div>
+        <!-- These two only appear after the user has entered the
+             corresponding secret code at least once -->
+        <div class="setting-row hidden" id="row-unicorn" data-toggle="unicorn">
+          <div class="setting-name">🦄 Unicorn mode</div>
+          <div class="setting-switch"></div>
+        </div>
+        <div class="setting-row hidden" id="row-god" data-toggle="god">
+          <div class="setting-name">⚡ God mode</div>
+          <div class="setting-switch"></div>
+        </div>
 
         <div class="setting-section-title" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.3em;color:var(--dim);margin-top:10px;margin-bottom:-2px">BLOCK SKIN</div>
         <div class="skin-picker" id="skin-picker"></div>
@@ -5365,9 +5376,14 @@ const SECRET_CODES = {
 
 // === UNICORN THEME (persistent toggle) ===
 let unicornMode = false;
-try { unicornMode = localStorage.getItem('issa-blocks-unicorn') === '1'; } catch (e) {}
+let unicornDiscovered = false;
+try {
+  unicornMode = localStorage.getItem('issa-blocks-unicorn') === '1';
+  unicornDiscovered = localStorage.getItem('issa-blocks-unicorn') !== null;
+} catch (e) {}
 function setUnicornMode(on) {
   unicornMode = on;
+  unicornDiscovered = true;
   try { localStorage.setItem('issa-blocks-unicorn', on ? '1' : '0'); } catch (e) {}
   document.body.classList.toggle('unicorn-mode', on);
 }
@@ -5378,9 +5394,14 @@ function applyUnicornMode() {
 // === GOD MODE (persistent toggle) — bypass overlap, no game over,
 // any-tier merge in fruit drop ===
 let godMode = false;
-try { godMode = localStorage.getItem('issa-blocks-god') === '1'; } catch (e) {}
+let godDiscovered = false;
+try {
+  godMode = localStorage.getItem('issa-blocks-god') === '1';
+  godDiscovered = localStorage.getItem('issa-blocks-god') !== null;
+} catch (e) {}
 function setGodMode(on) {
   godMode = on;
+  godDiscovered = true;
   try { localStorage.setItem('issa-blocks-god', on ? '1' : '0'); } catch (e) {}
   document.body.classList.toggle('god-mode', on);
 }
@@ -5790,7 +5811,14 @@ function paintGrid() {
     for (let x = 0; x < SIZE; x++) {
       const cell = cells[y * SIZE + x];
       const v = grid[y][x];
-      cell.className = 'cell' + (v ? ' filled' : '');
+      const hasFilled = cell.classList.contains('filled');
+      // Toggle filled only if it actually changed — preserves the
+      // running rainbow / glass / etc. animations on cells that were
+      // already filled (otherwise rewriting className restarts them).
+      if (v && !hasFilled) cell.classList.add('filled');
+      else if (!v && hasFilled) cell.classList.remove('filled');
+      // Always strip transient state classes so they don't linger
+      cell.classList.remove('placing', 'clearing', 'preview', 'preview-bad', 'hint');
       if (v) cell.style.setProperty('--c', COLORS[v]);
       else   cell.style.removeProperty('--c');
     }
@@ -8670,8 +8698,16 @@ window.addEventListener('load', () => {
       else if (key === 'music') active = !Music.muted;
       else if (key === 'vibration')  active = vibrationEnabled;
       else if (key === 'bigbuttons') active = bigButtons;
+      else if (key === 'unicorn')    active = unicornMode;
+      else if (key === 'god')        active = godMode;
       row.classList.toggle('active', active);
     });
+    // Show / hide the unicorn + god toggles based on whether the user
+    // has discovered the corresponding code.
+    const uRow = document.getElementById('row-unicorn');
+    const gRow = document.getElementById('row-god');
+    if (uRow) uRow.classList.toggle('hidden', !unicornDiscovered);
+    if (gRow) gRow.classList.toggle('hidden', !godDiscovered);
     // Achievement count badge
     const cnt = document.getElementById('ach-count');
     if (cnt) cnt.textContent = (stats.achievements ? stats.achievements.length : 0) + '/' + ACHIEVEMENTS.length;
@@ -8687,6 +8723,8 @@ window.addEventListener('load', () => {
       else if (key === 'music') Music.setMuted(!Music.muted);
       else if (key === 'vibration')  setVibration(!vibrationEnabled);
       else if (key === 'bigbuttons') setBigButtons(!bigButtons);
+      else if (key === 'unicorn')    setUnicornMode(!unicornMode);
+      else if (key === 'god')        setGodMode(!godMode);
       syncSettingsToggles();
     });
   });
