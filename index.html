@@ -1901,26 +1901,29 @@
       0 2px 4px rgba(0,0,0,0.32) !important;
   }
 
-  /* RAINBOW (secret) — moving / swirling rainbow gradient that cycles
-     continuously. background-size 250% means each cell shows ~3 colors
-     of the gradient at any moment, and the position animation slides
-     those colors across the cell over 3s for a clear swirl effect. */
+  /* RAINBOW (secret) — moving / swirling rainbow gradient that ALWAYS
+     runs. Painted on a ::before pseudo-element so the cell's own class
+     changes (.placing / .clearing / etc.) don't stop the swirl. */
   body.skin-rainbow .cell.filled,
   body.skin-rainbow .pcell:not(.empty) {
-    background: linear-gradient(135deg,
-      #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f) !important;
-    background-size: 250% 250% !important;
-    animation: rainbow-shift 3s linear infinite !important;
+    position: relative;
+    background: transparent !important;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.5),
       inset 0 -2px 2px rgba(0,0,0,0.22),
       0 2px 6px rgba(0,0,0,0.22) !important;
   }
-  /* Compose place-bounce + rainbow-shift so rainbow keeps swirling */
-  body.skin-rainbow .cell.filled.placing {
-    animation:
-      place 300ms cubic-bezier(.34, 1.5, .5, 1) backwards,
-      rainbow-shift 3s linear infinite !important;
+  body.skin-rainbow .cell.filled::before,
+  body.skin-rainbow .pcell:not(.empty)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg,
+      #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac, #ff5f5f);
+    background-size: 250% 250%;
+    animation: rainbow-shift 3s linear infinite;
+    pointer-events: none;
   }
   @keyframes rainbow-shift {
     0%   { background-position: 0%   0%;   }
@@ -2535,13 +2538,11 @@
     0%, 100% { transform: rotate(-1deg); }
     50%      { transform: rotate(1deg); }
   }
+  /* .merging now styled inline by the JS merge animator — we just add
+     a brightness flash via CSS so the converging fruits glow on the way. */
   .fruit-fruit.merging {
-    animation: fruit-merge 320ms ease-out forwards;
-  }
-  @keyframes fruit-merge {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.2); filter: brightness(1.6); }
-    100% { transform: scale(0); opacity: 0; }
+    filter: brightness(1.35) saturate(1.2);
+    transition: filter 200ms ease;
   }
   .fruit-fruit.spawning {
     animation: fruit-spawn 360ms cubic-bezier(.34, 1.5, .5, 1) backwards;
@@ -7867,15 +7868,46 @@ function fruitCheckMerges() {
         const mx = (a.x + b.x) / 2;
         const my = (a.y + b.y) / 2;
         const newTier = Math.min(FRUIT_TIERS.length - 1, Math.max(a.tier, b.tier) + 1);
-        // Remove via animation
-        a.el.classList.add('merging');
-        b.el.classList.add('merging');
+        // Capture start positions for the smooth converge
+        const ax0 = a.x, ay0 = a.y, ar = a.r;
+        const bx0 = b.x, by0 = b.y, br = b.r;
         const aEl = a.el, bEl = b.el;
-        setTimeout(() => { aEl.remove(); bEl.remove(); }, 320);
+        aEl.classList.add('merging');
+        bEl.classList.add('merging');
+        // Take them out of the physics array immediately so other fruits
+        // stop colliding with them, but keep their elements visible while
+        // they smoothly converge to the midpoint over 240ms.
         FRUIT.fruits.splice(j, 1);
         FRUIT.fruits.splice(i, 1);
-        // Spawn the new one
-        const fn = fruitSpawn(newTier, mx / FRUIT.containerW, my / FRUIT.containerH, false);
+        const startMs = performance.now();
+        const dur = 240;
+        (function mergeAnim() {
+          const t = Math.min(1, (performance.now() - startMs) / dur);
+          // ease-out cubic
+          const e = 1 - Math.pow(1 - t, 3);
+          const ax = ax0 + (mx - ax0) * e;
+          const ay = ay0 + (my - ay0) * e;
+          const bx = bx0 + (mx - bx0) * e;
+          const by = by0 + (my - by0) * e;
+          // Tiny squish + fade as the two converge
+          const s = 1 + 0.15 * Math.sin(t * Math.PI);
+          const o = 1 - t * 0.4;
+          aEl.style.transform = `translate(${ax - ar}px, ${ay - ar}px) scale(${s})`;
+          bEl.style.transform = `translate(${bx - br}px, ${by - br}px) scale(${s})`;
+          aEl.style.opacity = o;
+          bEl.style.opacity = o;
+          if (t < 1) requestAnimationFrame(mergeAnim);
+          else { aEl.remove(); bEl.remove(); }
+        })();
+        // Spawn the new one slightly delayed so it appears AS the two
+        // shrink — feels like one fruit emerging from the collision.
+        setTimeout(() => {
+          fruitSpawn(newTier, mx / FRUIT.containerW, my / FRUIT.containerH, false);
+        }, dur * 0.55);
+        // For the rest of this iteration's bookkeeping (score, sound,
+        // sparks etc.) we still need a 'new fruit' reference — score
+        // logic below uses `newTier` directly, not the spawned object.
+        const fn = null;
         // Score
         const gained = (newTier + 1) * 5 + (newTier + 1) * (newTier);
         FRUIT.score += gained;
