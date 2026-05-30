@@ -4966,7 +4966,7 @@
         </div>
       </div>
     </div>
-    <div class="flip-tips" id="flip-tips">Tap = flip up + spin. Avoid spikes &amp; gaps. Stop on the fork.</div>
+    <div class="flip-tips" id="flip-tips">One tap = one full flip. Block stops between flips. Land on the fork.</div>
   </div>
 
   <!-- ============================================ -->
@@ -8832,8 +8832,8 @@ const JOURNEY = {
   charY: 0,              // 0 = on ground, negative = above ground
   charVY: 0,
   worldX: 0,
-  gravity: 0.62,
-  jumpForce: 11,
+  gravity: 0.55,
+  jumpForce: 8,          // shorter hops — player can see what's coming
   grounded: true,
   goalX: 0,
   goalSlotIdx: 0,
@@ -8850,6 +8850,10 @@ const JOURNEY = {
   holding: false,
   waveSpeedY: 4.4,       // vertical speed in wave mode (px/frame)
   ceilingY: -200,        // max distance above ground before death in wave
+  // World doesn't start scrolling until the player taps. First tap = start
+  // (no jump). Subsequent taps = normal jump. Gives the player time to read
+  // the level before the run begins.
+  ready: false,
 };
 const JOURNEY_KEY = 'issa-blocks-journey-v1';
 function journeyLoadBest() {
@@ -8928,10 +8932,11 @@ function startJourney(stageIdx) {
   JOURNEY.portalsTriggered = new Set();
   JOURNEY.mode = 'cube';
   JOURNEY.holding = false;
+  JOURNEY.ready = false;
   document.getElementById('journey-stage-num').textContent = (JOURNEY.stage + 1);
   document.getElementById('journey-info').textContent = stage.name;
   document.getElementById('journey-status').classList.remove('hidden');
-  document.getElementById('journey-status').textContent = 'TAP TO JUMP';
+  document.getElementById('journey-status').textContent = 'TAP TO START';
   document.getElementById('journey-overlay').classList.remove('show');
   document.getElementById('journey-char').classList.remove('dead', 'win');
   document.getElementById('journey-char').style.transform = 'translateY(0)';
@@ -9009,7 +9014,7 @@ function journeyStep() {
     JOURNEY.rafId = requestAnimationFrame(journeyStep);
     return;
   }
-  if (!JOURNEY.won && !JOURNEY.lost) {
+  if (!JOURNEY.won && !JOURNEY.lost && JOURNEY.ready) {
     JOURNEY.worldX += JOURNEY.speed;
     if (JOURNEY.mode === 'cube') {
       // Cube: gravity + ground clamp
@@ -9091,6 +9096,14 @@ function attachJourneyInput() {
     if (e.target.closest('.journey-back'))    return;
     if (JOURNEY.lost) { startJourney(JOURNEY.stage); return; }
     if (JOURNEY.won) return;
+    // First tap: kick off the run, but DON'T jump yet — give the player a
+    // beat to see what's coming before they have to react.
+    if (!JOURNEY.ready) {
+      JOURNEY.ready = true;
+      const st = document.getElementById('journey-status');
+      if (st) st.textContent = 'TAP TO JUMP';
+      return;
+    }
     JOURNEY.holding = true;
     if (JOURNEY.mode === 'cube' && JOURNEY.grounded) {
       JOURNEY.charVY = -JOURNEY.jumpForce;
@@ -9119,112 +9132,106 @@ function detachJourneyInput() {
 // =================================================================
 // === BLOCK FLIP MODE (fork & sausage physics) ====================
 // =================================================================
-// The sausage-flip mechanic: tap = upward impulse + rotation impulse.
-// The block tumbles end-over-end through the air, gravity pulls it down.
-// Auto-scrolls forward. Spikes on the floor. Gaps in the floor (fall =
-// die). Floating platforms to land on. The fork at the end is the goal —
-// land on it (or even just touch the tines) to win.
-//
-// Distinct from JOURNEY:
-//  - rotation is the core mechanic (block visibly tumbles)
-//  - gaps make jumping mandatory at certain spots, not optional
-//  - lower gravity → floaty hangtime so flips read clearly
-//  - tap also works mid-air (adds extra spin, mini boost)
+// True sausage-flip physics: one tap = one full flip arc. The block has
+// world position + velocity in BOTH axes (no auto-scroll). Tap launches
+// a forward + upward impulse with rotation, gravity pulls down, and the
+// block stops on landing (heavy ground damping, snap to nearest 90°).
+// Camera follows the block once it crosses 40% of the stage width.
+// Spikes kill on contact. Gaps in the floor: fall in = die. Platforms
+// give you stepping stones over wide gaps. Touch the fork to win.
 
 const FLIP_STAGES = [
-  // Stage 1 — TUTORIAL: a few spikes, one small gap, an easy fork at the end.
+  // Stage 1 — TUTORIAL: a couple spikes spaced for clean single flips, then
+  // one small gap, then the fork. ~8-10 flips to clear.
   {
     name: 'EASY',
-    speed: 3.2,
     spikes: [
-      { x: 320, k: 'red'    },
-      { x: 540, k: 'orange' },
-      { x: 760, k: 'yellow' },
-      { x: 980, k: 'red'    },
+      { x: 260, k: 'red'    },
+      { x: 480, k: 'orange' },
+      { x: 700, k: 'yellow' },
     ],
     gaps: [
-      { x: 1180, w: 70 },          // first jump-the-gap section
+      { x: 900,  w: 90 },
     ],
-    platforms: [
-      { x: 1420, w: 90, y: 78 },   // a small floating ledge to land on
-    ],
-    forkX: 1700,
+    platforms: [],
+    forkX: 1180,
   },
-  // Stage 2 — MEDIUM: multiple spikes & two gaps, requires sustained flipping.
+  // Stage 2 — MEDIUM: tighter spike spacing, two gaps with one stepping stone.
   {
     name: 'MEDIUM',
-    speed: 3.9,
     spikes: [
-      { x: 240, k: 'red' },
-      { x: 340, k: 'orange' }, { x: 366, k: 'orange' },
-      { x: 500, k: 'yellow' },
-      { x: 660, k: 'red'    },
-      { x: 820, k: 'orange' }, { x: 846, k: 'orange' },
-      { x: 1380, k: 'yellow' },
-      { x: 1500, k: 'red'    }, { x: 1526, k: 'red' },
-      { x: 1700, k: 'orange' },
-      { x: 1900, k: 'yellow' }, { x: 1926, k: 'yellow' },
+      { x: 220, k: 'red'    },
+      { x: 380, k: 'orange' },
+      { x: 540, k: 'yellow' },
+      { x: 700, k: 'red'    },
+      { x: 1300, k: 'orange' },
+      { x: 1480, k: 'yellow' },
+      { x: 1640, k: 'red'    },
     ],
     gaps: [
-      { x: 1000, w: 110 },         // wider gap
-      { x: 1240, w: 90  },         // second gap right after
+      { x: 880,  w: 100 },
+      { x: 1100, w: 140 },
     ],
     platforms: [
-      { x: 1090, w: 80, y: 82 },   // mid-gap stepping stone
-      { x: 2080, w: 100, y: 86 },
+      { x: 1160, w: 60, y: 70 },   // stepping stone for the wider second gap
     ],
-    forkX: 2320,
+    forkX: 1840,
   },
-  // Stage 3 — HARDCORE: spike fields, narrow gaps with offset platforms,
-  // a forced "double-flip" gauntlet at the end.
+  // Stage 3 — HARDCORE: spike fields, three gaps including a wide one with
+  // a high platform, plus a tight finish before the fork.
   {
     name: 'HARDCORE',
-    speed: 4.6,
     spikes: [
-      { x: 220, k: 'red'    }, { x: 246, k: 'red' },
+      { x: 200, k: 'red'    }, { x: 226, k: 'red' },
       { x: 360, k: 'orange' },
-      { x: 480, k: 'yellow' }, { x: 506, k: 'yellow' }, { x: 532, k: 'yellow' },
-      { x: 700, k: 'red'    },
-      { x: 820, k: 'orange' }, { x: 846, k: 'orange' },
-      { x: 980, k: 'yellow' },
-      { x: 1480, k: 'red'    }, { x: 1506, k: 'red' },
-      { x: 1700, k: 'orange' },
-      { x: 1900, k: 'yellow' }, { x: 1926, k: 'yellow' }, { x: 1952, k: 'yellow' },
-      { x: 2200, k: 'red'    }, { x: 2226, k: 'red' },
-      { x: 2400, k: 'orange' },
-      { x: 2620, k: 'yellow' }, { x: 2646, k: 'yellow' },
+      { x: 500, k: 'yellow' }, { x: 526, k: 'yellow' },
+      { x: 660, k: 'red'    },
+      { x: 820, k: 'orange' },
+      { x: 1500, k: 'yellow' },
+      { x: 1660, k: 'red'    }, { x: 1686, k: 'red' },
+      { x: 1840, k: 'orange' },
+      { x: 2000, k: 'yellow' },
+      { x: 2360, k: 'red'    }, { x: 2386, k: 'red' },
     ],
     gaps: [
-      { x: 1100, w: 130 },         // wide gap with stepping stone
-      { x: 1320, w: 100 },
-      { x: 2520, w: 110 },         // late gap right before fork
+      { x: 980,  w: 110 },
+      { x: 1180, w: 160 },         // wide one — needs the platform
+      { x: 2160, w: 130 },
     ],
     platforms: [
-      { x: 1200, w: 70, y: 90 },
-      { x: 2030, w: 90, y: 78 },
-      { x: 2300, w: 70, y: 94 },
+      { x: 1240, w: 70, y: 84 },
+      { x: 2210, w: 70, y: 68 },
     ],
-    forkX: 2840,
+    forkX: 2580,
   },
 ];
 
 const FLIP = {
   active: false,
   stage: 0,
-  speed: 3.2,
-  charX: 60,
+  // World position + velocity. The block lives in world space; we render
+  // its screen position as charWorldX - cameraX.
+  charWorldX: 60,
   charY: 0,             // 0 = on ground, negative = above ground
+  charVX: 0,
   charVY: 0,
   charAngle: 0,         // visual rotation in radians
   charAngVel: 0,        // rad/frame
-  worldX: 0,
-  gravity: 0.42,
-  jumpForce: 9.0,
-  flipSpin: 0.20,       // base spin impulse per tap (rad/frame)
-  airBoost: 0.55,       // mid-air tap re-jump multiplier (less than ground)
-  airSpinBoost: 0.14,   // mid-air tap extra spin
+  // Camera offset (world->screen). Block stays at 40% of stage width once
+  // it crosses the follow threshold, otherwise camera is pinned at 0.
+  cameraX: 0,
+  stageW: 420,          // measured at runtime
+  followThreshFrac: 0.4,
+  // Tap impulses — tuned so one flip covers ~120-130 px and rotates the
+  // block ~1.8 full revolutions in the air for satisfying visual flips.
+  gravity: 0.55,
+  flipVX: 4.6,
+  flipVY: -7.6,
+  flipSpin: 0.42,       // ~2 full revs per flip arc
+  airDamp: 0.998,       // mild air friction
+  groundDamp: 0.18,     // heavy: block stops between flips
+  // State
   grounded: true,
-  fellInGap: false,
   forkX: 0,
   won: false,
   lost: false,
@@ -9242,26 +9249,23 @@ function flipSaveBest() {
   try { localStorage.setItem(FLIP_KEY, String(FLIP.bestStage)); } catch (e) {}
 }
 
-// Is the character horizontally over any floor-gap region?
-function flipOverGap(worldCharX) {
+// Is the given world-X over any floor-gap region?
+function flipOverGap(worldX) {
   const stage = FLIP_STAGES[FLIP.stage];
   for (const g of (stage.gaps || [])) {
-    if (worldCharX >= g.x && worldCharX <= g.x + g.w) return true;
+    if (worldX >= g.x && worldX <= g.x + g.w) return true;
   }
   return false;
 }
 
-// Returns the top-y of any platform the character is currently above (in world
-// coords), or null if none. Used so the character can stand on platforms.
-function flipPlatformBelow(worldCharX, charBottomY) {
+// Returns the top-y (negative px above ground) of any platform the block is
+// currently above and about to land on, or null. Block must be descending.
+function flipPlatformBelow(worldX, charY) {
   const stage = FLIP_STAGES[FLIP.stage];
   for (const p of (stage.platforms || [])) {
-    if (worldCharX >= p.x && worldCharX <= p.x + p.w) {
-      // platform top in "charY" space (charY=0 means on floor, negative = up).
-      // p.y is height above ground in px.
+    if (worldX >= p.x && worldX <= p.x + p.w) {
       const topY = -p.y;
-      // Only land if descending into the top from above
-      if (charBottomY >= topY - 4 && charBottomY <= topY + 6 && FLIP.charVY >= 0) {
+      if (charY >= topY - 4 && charY <= topY + 8 && FLIP.charVY >= 0) {
         return topY;
       }
     }
@@ -9273,8 +9277,7 @@ function buildFlipWorld() {
   const stage = FLIP_STAGES[FLIP.stage];
   const world = document.getElementById('flip-world');
   world.innerHTML = '';
-  // Ground (one piece — gaps render as overlays, then we delete ground beneath).
-  // Simpler: build ground as multiple segments around the gaps.
+  // Ground rendered as segments around the gaps so gaps look like real holes.
   let lastX = 0;
   const groundEnd = 4000;
   const sortedGaps = (stage.gaps || []).slice().sort((a, b) => a.x - b.x);
@@ -9286,7 +9289,6 @@ function buildFlipWorld() {
       seg.style.width = (g.x - lastX) + 'px';
       world.appendChild(seg);
     }
-    // Mark the gap visually too
     const gd = document.createElement('div');
     gd.className = 'flip-gap';
     gd.style.left = g.x + 'px';
@@ -9316,7 +9318,7 @@ function buildFlipWorld() {
     el.className = 'flip-platform';
     el.style.left = p.x + 'px';
     el.style.width = p.w + 'px';
-    el.style.bottom = (40 + p.y) + 'px';   // ground line is bottom: 38px, so platform sits at 40 + p.y
+    el.style.bottom = (40 + p.y) + 'px';
     el.dataset.idx = 'p' + i;
     world.appendChild(el);
   });
@@ -9334,18 +9336,21 @@ function startFlip(stageIdx) {
   flipLoadBest();
   document.body.dataset.screen = 'flip';
   const stage = FLIP_STAGES[FLIP.stage];
-  FLIP.speed = stage.speed;
   FLIP.forkX = stage.forkX;
+  FLIP.charWorldX = 60;
   FLIP.charY = 0;
+  FLIP.charVX = 0;
   FLIP.charVY = 0;
   FLIP.charAngle = 0;
   FLIP.charAngVel = 0;
-  FLIP.worldX = 0;
+  FLIP.cameraX = 0;
   FLIP.grounded = true;
-  FLIP.fellInGap = false;
   FLIP.won = false;
   FLIP.lost = false;
   FLIP.spikeHits = new Set();
+  // Measure stage width so camera-follow threshold matches the actual screen.
+  const stageEl = document.getElementById('flip-stage');
+  if (stageEl && stageEl.clientWidth > 0) FLIP.stageW = stageEl.clientWidth;
   document.getElementById('flip-stage-num').textContent = (FLIP.stage + 1);
   document.getElementById('flip-info').textContent = stage.name;
   document.getElementById('flip-status').classList.remove('hidden');
@@ -9353,6 +9358,7 @@ function startFlip(stageIdx) {
   document.getElementById('flip-overlay').classList.remove('show');
   const ch = document.getElementById('flip-char');
   ch.classList.remove('dead', 'win');
+  ch.style.left = '60px';
   ch.style.transform = 'translateY(0) rotate(0)';
   buildFlipWorld();
   attachFlipInput();
@@ -9422,79 +9428,90 @@ function flipStep() {
     return;
   }
   if (!FLIP.won && !FLIP.lost) {
-    FLIP.worldX += FLIP.speed;
-
-    // Physics
+    // === Integrate ===
     FLIP.charVY += FLIP.gravity;
+    FLIP.charVX *= FLIP.airDamp;
+    FLIP.charWorldX += FLIP.charVX;
     FLIP.charY += FLIP.charVY;
     FLIP.charAngle += FLIP.charAngVel;
 
-    // Determine ground state — could be ground, platform, or gap (no ground).
-    const worldCharX = FLIP.worldX + FLIP.charX;
-    const overGap = flipOverGap(worldCharX);
-    const platformY = flipPlatformBelow(worldCharX, FLIP.charY);
+    // === Resolve landings ===
+    const overGap = flipOverGap(FLIP.charWorldX);
+    const platformY = flipPlatformBelow(FLIP.charWorldX, FLIP.charY);
 
     if (platformY !== null && FLIP.charY >= platformY) {
-      // Land on platform
+      // Landed on a platform
       FLIP.charY = platformY;
       FLIP.charVY = 0;
+      FLIP.charVX *= FLIP.groundDamp;
+      FLIP.charAngVel *= 0.35;
       FLIP.grounded = true;
-      // Damp angular velocity as the block "sticks" to platform
-      FLIP.charAngVel *= 0.7;
-      // Snap to nearest 90° angle as it settles, so it looks like a square resting
-      if (Math.abs(FLIP.charAngVel) < 0.02) {
+      // Settle: snap toward nearest 90° rotation once spin is small
+      if (Math.abs(FLIP.charAngVel) < 0.04) {
         const snap = Math.round(FLIP.charAngle / (Math.PI / 2)) * (Math.PI / 2);
-        FLIP.charAngle += (snap - FLIP.charAngle) * 0.3;
+        FLIP.charAngle += (snap - FLIP.charAngle) * 0.4;
+        FLIP.charAngVel *= 0.6;
       }
     } else if (FLIP.charY >= 0 && !overGap) {
-      // Land on ground
+      // Landed on solid ground
       FLIP.charY = 0;
       FLIP.charVY = 0;
+      FLIP.charVX *= FLIP.groundDamp;
+      FLIP.charAngVel *= 0.35;
       FLIP.grounded = true;
-      FLIP.charAngVel *= 0.7;
-      if (Math.abs(FLIP.charAngVel) < 0.02) {
+      if (Math.abs(FLIP.charAngVel) < 0.04) {
         const snap = Math.round(FLIP.charAngle / (Math.PI / 2)) * (Math.PI / 2);
-        FLIP.charAngle += (snap - FLIP.charAngle) * 0.3;
+        FLIP.charAngle += (snap - FLIP.charAngle) * 0.4;
+        FLIP.charAngVel *= 0.6;
       }
     } else {
-      // In air (above ground OR over a gap)
+      // Airborne (or above a gap)
       FLIP.grounded = false;
-      // If over gap AND past the ground line — fall into the abyss
-      if (overGap && FLIP.charY > 30) {
+      // Fell into a gap — game over
+      if (overGap && FLIP.charY > 36) {
         flipDie();
       }
     }
 
-    // Render
+    // === Camera follow ===
+    // Block parks at 40% of stage width once it crosses that threshold.
+    const followX = FLIP.stageW * FLIP.followThreshFrac;
+    const desiredCam = Math.max(0, FLIP.charWorldX - followX);
+    // Smooth-follow so quick flips don't jerk the camera
+    FLIP.cameraX += (desiredCam - FLIP.cameraX) * 0.22;
+
+    // === Render ===
     const world = document.getElementById('flip-world');
-    if (world) world.style.transform = `translateX(${-FLIP.worldX}px)`;
+    if (world) world.style.transform = `translateX(${-FLIP.cameraX}px)`;
     const char = document.getElementById('flip-char');
     if (char && !char.classList.contains('dead') && !char.classList.contains('win')) {
+      const screenX = FLIP.charWorldX - FLIP.cameraX;
+      char.style.left = screenX + 'px';
       char.style.transform = `translateY(${FLIP.charY}px) rotate(${FLIP.charAngle}rad)`;
     }
 
-    // Spike collisions — only when the character is at ground height (not jumping over)
-    const charScreenX = FLIP.charX;
-    const charDistFromGround = -FLIP.charY;
+    // === Spike collisions (world-space) ===
+    // The block is dangerous-low when its bottom is within 14px of ground
+    // or platform level. Spikes hang from the ground line, so we compare
+    // worldCharX to the spike's worldX.
+    const distFromGround = -FLIP.charY;     // 0 = floor, positive = airborne
     for (const sEl of document.querySelectorAll('.flip-spike')) {
       const idx = sEl.dataset.idx;
       if (FLIP.spikeHits.has(idx)) continue;
       const sx = parseFloat(sEl.dataset.x);
-      const screenSX = sx - FLIP.worldX;
-      const horizDist = Math.abs(screenSX - charScreenX);
+      const horizDist = Math.abs(sx - FLIP.charWorldX);
       if (horizDist >= 12) continue;
-      if (charDistFromGround < 14) {
+      if (distFromGround < 14) {
         FLIP.spikeHits.add(idx);
         flipDie();
         break;
       }
     }
 
-    // Goal — fork. Win when the character is close to the fork in world space
-    // and either touching it OR landing on it. We let the player approach from
-    // either ground or air.
-    const forkScreenX = FLIP.forkX + 28 - FLIP.worldX;  // center of fork is ~+28 from forkX (width=80, fork width 56 centered)
-    if (Math.abs(forkScreenX - charScreenX) < 32 && FLIP.charY > -60) {
+    // === Fork (goal) ===
+    const stage = FLIP_STAGES[FLIP.stage];
+    const forkCenterX = stage.forkX + 40;   // fork is centered in its 80px box
+    if (Math.abs(FLIP.charWorldX - forkCenterX) < 28 && FLIP.charY > -40) {
       flipWin();
     }
   }
@@ -9508,19 +9525,15 @@ function attachFlipInput() {
     if (e.target.closest('.flip-back'))    return;
     if (FLIP.lost) { startFlip(FLIP.stage); return; }
     if (FLIP.won) return;
-    if (FLIP.grounded) {
-      // Full flip from ground
-      FLIP.charVY = -FLIP.jumpForce;
-      FLIP.charAngVel = FLIP.flipSpin;
-      FLIP.grounded = false;
-      document.getElementById('flip-status').classList.add('hidden');
-      if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
-    } else {
-      // Mid-air re-flip: smaller boost + extra spin
-      FLIP.charVY = -FLIP.jumpForce * FLIP.airBoost;
-      FLIP.charAngVel += FLIP.airSpinBoost;
-      if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
-    }
+    // One tap = one full flip. Mid-air taps are ignored (sausage-flip style):
+    // the player commits to a flip and has to wait for the block to land.
+    if (!FLIP.grounded) return;
+    FLIP.charVX = FLIP.flipVX;
+    FLIP.charVY = FLIP.flipVY;
+    FLIP.charAngVel = FLIP.flipSpin;
+    FLIP.grounded = false;
+    document.getElementById('flip-status').classList.add('hidden');
+    if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
   };
   document.addEventListener('pointerdown', _flipHandler);
 }
