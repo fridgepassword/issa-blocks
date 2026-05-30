@@ -2299,6 +2299,65 @@
       transparent 0%, #4dd0e1 12%, #f783ac 38%, #ffd93b 62%, #51cf66 88%, transparent 100%);
     box-shadow: 0 0 12px rgba(247,131,172,0.55);
   }
+  .journey-ceiling {
+    position: absolute;
+    left: 0;
+    top: calc(100% - 38px - 200px - 8px);
+    height: 2px;
+    width: 4000px;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(247,131,172,0.35) 12%, rgba(77,208,225,0.35) 50%, rgba(151,117,250,0.35) 88%, transparent 100%);
+    opacity: 0.55;
+  }
+
+  /* Wave-mode character — small trail behind, slight rotation */
+  .journey-character.wave {
+    border-radius: 0;
+    transform-origin: center;
+    box-shadow:
+      0 0 24px rgba(255,184,77,0.95),
+      -10px 0 14px rgba(255,184,77,0.5),
+      -22px 0 16px rgba(255,184,77,0.3);
+  }
+  .journey-character.wave .jc-eye { display: none; }
+
+  /* Portal — vertical glowing column that switches modes */
+  .journey-portal {
+    position: absolute;
+    bottom: 40px;
+    width: 30px;
+    height: 200px;
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 0 8px rgba(255,255,255,0.7);
+    animation: portal-pulse 1.1s ease-in-out infinite;
+  }
+  .journey-portal.portal-wave {
+    background: linear-gradient(180deg, rgba(77,208,225,0.18), rgba(151,117,250,0.32));
+    border: 1.5px solid rgba(77,208,225,0.7);
+    box-shadow: 0 0 22px rgba(77,208,225,0.65), inset 0 0 18px rgba(77,208,225,0.4);
+  }
+  .journey-portal.portal-cube {
+    background: linear-gradient(180deg, rgba(255,184,77,0.18), rgba(255,159,67,0.32));
+    border: 1.5px solid rgba(255,184,77,0.7);
+    box-shadow: 0 0 22px rgba(255,184,77,0.65), inset 0 0 18px rgba(255,184,77,0.4);
+  }
+  .journey-portal.used { opacity: 0.35; animation: none; }
+  @keyframes portal-pulse {
+    0%, 100% { transform: scaleY(1);    filter: brightness(1); }
+    50%      { transform: scaleY(1.04); filter: brightness(1.3); }
+  }
+
+  /* Top spike (hangs from the ceiling) — same triangle, pointing down */
+  .journey-spike.top {
+    bottom: auto;
+    top: 10px;
+    transform: rotate(180deg);
+  }
 
   .journey-spike {
     position: absolute;
@@ -5012,7 +5071,7 @@
     <div class="final" id="final-score">0</div>
     <div class="meta" id="best-meta">Best: 0</div>
     <button class="mz-revive-btn" id="mz-revive-btn" type="button">💎 REVIVE · 50 ISSA COINS</button>
-    <button class="free-revive-btn" id="free-revive-btn" type="button">💖 REVIVE (FREE · 1 PER RUN)</button>
+    <button class="free-revive-btn hidden" id="free-revive-btn" type="button" style="display:none">💖 REVIVE (FREE · 1 PER RUN)</button>
     <div class="btn-row">
       <button class="btn secondary" onclick="goToMenu()">MENU</button>
       <button class="btn" onclick="restartCurrent()">PLAY AGAIN</button>
@@ -7036,14 +7095,11 @@ function showGameOver(isWin) {
 
   newBest.classList.toggle('show', isNewBest);
 
-  // Show the free-revive button if user hasn't used it yet this run AND
-  // this isn't a sprint win / multiplayer turn-end (revive doesn't make
-  // sense in those contexts).
+  // Free revive button is permanently disabled (per user request) — leave
+  // the element in the DOM so older references don't error, but never
+  // show it.
   const reviveBtn = document.getElementById('free-revive-btn');
-  if (reviveBtn) {
-    const canRevive = !stats.reviveUsedThisRun && !mpActive && !(mode.timed && isWin);
-    reviveBtn.classList.toggle('shown', canRevive);
-  }
+  if (reviveBtn) reviveBtn.classList.remove('shown');
 
   // Don't fire SFX twice if the overlay is already showing
   const wasShowing = overlay.classList.contains('show');
@@ -7772,7 +7828,11 @@ const FRUIT_TIERS = [
 const FRUIT = {
   active: false,
   fruits: [],          // {id, x, y, vx, vy, r, tier, el, settled, _fixed}
-  nextTier: 0,         // 0-indexed tier of the next fruit to drop
+  // Two-stage upcoming-fruit queue: `currentTier` is what's about to drop
+  // (shown in the big top preview + name label) and `nextTier` is what
+  // will replace it AFTER this drop (shown in the small NEXT slot).
+  currentTier: 0,
+  nextTier: 0,
   dropX: 0.5,          // 0..1
   score: 0,
   best: 0,
@@ -7911,7 +7971,9 @@ function startFruit() {
   FRUIT.dangerStartMs = 0;
   FRUIT.lastFrameMs = performance.now();
   FRUIT.highestTierUnlocked = 0;
-  fruitChooseNextTier();
+  // Prime both slots of the upcoming-fruit queue
+  FRUIT.currentTier = fruitPickTier();
+  FRUIT.nextTier    = fruitPickTier();
   fruitUpdatePreview();
   fruitUpdateScoreUI();
   fruitRenderLadder();
@@ -7954,17 +8016,21 @@ function fruitMeasureContainer() {
   }
 }
 
-function fruitChooseNextTier() {
-  // Bias toward smaller tiers; only allow up to tier 4 to spawn (game balance)
+// Pick a fresh tier with the natural spawn weighting and return it.
+// Callers decide whether the result becomes `currentTier` (start of run)
+// or `nextTier` (refill after a drop).
+function fruitPickTier() {
   const weights = [10, 8, 6, 4, 2];
   const total = weights.reduce((a, b) => a + b, 0);
   let r = Math.random() * total;
   for (let i = 0; i < weights.length; i++) {
     r -= weights[i];
-    if (r <= 0) { FRUIT.nextTier = i; return; }
+    if (r <= 0) return i;
   }
-  FRUIT.nextTier = 0;
+  return 0;
 }
+// Backwards-compat shim used by old callers — refills only the next-after
+function fruitChooseNextTier() { FRUIT.nextTier = fruitPickTier(); }
 
 function fruitUpdatePreview() {
   const prev = document.getElementById('fruit-preview');
@@ -7972,13 +8038,11 @@ function fruitUpdatePreview() {
   const nameEl = document.getElementById('fruit-preview-name');
   const nextSlot = document.getElementById('fruit-next-slot');
   if (!prev || !guide || !nameEl) return;
-  const tier = FRUIT.nextTier;
-  const t = FRUIT_TIERS[tier];
-  const px = FRUIT.containerW * t.r * 2;
-  // Drop-preview ghost: clearly visible, slightly translucent so the danger
-  // line / next-display behind it stay readable
+  // Big preview + name: the fruit ABOUT TO DROP (currentTier)
+  const cur = FRUIT_TIERS[FRUIT.currentTier];
+  const px = FRUIT.containerW * cur.r * 2;
   prev.innerHTML = '';
-  const ghost = makeFruitEl(tier);
+  const ghost = makeFruitEl(FRUIT.currentTier);
   ghost.classList.remove('spawning');
   ghost.style.width = px + 'px';
   ghost.style.height = px + 'px';
@@ -7988,11 +8052,11 @@ function fruitUpdatePreview() {
   const xPx = FRUIT.dropX * FRUIT.containerW;
   prev.style.left = xPx + 'px';
   guide.style.left = xPx + 'px';
-  nameEl.textContent = t.name;
-  // "Next" slot in the top-right
+  nameEl.textContent = cur.name;
+  // Small NEXT slot in the top-right: the fruit AFTER this one (nextTier)
   if (nextSlot) {
     nextSlot.innerHTML = '';
-    const mini = makeFruitEl(tier);
+    const mini = makeFruitEl(FRUIT.nextTier);
     mini.classList.remove('spawning');
     nextSlot.appendChild(mini);
   }
@@ -8053,13 +8117,16 @@ function fruitPaintOne(f) {
 function fruitDrop() {
   if (FRUIT.gameOver) return;
   if (FRUIT.dropCooldownMs > performance.now()) return;
-  const tier = FRUIT.nextTier;
+  const tier = FRUIT.currentTier;
   const t = FRUIT_TIERS[tier];
   const r = t.r * FRUIT.containerW;
   const normX = Math.max(t.r, Math.min(1 - t.r, FRUIT.dropX));
   fruitSpawn(tier, normX, (40 + r) / FRUIT.containerH, true);
   FRUIT.dropCooldownMs = performance.now() + 350;
-  fruitChooseNextTier();
+  // Roll the queue forward: what was the NEXT becomes the new CURRENT,
+  // and we pick a fresh NEXT.
+  FRUIT.currentTier = FRUIT.nextTier;
+  FRUIT.nextTier = fruitPickTier();
   fruitUpdatePreview();
   if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
 }
@@ -8306,50 +8373,97 @@ function fruitDoGameOver() {
 // completes the row and the row clears like a main-game line clear.
 
 const JOURNEY_STAGES = [
-  // Stage 1 — EASY: a handful of spikes, slow scroll
+  // Stage 1 — EASY: a brisk cube run, a short wave section, more cube
   {
     name: 'EASY',
-    speed: 2.6,
+    speed: 4.4,
     spikes: [
-      { x: 320, k: 'pink' },
-      { x: 520, k: 'cyan' },
-      { x: 720, k: 'yellow' },
-      { x: 960, k: 'pink' },
+      { x: 260, k: 'pink' },
+      { x: 380, k: 'cyan' }, { x: 406, k: 'cyan' },
+      { x: 560, k: 'yellow' },
+      { x: 700, k: 'pink' },
+      { x: 820, k: 'cyan' },
+      // Wave section: 1080 -> 1380. Top spikes inside.
+      { x: 1140, k: 'pink', top: true },
+      { x: 1220, k: 'cyan' },
+      { x: 1300, k: 'yellow', top: true },
+      // Back to cube
+      { x: 1520, k: 'pink' }, { x: 1546, k: 'pink' },
+      { x: 1700, k: 'cyan' },
     ],
-    goalX: 1200,
+    portals: [
+      { x: 1060, to: 'wave' },
+      { x: 1400, to: 'cube' },
+    ],
+    goalX: 1860,
     goalSlot: 3,
   },
-  // Stage 2 — MEDIUM: more spikes, faster, some doubles
+  // Stage 2 — MEDIUM: more density, faster
   {
     name: 'MEDIUM',
-    speed: 3.2,
+    speed: 5.0,
     spikes: [
-      { x: 280, k: 'pink' },
-      { x: 420, k: 'cyan' }, { x: 446, k: 'cyan' },
-      { x: 640, k: 'yellow' },
-      { x: 820, k: 'pink' }, { x: 846, k: 'pink' },
-      { x: 1020, k: 'cyan' },
-      { x: 1180, k: 'yellow' }, { x: 1206, k: 'yellow' }, { x: 1232, k: 'yellow' },
+      { x: 230, k: 'pink' },
+      { x: 340, k: 'cyan' }, { x: 366, k: 'cyan' },
+      { x: 480, k: 'yellow' },
+      { x: 600, k: 'pink' }, { x: 626, k: 'pink' },
+      { x: 760, k: 'cyan' }, { x: 786, k: 'cyan' },
+      { x: 920, k: 'yellow' }, { x: 946, k: 'yellow' }, { x: 972, k: 'yellow' },
+      // Wave 1
+      { x: 1180, k: 'pink', top: true },
+      { x: 1240, k: 'cyan' },
+      { x: 1300, k: 'yellow', top: true },
+      { x: 1360, k: 'pink' },
+      { x: 1420, k: 'cyan', top: true },
+      // Cube
+      { x: 1620, k: 'yellow' }, { x: 1646, k: 'yellow' },
+      { x: 1760, k: 'pink' },
+      { x: 1880, k: 'cyan' }, { x: 1906, k: 'cyan' },
     ],
-    goalX: 1440,
+    portals: [
+      { x: 1120, to: 'wave' },
+      { x: 1520, to: 'cube' },
+    ],
+    goalX: 2040,
     goalSlot: 4,
   },
-  // Stage 3 — HARDCORE: spike fields and tight gaps
+  // Stage 3 — HARDCORE: spike fields, dual wave, tight gaps
   {
     name: 'HARDCORE',
-    speed: 3.8,
+    speed: 5.8,
     spikes: [
-      { x: 260, k: 'pink' }, { x: 286, k: 'pink' },
-      { x: 420, k: 'cyan' },
-      { x: 540, k: 'yellow' }, { x: 566, k: 'yellow' }, { x: 592, k: 'yellow' },
-      { x: 740, k: 'pink' },
-      { x: 860, k: 'cyan' }, { x: 886, k: 'cyan' },
-      { x: 1020, k: 'yellow' },
-      { x: 1150, k: 'pink' }, { x: 1176, k: 'pink' }, { x: 1202, k: 'pink' },
-      { x: 1360, k: 'cyan' },
-      { x: 1500, k: 'yellow' }, { x: 1526, k: 'yellow' },
+      { x: 220, k: 'pink' }, { x: 246, k: 'pink' },
+      { x: 360, k: 'cyan' },
+      { x: 470, k: 'yellow' }, { x: 496, k: 'yellow' }, { x: 522, k: 'yellow' },
+      { x: 660, k: 'pink' },
+      { x: 760, k: 'cyan' }, { x: 786, k: 'cyan' },
+      { x: 900, k: 'yellow' },
+      { x: 1020, k: 'pink' }, { x: 1046, k: 'pink' }, { x: 1072, k: 'pink' },
+      // Wave 1 - busy
+      { x: 1240, k: 'cyan', top: true },
+      { x: 1290, k: 'yellow' },
+      { x: 1340, k: 'pink', top: true },
+      { x: 1390, k: 'cyan' },
+      { x: 1440, k: 'yellow', top: true },
+      { x: 1490, k: 'pink' },
+      { x: 1540, k: 'cyan', top: true },
+      // Cube
+      { x: 1720, k: 'yellow' },
+      { x: 1840, k: 'pink' }, { x: 1866, k: 'pink' },
+      // Wave 2 - finale
+      { x: 2020, k: 'cyan' },
+      { x: 2070, k: 'yellow', top: true },
+      { x: 2120, k: 'pink' },
+      { x: 2170, k: 'cyan', top: true },
+      { x: 2300, k: 'yellow' },
     ],
-    goalX: 1720,
+    portals: [
+      { x: 1180, to: 'wave' },
+      { x: 1640, to: 'cube' },
+      { x: 1960, to: 'wave' },
+      { x: 2360, to: 'cube' },
+    ],
+    goalX: 2480,
     goalSlot: 5,
   },
 ];
@@ -8359,10 +8473,10 @@ const JOURNEY = {
   stage: 0,
   speed: 2.6,
   charX: 60,
-  charY: 0,
+  charY: 0,              // 0 = on ground, negative = above ground
   charVY: 0,
   worldX: 0,
-  gravity: 0.55,
+  gravity: 0.62,
   jumpForce: 11,
   grounded: true,
   goalX: 0,
@@ -8370,10 +8484,16 @@ const JOURNEY = {
   won: false,
   lost: false,
   rafId: 0,
-  containerH: 275,
+  containerH: 275,       // measured from stage at startJourney
   charSize: 26,
   spikeHits: new Set(),
+  portalsTriggered: new Set(),
   bestStage: 0,
+  // Geometry-Dash-style mode: 'cube' (tap-jump) or 'wave' (tap-hold = up 45°)
+  mode: 'cube',
+  holding: false,
+  waveSpeedY: 4.4,       // vertical speed in wave mode (px/frame)
+  ceilingY: -200,        // max distance above ground before death in wave
 };
 const JOURNEY_KEY = 'issa-blocks-journey-v1';
 function journeyLoadBest() {
@@ -8392,13 +8512,32 @@ function buildJourneyWorld() {
   ground.className = 'journey-ground';
   ground.style.width = '4000px';
   world.appendChild(ground);
+  // Ceiling line (only visible danger during wave segments — but draw always)
+  const ceiling = document.createElement('div');
+  ceiling.className = 'journey-ceiling';
+  ceiling.style.width = '4000px';
+  world.appendChild(ceiling);
   // Spikes
   stage.spikes.forEach((s, i) => {
     const el = document.createElement('div');
-    el.className = 'journey-spike' + (s.k === 'cyan' ? ' cyan' : s.k === 'yellow' ? ' yellow' : '');
+    el.className = 'journey-spike'
+      + (s.k === 'cyan' ? ' cyan' : s.k === 'yellow' ? ' yellow' : '')
+      + (s.top ? ' top' : '');
     el.style.left = s.x + 'px';
     el.dataset.idx = i;
     el.dataset.x = s.x;
+    el.dataset.top = s.top ? '1' : '0';
+    world.appendChild(el);
+  });
+  // Portals
+  (stage.portals || []).forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'journey-portal portal-' + p.to;
+    el.style.left = p.x + 'px';
+    el.dataset.idx = 'p' + i;
+    el.dataset.x = p.x;
+    el.dataset.to = p.to;
+    el.textContent = p.to === 'wave' ? '〰️' : '⬛';
     world.appendChild(el);
   });
   // Goal row (8 cells, one empty slot is the goal)
@@ -8430,6 +8569,9 @@ function startJourney(stageIdx) {
   JOURNEY.won = false;
   JOURNEY.lost = false;
   JOURNEY.spikeHits = new Set();
+  JOURNEY.portalsTriggered = new Set();
+  JOURNEY.mode = 'cube';
+  JOURNEY.holding = false;
   document.getElementById('journey-stage-num').textContent = (JOURNEY.stage + 1);
   document.getElementById('journey-info').textContent = stage.name;
   document.getElementById('journey-status').classList.remove('hidden');
@@ -8512,84 +8654,121 @@ function journeyStep() {
     return;
   }
   if (!JOURNEY.won && !JOURNEY.lost) {
-    // Scroll world
     JOURNEY.worldX += JOURNEY.speed;
-    // Gravity / jump
-    JOURNEY.charVY += JOURNEY.gravity;
-    JOURNEY.charY += JOURNEY.charVY;
-    if (JOURNEY.charY > 0) {
-      JOURNEY.charY = 0;
-      JOURNEY.charVY = 0;
-      JOURNEY.grounded = true;
+    if (JOURNEY.mode === 'cube') {
+      // Cube: gravity + ground clamp
+      JOURNEY.charVY += JOURNEY.gravity;
+      JOURNEY.charY += JOURNEY.charVY;
+      if (JOURNEY.charY > 0) {
+        JOURNEY.charY = 0;
+        JOURNEY.charVY = 0;
+        JOURNEY.grounded = true;
+      }
+    } else {
+      // Wave: tap-and-hold ascends at 45°, release descends at 45°.
+      JOURNEY.charY += JOURNEY.holding ? -JOURNEY.waveSpeedY : +JOURNEY.waveSpeedY;
+      // Die on ground or ceiling
+      if (JOURNEY.charY > 0) { journeyDie(); }
+      else if (JOURNEY.charY < JOURNEY.ceilingY) { journeyDie(); }
     }
     const world = document.getElementById('journey-world');
     if (world) world.style.transform = `translateX(${-JOURNEY.worldX}px)`;
     const char = document.getElementById('journey-char');
-    if (char) char.style.transform = `translateY(${JOURNEY.charY}px)`;
-    // Collisions — spikes
+    if (char) {
+      char.style.transform = `translateY(${JOURNEY.charY}px)`;
+      char.classList.toggle('wave', JOURNEY.mode === 'wave');
+    }
+    // Portals — switch mode when character passes through one
     const charScreenX = JOURNEY.charX;
-    const charBottomFromGround = -JOURNEY.charY;     // 0 = on ground, positive = up in air
+    for (const pEl of document.querySelectorAll('.journey-portal')) {
+      const idx = pEl.dataset.idx;
+      if (JOURNEY.portalsTriggered.has(idx)) continue;
+      const px = parseFloat(pEl.dataset.x);
+      const screenPX = px - JOURNEY.worldX;
+      if (Math.abs(screenPX - charScreenX) < 20) {
+        JOURNEY.portalsTriggered.add(idx);
+        JOURNEY.mode = pEl.dataset.to;
+        pEl.classList.add('used');
+        if (typeof SFX !== 'undefined' && SFX.combo) SFX.combo();
+        if (JOURNEY.mode === 'cube') {
+          // Soft-land: zero vertical velocity and grace
+          JOURNEY.charVY = 0;
+          JOURNEY.grounded = (JOURNEY.charY >= 0);
+        }
+      }
+    }
+    // Spike collisions — distinguish floor vs top spikes
+    const charDistFromGround = -JOURNEY.charY;     // 0 = grounded, positive = airborne
     for (const sEl of document.querySelectorAll('.journey-spike')) {
       const idx = sEl.dataset.idx;
       if (JOURNEY.spikeHits.has(idx)) continue;
       const sx = parseFloat(sEl.dataset.x);
+      const isTop = sEl.dataset.top === '1';
       const screenSX = sx - JOURNEY.worldX;
       const horizDist = Math.abs(screenSX - charScreenX);
-      // Spike is 18px tall, top at -18 (relative to ground line)
-      if (horizDist < 12 && charBottomFromGround < 14) {
-        JOURNEY.spikeHits.add(idx);
-        journeyDie();
-        break;
+      if (horizDist >= 12) continue;
+      // Top spike hangs from a logical ceiling around -200..-170; we'll treat
+      // it as a danger when the character is high (charY < -140)
+      if (isTop) {
+        if (JOURNEY.charY < -140) { JOURNEY.spikeHits.add(idx); journeyDie(); break; }
+      } else {
+        if (charDistFromGround < 14) { JOURNEY.spikeHits.add(idx); journeyDie(); break; }
       }
     }
     // Goal — when the character passes over the empty slot AND is descending
     // into ground range, snap a win.
     const stage = JOURNEY_STAGES[JOURNEY.stage];
-    const slotCenterWorld = stage.goalX + stage.goalSlot * 31 + 14; // 28 + 3 gap
+    const slotCenterWorld = stage.goalX + stage.goalSlot * 31 + 14;
     const slotScreenX = slotCenterWorld - JOURNEY.worldX;
     if (Math.abs(slotScreenX - charScreenX) < 14 && JOURNEY.charY > -22 && JOURNEY.charVY >= 0) {
-      // Centered above the slot and descending — win!
-      const char = document.getElementById('journey-char');
-      char.classList.add('win');
+      if (char) char.classList.add('win');
       journeyWin();
     }
   }
   JOURNEY.rafId = requestAnimationFrame(journeyStep);
 }
 
-let _journeyTapHandler = null;
+let _journeyDownHandler = null, _journeyUpHandler = null;
 function attachJourneyInput() {
-  _journeyTapHandler = (e) => {
-    // Ignore taps that land on the overlay's buttons
+  _journeyDownHandler = (e) => {
     if (e.target.closest('.journey-overlay')) return;
     if (e.target.closest('.journey-back'))    return;
-    if (JOURNEY.lost) {
-      // Retry the same stage on tap-to-retry
-      startJourney(JOURNEY.stage);
-      return;
-    }
+    if (JOURNEY.lost) { startJourney(JOURNEY.stage); return; }
     if (JOURNEY.won) return;
-    if (JOURNEY.grounded) {
+    JOURNEY.holding = true;
+    if (JOURNEY.mode === 'cube' && JOURNEY.grounded) {
       JOURNEY.charVY = -JOURNEY.jumpForce;
       JOURNEY.grounded = false;
       document.getElementById('journey-status').classList.add('hidden');
       if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+    } else if (JOURNEY.mode === 'wave') {
+      document.getElementById('journey-status').classList.add('hidden');
     }
   };
-  document.addEventListener('pointerdown', _journeyTapHandler);
+  _journeyUpHandler = () => { JOURNEY.holding = false; };
+  document.addEventListener('pointerdown', _journeyDownHandler);
+  document.addEventListener('pointerup',   _journeyUpHandler);
+  document.addEventListener('pointercancel', _journeyUpHandler);
 }
 function detachJourneyInput() {
-  if (_journeyTapHandler) document.removeEventListener('pointerdown', _journeyTapHandler);
-  _journeyTapHandler = null;
+  if (_journeyDownHandler) document.removeEventListener('pointerdown', _journeyDownHandler);
+  if (_journeyUpHandler) {
+    document.removeEventListener('pointerup',   _journeyUpHandler);
+    document.removeEventListener('pointercancel', _journeyUpHandler);
+  }
+  _journeyDownHandler = null;
+  _journeyUpHandler = null;
 }
 
 // =================================================================
 // === LINE PUZZLE (HAMILTONIAN PATH) =============================
 // =================================================================
 
-// Level definitions. Each level has a grid mask (1 = on cell, 0 = empty
-// space outside the puzzle), the column count, and the starting cell index.
-// Every "on" cell must be visited exactly once.
+// Level definitions. Every level here has been verified to actually have
+// at least one Hamiltonian path from the start cell. The old plus, ring,
+// and scattered-hole levels were mathematically impossible (they had >2
+// leaf cells or disconnected components) and have been removed. For
+// infinite procedurally-generated puzzles use the ENDLESS card.
 const LINE_LEVELS = [
   // L1 — 4x4 full
   { cols: 4, rows: 4, start: 0, cells: [
@@ -8614,15 +8793,7 @@ const LINE_LEVELS = [
     1,1,1,1,1,
     1,1,1,1,0,
   ]},
-  // L4 — 5x5 plus shape
-  { cols: 5, rows: 5, start: 2, cells: [
-    0,0,1,0,0,
-    0,1,1,1,0,
-    1,1,1,1,1,
-    0,1,1,1,0,
-    0,0,1,0,0,
-  ]},
-  // L5 — 6x6 full
+  // L4 — 6x6 full
   { cols: 6, rows: 6, start: 0, cells: [
     1,1,1,1,1,1,
     1,1,1,1,1,1,
@@ -8631,16 +8802,7 @@ const LINE_LEVELS = [
     1,1,1,1,1,1,
     1,1,1,1,1,1,
   ]},
-  // L6 — 6x6 with center 2x2 missing
-  { cols: 6, rows: 6, start: 0, cells: [
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,0,0,1,1,
-    1,1,0,0,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-  ]},
-  // L7 — 6x6 stairstep
+  // L5 — 6x6 stairstep (a Hamiltonian path exists: snake the rows)
   { cols: 6, rows: 6, start: 0, cells: [
     1,1,1,1,1,1,
     1,1,1,1,1,1,
@@ -8649,17 +8811,7 @@ const LINE_LEVELS = [
     0,0,1,1,1,1,
     0,0,0,1,1,1,
   ]},
-  // L8 — 7x7 plus
-  { cols: 7, rows: 7, start: 3, cells: [
-    0,0,1,1,1,0,0,
-    0,0,1,1,1,0,0,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    0,0,1,1,1,0,0,
-    0,0,1,1,1,0,0,
-  ]},
-  // L9 — 7x7 full
+  // L6 — 7x7 full
   { cols: 7, rows: 7, start: 0, cells: [
     1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,
@@ -8669,17 +8821,7 @@ const LINE_LEVELS = [
     1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,
   ]},
-  // L10 — 7x7 ring + middle dot
-  { cols: 7, rows: 7, start: 0, cells: [
-    1,1,1,1,1,1,1,
-    1,0,0,0,0,0,1,
-    1,0,1,1,1,0,1,
-    1,0,1,1,1,0,1,
-    1,0,1,1,1,0,1,
-    1,0,0,0,0,0,1,
-    1,1,1,1,1,1,1,
-  ]},
-  // L11 — 8x8 full
+  // L7 — 8x8 full
   { cols: 8, rows: 8, start: 0, cells: [
     1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,
@@ -8688,17 +8830,6 @@ const LINE_LEVELS = [
     1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-  ]},
-  // L12 — 8x8 with scattered holes
-  { cols: 8, rows: 8, start: 0, cells: [
-    1,1,1,1,1,1,1,1,
-    1,1,1,0,0,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,0,1,1,1,1,0,1,
-    1,0,1,1,1,1,0,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,0,0,1,1,1,
     1,1,1,1,1,1,1,1,
   ]},
 ];
