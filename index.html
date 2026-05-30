@@ -128,8 +128,19 @@
   body[data-screen="journey"] .fruit-screen,
   body[data-screen="journey"] .line-screen,
   body[data-screen="journey"] .extras-screen,
-  body[data-screen="journey"] .adventure-screen { display: none; }
+  body[data-screen="journey"] .adventure-screen,
+  body[data-screen="journey"] .flip-screen { display: none; }
   body[data-screen="journey"] .journey-screen { display: flex; }
+  .flip-screen { display: none; }
+  body[data-screen="flip"] .title-screen,
+  body[data-screen="flip"] .game-screen,
+  body[data-screen="flip"] .custom-config,
+  body[data-screen="flip"] .fruit-screen,
+  body[data-screen="flip"] .line-screen,
+  body[data-screen="flip"] .extras-screen,
+  body[data-screen="flip"] .adventure-screen,
+  body[data-screen="flip"] .journey-screen { display: none; }
+  body[data-screen="flip"] .flip-screen { display: flex; }
   html.cc-scroll { overflow-y: auto !important; height: auto !important; }
 
   /* === TITLE SCREEN === */
@@ -2506,6 +2517,308 @@
     background: linear-gradient(180deg, rgba(151,117,250,0.10), rgba(247,131,172,0.04));
   }
 
+  /* === BLOCK FLIP MODE (fork & sausage physics) === */
+  .mode-card[data-mode="flip"] .mode-name {
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #51cf66);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="flip"]:hover {
+    border-color: rgba(255,217,59,0.4);
+    background: linear-gradient(180deg, rgba(255,217,59,0.10), rgba(81,207,102,0.04));
+  }
+
+  .flip-screen {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    gap: 10px;
+    padding: 4px 4px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .flip-header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .flip-back {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding: 7px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .flip-title {
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #51cf66, #4dd0e1);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    animation: rainbow-shift 6s linear infinite;
+  }
+  .flip-stage-num {
+    background: rgba(255,217,59,0.18);
+    color: #ffd93b;
+    -webkit-background-clip: initial;
+            background-clip: initial;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 13px;
+    margin-left: 6px;
+  }
+  .flip-info-wrap { text-align: right; }
+  .flip-info-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+  }
+  .flip-info {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: #ffd93b;
+    letter-spacing: 0.1em;
+  }
+  .flip-stage {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    aspect-ratio: 16 / 10;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,217,59,0.18), transparent 70%),
+      linear-gradient(180deg, #100a02 0%, #2a1408 50%, #3a1810 100%);
+    border: 2px solid rgba(255,217,59,0.45);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+      0 0 32px rgba(255,217,59,0.35),
+      inset 0 0 60px rgba(255,159,67,0.18);
+    touch-action: none;
+    user-select: none;
+  }
+  .flip-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,217,59,0.13) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,217,59,0.13) 1px, transparent 1px);
+    background-size: 32px 32px;
+    animation: jgrid-scroll 0.9s linear infinite;
+    pointer-events: none;
+  }
+  .flip-world {
+    position: absolute;
+    left: 0; top: 0;
+    width: 4000px;
+    height: 100%;
+    will-change: transform;
+    pointer-events: none;
+  }
+  .flip-character {
+    position: absolute;
+    left: 60px;
+    bottom: 40px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background:
+      radial-gradient(circle at 35% 30%, #fff0c4, #ffb84d 60%, #c98a1a);
+    box-shadow:
+      0 0 18px rgba(255,184,77,0.85),
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -2px 0 rgba(0,0,0,0.25);
+    z-index: 5;
+    will-change: transform;
+    transition: transform 0s linear;
+    transform-origin: 50% 50%;
+  }
+  .flip-character .fc-eye {
+    position: absolute;
+    width: 5px;
+    height: 6px;
+    background: #1a0a00;
+    border-radius: 50%;
+    top: 8px;
+  }
+  .flip-character .fc-eye.left  { left: 5px; }
+  .flip-character .fc-eye.right { right: 5px; }
+  .flip-character.dead {
+    animation: fchar-die 600ms ease-out forwards;
+  }
+  @keyframes fchar-die {
+    0%   { opacity: 1; }
+    100% { transform: translateY(80px) scale(0.5) rotate(720deg); opacity: 0; }
+  }
+  .flip-character.win {
+    animation: fchar-win 480ms cubic-bezier(.34, 1.6, .5, 1) forwards;
+  }
+  @keyframes fchar-win {
+    0%   { transform: scale(1); }
+    60%  { transform: scale(1.35) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .flip-ground {
+    position: absolute;
+    left: 0; bottom: 38px;
+    height: 2px;
+    width: 4000px;
+    background: linear-gradient(90deg,
+      transparent 0%, #ffd93b 12%, #ff9f43 38%, #51cf66 62%, #4dd0e1 88%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255,217,59,0.55);
+  }
+  .flip-gap {
+    /* a "missing" floor segment — invisible, but blocks ground at this x range */
+    position: absolute;
+    bottom: 30px;
+    height: 8px;
+    background: linear-gradient(180deg, transparent, rgba(255,0,0,0.25));
+    border-top: 1px dashed rgba(255,77,77,0.45);
+    pointer-events: none;
+  }
+  .flip-spike {
+    position: absolute;
+    bottom: 40px;
+    width: 0; height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-bottom: 18px solid #ff5f5f;
+    filter: drop-shadow(0 0 7px rgba(255,95,95,0.7));
+    animation: jspike-pulse 1.1s ease-in-out infinite;
+  }
+  .flip-spike.orange { border-bottom-color: #ff9f43; filter: drop-shadow(0 0 7px rgba(255,159,67,0.7)); }
+  .flip-spike.yellow { border-bottom-color: #ffd93b; filter: drop-shadow(0 0 7px rgba(255,217,59,0.7)); }
+  .flip-platform {
+    position: absolute;
+    bottom: 80px;
+    height: 8px;
+    background: linear-gradient(180deg, #ffd93b, #ff9f43);
+    border-radius: 4px;
+    box-shadow:
+      0 0 12px rgba(255,217,59,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.5),
+      inset 0 -1px 0 rgba(0,0,0,0.25);
+  }
+  .flip-pan {
+    /* the goal: a giant fork on the floor, tines pointing up. The block lands on it = win. */
+    position: absolute;
+    bottom: 40px;
+    width: 80px;
+    height: 90px;
+    display: grid;
+    place-items: end center;
+    pointer-events: none;
+  }
+  .flip-pan-fork {
+    position: relative;
+    width: 56px;
+    height: 90px;
+    background: linear-gradient(180deg, #d8d8e0 0%, #aaaab8 60%, #8a8a98 100%);
+    /* fork handle shape — wider base, narrow grip */
+    clip-path: polygon(
+      0%  92%, 100% 92%, 100% 70%, 80% 60%, 80% 0%, 65% 0%, 65% 55%,
+      55% 55%, 55% 0%, 45% 0%, 45% 55%, 35% 55%, 35% 0%, 20% 0%, 20% 60%, 0% 70%
+    );
+    box-shadow: 0 0 22px rgba(255,217,59,0.55);
+    animation: fork-glow 1.6s ease-in-out infinite;
+  }
+  @keyframes fork-glow {
+    0%, 100% { filter: brightness(1)   drop-shadow(0 0 6px rgba(255,217,59,0.5)); }
+    50%      { filter: brightness(1.3) drop-shadow(0 0 16px rgba(255,217,59,0.9)); }
+  }
+  .flip-pan-label {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: #ffd93b;
+    text-shadow: 0 0 6px rgba(255,217,59,0.7);
+    white-space: nowrap;
+  }
+
+  .flip-status {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.6);
+    pointer-events: none;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    animation: jpulse 1.6s ease-in-out infinite;
+  }
+  .flip-status.hidden { display: none; }
+
+  .flip-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(40,18,2,0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 20px;
+    text-align: center;
+  }
+  .flip-overlay.show { display: flex; animation: fade 280ms ease-out; }
+  .flip-overlay h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #ffd93b, #ff9f43, #51cf66);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    margin-bottom: 6px;
+  }
+  .flip-overlay-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .flip-overlay .btn-row { margin-top: 4px; }
+
+  .flip-tips {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: var(--dim);
+    text-transform: uppercase;
+    padding: 0 8px;
+  }
+
   /* === ADVENTURE LEVEL SELECT === */
   .adventure-screen {
     flex-direction: column;
@@ -4616,7 +4929,44 @@
         <div class="mode-desc">Hop a cute block through neon spikes to fill the row.</div>
         <div class="mode-best">STG<b id="best-journey">1/3</b></div>
       </button>
+      <button class="mode-card" data-mode="flip" onclick="startFlip(0)">
+        <div class="mode-name">BLOCK FLIP</div>
+        <div class="mode-desc">Sausage-flip physics, but you're a block. Tap to tumble. Land on the fork.</div>
+        <div class="mode-best">STG<b id="best-flip">0/3</b></div>
+      </button>
     </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- BLOCK FLIP MODE (fork & sausage physics)      -->
+  <!-- ============================================ -->
+  <div class="flip-screen">
+    <div class="flip-header">
+      <button class="flip-back" type="button" onclick="exitFlip()">← MENU</button>
+      <div class="flip-title">FLIP <span class="flip-stage-num" id="flip-stage-num">1</span></div>
+      <div class="flip-info-wrap">
+        <div class="flip-info-label">STAGE</div>
+        <div class="flip-info" id="flip-info">EASY</div>
+      </div>
+    </div>
+    <div class="flip-stage" id="flip-stage">
+      <div class="flip-bg-grid"></div>
+      <div class="flip-world" id="flip-world"></div>
+      <div class="flip-character" id="flip-char">
+        <span class="fc-eye left"></span>
+        <span class="fc-eye right"></span>
+      </div>
+      <div class="flip-status" id="flip-status">TAP TO FLIP</div>
+      <div class="flip-overlay" id="flip-overlay">
+        <h2 id="flip-overlay-title">DINNER TIME</h2>
+        <div class="flip-overlay-sub" id="flip-overlay-sub">Perfect plate.</div>
+        <div class="btn-row">
+          <button class="btn secondary" type="button" onclick="exitFlip()">MENU</button>
+          <button class="btn" type="button" id="flip-next-btn" onclick="flipNext()">NEXT STAGE →</button>
+        </div>
+      </div>
+    </div>
+    <div class="flip-tips" id="flip-tips">Tap = flip up + spin. Avoid spikes &amp; gaps. Stop on the fork.</div>
   </div>
 
   <!-- ============================================ -->
@@ -5939,6 +6289,12 @@ function refreshBestLabels() {
     let b = 0;
     try { b = parseInt(localStorage.getItem('issa-blocks-journey-v1') || '0', 10) || 0; } catch (e) {}
     jrn.textContent = b + '/' + (typeof JOURNEY_STAGES !== 'undefined' ? JOURNEY_STAGES.length : 3);
+  }
+  const flp = document.getElementById('best-flip');
+  if (flp) {
+    let b = 0;
+    try { b = parseInt(localStorage.getItem('issa-blocks-flip-v1') || '0', 10) || 0; } catch (e) {}
+    flp.textContent = b + '/' + (typeof FLIP_STAGES !== 'undefined' ? FLIP_STAGES.length : 3);
   }
   const dailyEl = document.getElementById('best-daily');
   if (dailyEl) {
@@ -8758,6 +9114,419 @@ function detachJourneyInput() {
   }
   _journeyDownHandler = null;
   _journeyUpHandler = null;
+}
+
+// =================================================================
+// === BLOCK FLIP MODE (fork & sausage physics) ====================
+// =================================================================
+// The sausage-flip mechanic: tap = upward impulse + rotation impulse.
+// The block tumbles end-over-end through the air, gravity pulls it down.
+// Auto-scrolls forward. Spikes on the floor. Gaps in the floor (fall =
+// die). Floating platforms to land on. The fork at the end is the goal —
+// land on it (or even just touch the tines) to win.
+//
+// Distinct from JOURNEY:
+//  - rotation is the core mechanic (block visibly tumbles)
+//  - gaps make jumping mandatory at certain spots, not optional
+//  - lower gravity → floaty hangtime so flips read clearly
+//  - tap also works mid-air (adds extra spin, mini boost)
+
+const FLIP_STAGES = [
+  // Stage 1 — TUTORIAL: a few spikes, one small gap, an easy fork at the end.
+  {
+    name: 'EASY',
+    speed: 3.2,
+    spikes: [
+      { x: 320, k: 'red'    },
+      { x: 540, k: 'orange' },
+      { x: 760, k: 'yellow' },
+      { x: 980, k: 'red'    },
+    ],
+    gaps: [
+      { x: 1180, w: 70 },          // first jump-the-gap section
+    ],
+    platforms: [
+      { x: 1420, w: 90, y: 78 },   // a small floating ledge to land on
+    ],
+    forkX: 1700,
+  },
+  // Stage 2 — MEDIUM: multiple spikes & two gaps, requires sustained flipping.
+  {
+    name: 'MEDIUM',
+    speed: 3.9,
+    spikes: [
+      { x: 240, k: 'red' },
+      { x: 340, k: 'orange' }, { x: 366, k: 'orange' },
+      { x: 500, k: 'yellow' },
+      { x: 660, k: 'red'    },
+      { x: 820, k: 'orange' }, { x: 846, k: 'orange' },
+      { x: 1380, k: 'yellow' },
+      { x: 1500, k: 'red'    }, { x: 1526, k: 'red' },
+      { x: 1700, k: 'orange' },
+      { x: 1900, k: 'yellow' }, { x: 1926, k: 'yellow' },
+    ],
+    gaps: [
+      { x: 1000, w: 110 },         // wider gap
+      { x: 1240, w: 90  },         // second gap right after
+    ],
+    platforms: [
+      { x: 1090, w: 80, y: 82 },   // mid-gap stepping stone
+      { x: 2080, w: 100, y: 86 },
+    ],
+    forkX: 2320,
+  },
+  // Stage 3 — HARDCORE: spike fields, narrow gaps with offset platforms,
+  // a forced "double-flip" gauntlet at the end.
+  {
+    name: 'HARDCORE',
+    speed: 4.6,
+    spikes: [
+      { x: 220, k: 'red'    }, { x: 246, k: 'red' },
+      { x: 360, k: 'orange' },
+      { x: 480, k: 'yellow' }, { x: 506, k: 'yellow' }, { x: 532, k: 'yellow' },
+      { x: 700, k: 'red'    },
+      { x: 820, k: 'orange' }, { x: 846, k: 'orange' },
+      { x: 980, k: 'yellow' },
+      { x: 1480, k: 'red'    }, { x: 1506, k: 'red' },
+      { x: 1700, k: 'orange' },
+      { x: 1900, k: 'yellow' }, { x: 1926, k: 'yellow' }, { x: 1952, k: 'yellow' },
+      { x: 2200, k: 'red'    }, { x: 2226, k: 'red' },
+      { x: 2400, k: 'orange' },
+      { x: 2620, k: 'yellow' }, { x: 2646, k: 'yellow' },
+    ],
+    gaps: [
+      { x: 1100, w: 130 },         // wide gap with stepping stone
+      { x: 1320, w: 100 },
+      { x: 2520, w: 110 },         // late gap right before fork
+    ],
+    platforms: [
+      { x: 1200, w: 70, y: 90 },
+      { x: 2030, w: 90, y: 78 },
+      { x: 2300, w: 70, y: 94 },
+    ],
+    forkX: 2840,
+  },
+];
+
+const FLIP = {
+  active: false,
+  stage: 0,
+  speed: 3.2,
+  charX: 60,
+  charY: 0,             // 0 = on ground, negative = above ground
+  charVY: 0,
+  charAngle: 0,         // visual rotation in radians
+  charAngVel: 0,        // rad/frame
+  worldX: 0,
+  gravity: 0.42,
+  jumpForce: 9.0,
+  flipSpin: 0.20,       // base spin impulse per tap (rad/frame)
+  airBoost: 0.55,       // mid-air tap re-jump multiplier (less than ground)
+  airSpinBoost: 0.14,   // mid-air tap extra spin
+  grounded: true,
+  fellInGap: false,
+  forkX: 0,
+  won: false,
+  lost: false,
+  rafId: 0,
+  containerH: 275,
+  charSize: 26,
+  spikeHits: new Set(),
+  bestStage: 0,
+};
+const FLIP_KEY = 'issa-blocks-flip-v1';
+function flipLoadBest() {
+  try { FLIP.bestStage = parseInt(localStorage.getItem(FLIP_KEY) || '0', 10) || 0; } catch (e) {}
+}
+function flipSaveBest() {
+  try { localStorage.setItem(FLIP_KEY, String(FLIP.bestStage)); } catch (e) {}
+}
+
+// Is the character horizontally over any floor-gap region?
+function flipOverGap(worldCharX) {
+  const stage = FLIP_STAGES[FLIP.stage];
+  for (const g of (stage.gaps || [])) {
+    if (worldCharX >= g.x && worldCharX <= g.x + g.w) return true;
+  }
+  return false;
+}
+
+// Returns the top-y of any platform the character is currently above (in world
+// coords), or null if none. Used so the character can stand on platforms.
+function flipPlatformBelow(worldCharX, charBottomY) {
+  const stage = FLIP_STAGES[FLIP.stage];
+  for (const p of (stage.platforms || [])) {
+    if (worldCharX >= p.x && worldCharX <= p.x + p.w) {
+      // platform top in "charY" space (charY=0 means on floor, negative = up).
+      // p.y is height above ground in px.
+      const topY = -p.y;
+      // Only land if descending into the top from above
+      if (charBottomY >= topY - 4 && charBottomY <= topY + 6 && FLIP.charVY >= 0) {
+        return topY;
+      }
+    }
+  }
+  return null;
+}
+
+function buildFlipWorld() {
+  const stage = FLIP_STAGES[FLIP.stage];
+  const world = document.getElementById('flip-world');
+  world.innerHTML = '';
+  // Ground (one piece — gaps render as overlays, then we delete ground beneath).
+  // Simpler: build ground as multiple segments around the gaps.
+  let lastX = 0;
+  const groundEnd = 4000;
+  const sortedGaps = (stage.gaps || []).slice().sort((a, b) => a.x - b.x);
+  for (const g of sortedGaps) {
+    if (g.x > lastX) {
+      const seg = document.createElement('div');
+      seg.className = 'flip-ground';
+      seg.style.left = lastX + 'px';
+      seg.style.width = (g.x - lastX) + 'px';
+      world.appendChild(seg);
+    }
+    // Mark the gap visually too
+    const gd = document.createElement('div');
+    gd.className = 'flip-gap';
+    gd.style.left = g.x + 'px';
+    gd.style.width = g.w + 'px';
+    world.appendChild(gd);
+    lastX = g.x + g.w;
+  }
+  if (lastX < groundEnd) {
+    const seg = document.createElement('div');
+    seg.className = 'flip-ground';
+    seg.style.left = lastX + 'px';
+    seg.style.width = (groundEnd - lastX) + 'px';
+    world.appendChild(seg);
+  }
+  // Spikes
+  (stage.spikes || []).forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'flip-spike' + (s.k === 'orange' ? ' orange' : s.k === 'yellow' ? ' yellow' : '');
+    el.style.left = s.x + 'px';
+    el.dataset.idx = i;
+    el.dataset.x = s.x;
+    world.appendChild(el);
+  });
+  // Platforms
+  (stage.platforms || []).forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'flip-platform';
+    el.style.left = p.x + 'px';
+    el.style.width = p.w + 'px';
+    el.style.bottom = (40 + p.y) + 'px';   // ground line is bottom: 38px, so platform sits at 40 + p.y
+    el.dataset.idx = 'p' + i;
+    world.appendChild(el);
+  });
+  // Fork (the goal)
+  const pan = document.createElement('div');
+  pan.className = 'flip-pan';
+  pan.id = 'flip-pan';
+  pan.style.left = stage.forkX + 'px';
+  pan.innerHTML = '<div class="flip-pan-label">FORK</div><div class="flip-pan-fork"></div>';
+  world.appendChild(pan);
+}
+
+function startFlip(stageIdx) {
+  if (typeof stageIdx === 'number') FLIP.stage = stageIdx;
+  flipLoadBest();
+  document.body.dataset.screen = 'flip';
+  const stage = FLIP_STAGES[FLIP.stage];
+  FLIP.speed = stage.speed;
+  FLIP.forkX = stage.forkX;
+  FLIP.charY = 0;
+  FLIP.charVY = 0;
+  FLIP.charAngle = 0;
+  FLIP.charAngVel = 0;
+  FLIP.worldX = 0;
+  FLIP.grounded = true;
+  FLIP.fellInGap = false;
+  FLIP.won = false;
+  FLIP.lost = false;
+  FLIP.spikeHits = new Set();
+  document.getElementById('flip-stage-num').textContent = (FLIP.stage + 1);
+  document.getElementById('flip-info').textContent = stage.name;
+  document.getElementById('flip-status').classList.remove('hidden');
+  document.getElementById('flip-status').textContent = 'TAP TO FLIP';
+  document.getElementById('flip-overlay').classList.remove('show');
+  const ch = document.getElementById('flip-char');
+  ch.classList.remove('dead', 'win');
+  ch.style.transform = 'translateY(0) rotate(0)';
+  buildFlipWorld();
+  attachFlipInput();
+  FLIP.active = true;
+  cancelAnimationFrame(FLIP.rafId);
+  FLIP.rafId = requestAnimationFrame(flipStep);
+  if (typeof SFX !== 'undefined' && SFX.start) SFX.start();
+}
+
+function exitFlip() {
+  FLIP.active = false;
+  cancelAnimationFrame(FLIP.rafId);
+  detachFlipInput();
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
+  refreshBestLabels();
+}
+
+function flipNext() {
+  if (FLIP.stage + 1 < FLIP_STAGES.length) {
+    startFlip(FLIP.stage + 1);
+  } else {
+    exitFlip();
+  }
+}
+
+function flipDie() {
+  if (FLIP.won || FLIP.lost) return;
+  FLIP.lost = true;
+  const ch = document.getElementById('flip-char');
+  ch.classList.add('dead');
+  document.getElementById('flip-status').classList.remove('hidden');
+  document.getElementById('flip-status').textContent = 'TAP TO RETRY';
+  if (typeof SFX !== 'undefined' && SFX.over) SFX.over();
+  if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
+}
+
+function flipWin() {
+  if (FLIP.won || FLIP.lost) return;
+  FLIP.won = true;
+  document.getElementById('flip-status').classList.add('hidden');
+  const ch = document.getElementById('flip-char');
+  ch.classList.add('win');
+  if (typeof SFX !== 'undefined' && SFX.newBest) SFX.newBest();
+  if (navigator.vibrate) navigator.vibrate([15, 30, 25, 30, 25]);
+  setTimeout(() => {
+    const overlay = document.getElementById('flip-overlay');
+    const title = document.getElementById('flip-overlay-title');
+    const sub = document.getElementById('flip-overlay-sub');
+    const nextBtn = document.getElementById('flip-next-btn');
+    const isLast = FLIP.stage + 1 >= FLIP_STAGES.length;
+    title.textContent = isLast ? 'DINNER IS SERVED' : 'STUCK THE LANDING';
+    sub.textContent = isLast
+      ? "You are now an entrée. Bon appétit."
+      : "Tasty flip. The next plate is bigger.";
+    nextBtn.textContent = isLast ? 'DONE' : 'NEXT STAGE →';
+    overlay.classList.add('show');
+    if (FLIP.stage + 1 > FLIP.bestStage) {
+      FLIP.bestStage = FLIP.stage + 1;
+      flipSaveBest();
+    }
+  }, 700);
+}
+
+function flipStep() {
+  if (!FLIP.active) {
+    FLIP.rafId = requestAnimationFrame(flipStep);
+    return;
+  }
+  if (!FLIP.won && !FLIP.lost) {
+    FLIP.worldX += FLIP.speed;
+
+    // Physics
+    FLIP.charVY += FLIP.gravity;
+    FLIP.charY += FLIP.charVY;
+    FLIP.charAngle += FLIP.charAngVel;
+
+    // Determine ground state — could be ground, platform, or gap (no ground).
+    const worldCharX = FLIP.worldX + FLIP.charX;
+    const overGap = flipOverGap(worldCharX);
+    const platformY = flipPlatformBelow(worldCharX, FLIP.charY);
+
+    if (platformY !== null && FLIP.charY >= platformY) {
+      // Land on platform
+      FLIP.charY = platformY;
+      FLIP.charVY = 0;
+      FLIP.grounded = true;
+      // Damp angular velocity as the block "sticks" to platform
+      FLIP.charAngVel *= 0.7;
+      // Snap to nearest 90° angle as it settles, so it looks like a square resting
+      if (Math.abs(FLIP.charAngVel) < 0.02) {
+        const snap = Math.round(FLIP.charAngle / (Math.PI / 2)) * (Math.PI / 2);
+        FLIP.charAngle += (snap - FLIP.charAngle) * 0.3;
+      }
+    } else if (FLIP.charY >= 0 && !overGap) {
+      // Land on ground
+      FLIP.charY = 0;
+      FLIP.charVY = 0;
+      FLIP.grounded = true;
+      FLIP.charAngVel *= 0.7;
+      if (Math.abs(FLIP.charAngVel) < 0.02) {
+        const snap = Math.round(FLIP.charAngle / (Math.PI / 2)) * (Math.PI / 2);
+        FLIP.charAngle += (snap - FLIP.charAngle) * 0.3;
+      }
+    } else {
+      // In air (above ground OR over a gap)
+      FLIP.grounded = false;
+      // If over gap AND past the ground line — fall into the abyss
+      if (overGap && FLIP.charY > 30) {
+        flipDie();
+      }
+    }
+
+    // Render
+    const world = document.getElementById('flip-world');
+    if (world) world.style.transform = `translateX(${-FLIP.worldX}px)`;
+    const char = document.getElementById('flip-char');
+    if (char && !char.classList.contains('dead') && !char.classList.contains('win')) {
+      char.style.transform = `translateY(${FLIP.charY}px) rotate(${FLIP.charAngle}rad)`;
+    }
+
+    // Spike collisions — only when the character is at ground height (not jumping over)
+    const charScreenX = FLIP.charX;
+    const charDistFromGround = -FLIP.charY;
+    for (const sEl of document.querySelectorAll('.flip-spike')) {
+      const idx = sEl.dataset.idx;
+      if (FLIP.spikeHits.has(idx)) continue;
+      const sx = parseFloat(sEl.dataset.x);
+      const screenSX = sx - FLIP.worldX;
+      const horizDist = Math.abs(screenSX - charScreenX);
+      if (horizDist >= 12) continue;
+      if (charDistFromGround < 14) {
+        FLIP.spikeHits.add(idx);
+        flipDie();
+        break;
+      }
+    }
+
+    // Goal — fork. Win when the character is close to the fork in world space
+    // and either touching it OR landing on it. We let the player approach from
+    // either ground or air.
+    const forkScreenX = FLIP.forkX + 28 - FLIP.worldX;  // center of fork is ~+28 from forkX (width=80, fork width 56 centered)
+    if (Math.abs(forkScreenX - charScreenX) < 32 && FLIP.charY > -60) {
+      flipWin();
+    }
+  }
+  FLIP.rafId = requestAnimationFrame(flipStep);
+}
+
+let _flipHandler = null;
+function attachFlipInput() {
+  _flipHandler = (e) => {
+    if (e.target.closest('.flip-overlay')) return;
+    if (e.target.closest('.flip-back'))    return;
+    if (FLIP.lost) { startFlip(FLIP.stage); return; }
+    if (FLIP.won) return;
+    if (FLIP.grounded) {
+      // Full flip from ground
+      FLIP.charVY = -FLIP.jumpForce;
+      FLIP.charAngVel = FLIP.flipSpin;
+      FLIP.grounded = false;
+      document.getElementById('flip-status').classList.add('hidden');
+      if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+    } else {
+      // Mid-air re-flip: smaller boost + extra spin
+      FLIP.charVY = -FLIP.jumpForce * FLIP.airBoost;
+      FLIP.charAngVel += FLIP.airSpinBoost;
+      if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+    }
+  };
+  document.addEventListener('pointerdown', _flipHandler);
+}
+function detachFlipInput() {
+  if (_flipHandler) document.removeEventListener('pointerdown', _flipHandler);
+  _flipHandler = null;
 }
 
 // =================================================================
