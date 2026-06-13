@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -734,6 +734,122 @@
     60% { transform: translate(4px, -2px) rotate(0.4deg); }
     75% { transform: translate(-3px, 2px) rotate(-0.3deg); }
     90% { transform: translate(2px, -1px) rotate(0.2deg); }
+  }
+  /* bigger clears shake harder */
+  .grid.shake-xl { animation: board-shake-xl 480ms ease-in-out; }
+  @keyframes board-shake-xl {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    12% { transform: translate(-9px, 5px) rotate(-1.1deg); }
+    26% { transform: translate(10px, -7px) rotate(1.2deg); }
+    40% { transform: translate(-11px, 6px) rotate(-1.3deg); }
+    55% { transform: translate(9px, -5px) rotate(1deg); }
+    70% { transform: translate(-7px, 4px) rotate(-0.7deg); }
+    85% { transform: translate(4px, -2px) rotate(0.4deg); }
+  }
+
+  /* === NEON BORDER FLASH (own element so it stacks with combo-flash + shake) === */
+  .board-neon {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 8;
+    border: 3px solid var(--neon, #4dd0e1);
+    opacity: 0;
+    box-shadow:
+      0 0 12px 2px var(--neon, #4dd0e1),
+      0 0 28px 6px var(--neon, #4dd0e1),
+      inset 0 0 18px 2px var(--neon, #4dd0e1);
+  }
+  .board-neon.flash { animation: neon-flash var(--neon-dur, 620ms) cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes neon-flash {
+    0%   { opacity: 0; border-width: 2px; }
+    12%  { opacity: 1; border-width: var(--neon-bw, 4px); }
+    55%  { opacity: 0.85; }
+    100% { opacity: 0; border-width: 2px; }
+  }
+  /* intensity tiers: brighter, thicker, multi-color as lines stack up */
+  .board-neon.n1 { --neon: #4dd0e1; --neon-bw: 4px; }
+  .board-neon.n2 { --neon: #51cf66; --neon-bw: 5px; }
+  .board-neon.n3 { --neon: #ff9f43; --neon-bw: 7px; }
+  .board-neon.n4 {
+    --neon-bw: 9px;
+    border-color: #fff;
+    animation: neon-flash-mega var(--neon-dur, 760ms) cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes neon-flash-mega {
+    0%   { opacity: 0; border-width: 3px; box-shadow: 0 0 14px 3px #ffd93b, inset 0 0 20px 3px #ffd93b; }
+    10%  { opacity: 1; border-width: 10px; border-color: #fff; box-shadow: 0 0 26px 8px #ffd93b, 0 0 50px 14px #ff5f5f, inset 0 0 30px 6px #ff9f43; }
+    35%  { opacity: 1; border-color: #ffd93b; box-shadow: 0 0 30px 10px #ff5f5f, 0 0 60px 18px #f783ac, inset 0 0 30px 6px #ff5f5f; }
+    60%  { opacity: 0.9; border-color: #f783ac; box-shadow: 0 0 26px 8px #f783ac, 0 0 50px 14px #5c7cfa, inset 0 0 26px 5px #f783ac; }
+    100% { opacity: 0; border-width: 3px; box-shadow: 0 0 10px 2px #5c7cfa, inset 0 0 14px 2px #5c7cfa; }
+  }
+
+  /* === COMIC-BOOK POW BURST === */
+  .comic-burst {
+    position: absolute;
+    z-index: 14;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    will-change: transform, opacity;
+  }
+  .comic-burst.go { animation: comic-anim 720ms cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes comic-anim {
+    0%   { transform: translate(-50%,-50%) scale(0.1) rotate(-25deg); opacity: 0; }
+    18%  { transform: translate(-50%,-50%) scale(1.35) rotate(6deg); opacity: 1; }
+    34%  { transform: translate(-50%,-50%) scale(0.95) rotate(-3deg); opacity: 1; }
+    50%  { transform: translate(-50%,-50%) scale(1.05) rotate(1deg); opacity: 1; }
+    72%  { transform: translate(-50%,-50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(1.25) rotate(0deg); opacity: 0; }
+  }
+  .comic-burst .burst-star {
+    grid-area: 1 / 1;
+    width: var(--burst-size, 150px);
+    height: var(--burst-size, 150px);
+    background: radial-gradient(circle at 50% 42%, #fffef0 0%, #ffe14d 34%, #ff9f43 70%, #ff7a1a 100%);
+    clip-path: polygon(50% 0%, 61% 22%, 84% 12%, 78% 37%, 100% 38%, 82% 55%, 96% 76%, 70% 71%, 68% 96%, 50% 79%, 32% 96%, 30% 71%, 4% 76%, 18% 55%, 0% 38%, 22% 37%, 16% 12%, 39% 22%);
+    filter:
+      drop-shadow(3px 3px 0 #1a1a22) drop-shadow(-3px -3px 0 #1a1a22)
+      drop-shadow(3px -3px 0 #1a1a22) drop-shadow(-3px 3px 0 #1a1a22)
+      drop-shadow(0 0 16px rgba(255,200,80,0.7));
+  }
+  .comic-burst .burst-word {
+    grid-area: 1 / 1;
+    font-family: 'Bangers', 'Bricolage Grotesque', cursive;
+    font-size: var(--burst-font, 40px);
+    letter-spacing: 0.02em;
+    color: #ff3b3b;
+    -webkit-text-stroke: 2px #1a1a22;
+    text-shadow: 3px 3px 0 #1a1a22, 0 0 10px rgba(255,255,255,0.5);
+    transform: rotate(-7deg);
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .comic-burst.big .burst-word { color: #ffd93b; }
+
+  /* comic radial speed-lines that shoot out behind the burst */
+  .speedlines {
+    position: absolute;
+    z-index: 9;
+    pointer-events: none;
+    width: 8px; height: 8px;
+    transform: translate(-50%, -50%);
+    background:
+      repeating-conic-gradient(from 0deg,
+        rgba(255,255,255,0.85) 0deg 3deg,
+        transparent 3deg 18deg);
+    border-radius: 50%;
+    opacity: 0;
+    -webkit-mask: radial-gradient(circle, transparent 28%, #000 42%, #000 58%, transparent 72%);
+            mask: radial-gradient(circle, transparent 28%, #000 42%, #000 58%, transparent 72%);
+  }
+  .speedlines.go { animation: speedlines-anim 460ms ease-out forwards; }
+  @keyframes speedlines-anim {
+    0%   { width: 20px; height: 20px; opacity: 0; }
+    25%  { opacity: 0.9; }
+    100% { width: 300px; height: 300px; opacity: 0; }
   }
 
   /* === GAME OVER OVERLAY === */
@@ -6833,9 +6949,13 @@ function placePiece(source, gx, gy) {
 
     const tag = tagForClear(totalLines, streak);
     showScorePop(fbx, fby, gained, tier, tag);
+    flashBoardNeon(totalLines);
+    comicPop(fbx, fby, totalLines, streak);
     spawnShockwave(fbx, fby);
+    // Bigger clears throw a second, larger ring for extra boom.
+    if (totalLines >= 2) setTimeout(() => spawnShockwave(fbx, fby), 90);
     burstClear([...toClear], tier);
-    shakeBoard(tier);
+    shakeBoard(tier, totalLines);
     if (streak >= 2) showComboPop(streak);
 
     if (totalLines >= 2 || streak >= 2) {
@@ -7122,13 +7242,63 @@ function spawnShockwave(bx, by) {
 
 // Shake the grid; intensity scales with clear size. Targets #grid (not #board)
 // so the board frame's combo-flash box-shadow can play simultaneously.
-function shakeBoard(tier) {
+function shakeBoard(tier, lines) {
   const g = document.getElementById('grid');
-  const cls = tier >= 3 ? 'shake-lg' : tier >= 2 ? 'shake-md' : 'shake-sm';
-  g.classList.remove('shake-sm', 'shake-md', 'shake-lg');
+  const cls = (lines >= 3 || tier >= 4) ? 'shake-xl'
+            : tier >= 3 ? 'shake-lg' : tier >= 2 ? 'shake-md' : 'shake-sm';
+  g.classList.remove('shake-sm', 'shake-md', 'shake-lg', 'shake-xl');
   void g.offsetWidth;
   g.classList.add(cls);
-  setTimeout(() => g.classList.remove(cls), 450);
+  setTimeout(() => g.classList.remove(cls), 500);
+}
+
+// Neon border flash on the board frame. Intensity (color/thickness/glow) scales
+// with how many lines cleared at once. Uses its own overlay element so it stacks
+// with the combo-flash box-shadow and the grid shake.
+function flashBoardNeon(lines) {
+  const board = document.getElementById('board');
+  const ring = document.createElement('div');
+  const n = Math.min(4, Math.max(1, lines));
+  ring.className = 'board-neon n' + n;
+  ring.style.setProperty('--neon-dur', (560 + n * 70) + 'ms');
+  board.appendChild(ring);
+  void ring.offsetWidth;
+  ring.classList.add('flash');
+  setTimeout(() => ring.remove(), 900);
+}
+
+// Comic-book "POW!" starburst at the clear focal point. Word + size escalate
+// with the clear: single → POW!, double → BAM!, triple → BOOM!, quad+ → KAPOW!
+const COMIC_WORDS = { 1: 'POW!', 2: 'BAM!', 3: 'BOOM!', 4: 'KAPOW!' };
+function comicPop(bx, by, lines, streak) {
+  const board = document.getElementById('board');
+  const n = Math.min(4, Math.max(1, lines));
+  let word = COMIC_WORDS[n];
+  if (n < 4 && streak >= 4) word = 'COMBO!';
+
+  // radial speed lines behind
+  const sl = document.createElement('div');
+  sl.className = 'speedlines';
+  sl.style.left = bx + 'px';
+  sl.style.top = by + 'px';
+  board.appendChild(sl);
+  void sl.offsetWidth;
+  sl.classList.add('go');
+  setTimeout(() => sl.remove(), 480);
+
+  const burst = document.createElement('div');
+  burst.className = 'comic-burst' + (n >= 3 ? ' big' : '');
+  burst.style.left = bx + 'px';
+  burst.style.top = by + 'px';
+  const size = 120 + n * 28;
+  const font = 34 + n * 8;
+  burst.style.setProperty('--burst-size', size + 'px');
+  burst.style.setProperty('--burst-font', font + 'px');
+  burst.innerHTML = `<div class="burst-star"></div><div class="burst-word">${word}</div>`;
+  board.appendChild(burst);
+  void burst.offsetWidth;
+  burst.classList.add('go');
+  setTimeout(() => burst.remove(), 760);
 }
 
 // Shatter one block into flying colored shards (gravity arc + spin).
@@ -7137,13 +7307,15 @@ function spawnShards(bx, by, colorKey, count) {
   const color = COLORS[colorKey] || COLORS.amber;
   const cellPx = (typeof gridCellSize === 'function' ? gridCellSize() : 36);
   for (let i = 0; i < count; i++) {
-    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
-    const speed = 46 + Math.random() * 60;
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.9;
+    const speed = 64 + Math.random() * 96;            // launch harder/farther
     const dx = Math.cos(angle) * speed;
-    const peakY = Math.sin(angle) * speed - 14;       // initial outward/up
-    const fallY = peakY + 70 + Math.random() * 60;    // gravity pulls down
-    const rot = (Math.random() - 0.5) * 720;
-    const size = Math.max(6, cellPx * (0.22 + Math.random() * 0.16));
+    const peakY = Math.sin(angle) * speed - 20;       // initial outward/up
+    const fallY = peakY + 90 + Math.random() * 80;    // gravity pulls down
+    const rot = (Math.random() - 0.5) * 1000;
+    // mostly small shards with the occasional big chunk for a chunkier blast
+    const chunk = Math.random() < 0.25 ? (0.34 + Math.random() * 0.18) : (0.2 + Math.random() * 0.16);
+    const size = Math.max(6, cellPx * chunk);
 
     const shard = document.createElement('div');
     shard.className = 'shard';
@@ -7167,8 +7339,8 @@ function spawnShards(bx, by, colorKey, count) {
 
 // Extra debris burst at each cleared cell: shards + sparks, scaling with tier.
 function burstClear(cellKeys, tier) {
-  const sparks = tier >= 3 ? 6 : tier >= 2 ? 5 : tier >= 1 ? 4 : 3;
-  const shards = tier >= 3 ? 7 : tier >= 2 ? 6 : tier >= 1 ? 5 : 4;
+  const sparks = tier >= 3 ? 8 : tier >= 2 ? 7 : tier >= 1 ? 6 : 5;
+  const shards = tier >= 3 ? 10 : tier >= 2 ? 8 : tier >= 1 ? 7 : 6;
   cellKeys.forEach(k => {
     const [x, y] = k.split(',').map(Number);
     const color = grid[y][x] || 'amber';
