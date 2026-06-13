@@ -40,6 +40,29 @@
     --gap: 3px;
   }
 
+  /* === LIGHT MODE === */
+  body.theme-light {
+    --bg: #eef0f6;
+    --bg-2: #ffffff;
+    --cell: #d9dce8;
+    --cell-edge: rgba(0,0,0,0.07);
+    --text: #1c1c28;
+    --dim: #8a8a98;
+    --accent: #f08a24;
+  }
+  body.theme-light {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(240,138,36,0.10), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.08), transparent 60%),
+      var(--bg);
+  }
+  /* Fix white-on-white UI chrome that relied on a dark backdrop */
+  body.theme-light .setting-switch { background: rgba(0,0,0,0.16); }
+  body.theme-light .setting-switch::after { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  body.theme-light .setting-link { background: rgba(0,0,0,0.035); border-color: rgba(0,0,0,0.08); }
+  body.theme-light .panel-card { border-color: rgba(0,0,0,0.10); box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
+  body.theme-light .panel-head { border-bottom-color: rgba(0,0,0,0.08); }
+
   html, body {
     /* Allow vertical scroll everywhere — the title screen (5 mode cards),
        custom config, MZ banners, and super mode all need it on shorter
@@ -5176,6 +5199,10 @@
           <div class="setting-name">🔍 Big buttons</div>
           <div class="setting-switch"></div>
         </div>
+        <div class="setting-row" data-toggle="lightmode">
+          <div class="setting-name">☀️ Light mode</div>
+          <div class="setting-switch"></div>
+        </div>
         <!-- These two only appear after the user has entered the
              corresponding secret code at least once -->
         <div class="setting-row hidden" id="row-unicorn" data-toggle="unicorn">
@@ -6084,6 +6111,18 @@ function setBigButtons(on) {
 }
 function applyBigButtons() {
   document.body.classList.toggle('big-buttons', bigButtons);
+}
+
+// === LIGHT MODE SETTING ===
+let lightMode = false;
+try { lightMode = localStorage.getItem('issa-blocks-light') === '1'; } catch (e) {}
+function setLightMode(on) {
+  lightMode = on;
+  try { localStorage.setItem('issa-blocks-light', on ? '1' : '0'); } catch (e) {}
+  document.body.classList.toggle('theme-light', on);
+}
+function applyLightMode() {
+  document.body.classList.toggle('theme-light', lightMode);
 }
 // Wrap navigator.vibrate so toggle works without rewriting every call
 const _origVibrate = navigator.vibrate && navigator.vibrate.bind(navigator);
@@ -9809,6 +9848,7 @@ window.addEventListener('load', () => {
   loadCustomConfig();
   applySkin();
   applyBigButtons();
+  applyLightMode();
   applyUnicornMode();
   applyGodMode();
   refreshBestLabels();
@@ -10011,6 +10051,7 @@ window.addEventListener('load', () => {
       else if (key === 'music') active = !Music.muted;
       else if (key === 'vibration')  active = vibrationEnabled;
       else if (key === 'bigbuttons') active = bigButtons;
+      else if (key === 'lightmode')  active = lightMode;
       else if (key === 'unicorn')    active = unicornMode;
       else if (key === 'god')        active = godMode;
       row.classList.toggle('active', active);
@@ -10036,6 +10077,7 @@ window.addEventListener('load', () => {
       else if (key === 'music') Music.setMuted(!Music.muted);
       else if (key === 'vibration')  setVibration(!vibrationEnabled);
       else if (key === 'bigbuttons') setBigButtons(!bigButtons);
+      else if (key === 'lightmode')  setLightMode(!lightMode);
       else if (key === 'unicorn')    setUnicornMode(!unicornMode);
       else if (key === 'god')        setGodMode(!godMode);
       syncSettingsToggles();
