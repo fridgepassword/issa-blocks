@@ -5713,6 +5713,8 @@ let holds = [];           // pieces in stash slots (or null)
 let maxHoldSlots = 0;     // earned 1 per line cleared, capped
 const HOLD_SLOT_CAP = 8;
 let score = 0, streak = 0;
+// Scales every point gain up so scores feel chunkier / more rewarding.
+const SCORE_SCALE = 10;
 let drag = null;
 
 // Multiplayer (hot-seat) state
@@ -6893,7 +6895,7 @@ function placePiece(source, gx, gy) {
   clearPieceFrom(source);
   SFX.place();
 
-  const placementScore = Math.round(piece.cells.length * mode.multiplier);
+  const placementScore = Math.round(piece.cells.length * mode.multiplier * SCORE_SCALE);
   score += placementScore;
   // === STATS ===
   stats.piecesPlaced += 1;
@@ -6986,7 +6988,7 @@ function placePiece(source, gx, gy) {
     let gained = totalLines * 10;
     if (totalLines >= 2) gained += (totalLines - 1) * 10;
     if (streak > 1) gained += streak * 5;
-    gained = Math.round(gained * mode.multiplier * nextClearMult);
+    gained = Math.round(gained * mode.multiplier * nextClearMult * SCORE_SCALE);
     score += gained;
     if (nextClearMult !== 1) nextClearMult = 1;     // multiplier piece's effect consumed
     // === STATS: track lines, streak, biggest single clear, combo ===
@@ -7668,7 +7670,7 @@ function detonateAt(gx, gy, piece) {
   }
   // Score the explosion (3 pts per cell, multiplied by mode)
   const mode = MODES[currentMode];
-  const gained = Math.round(cleared.length * 3 * (mode.multiplier || 1));
+  const gained = Math.round(cleared.length * 3 * (mode.multiplier || 1) * SCORE_SCALE);
   score += gained;
   setScoreDisplay('score', score);
   showFloater(`💥 BOOM +${gained}`);
@@ -7753,7 +7755,7 @@ function detonateLightning(gx, gy, piece) {
   cleared.delete(`${cx},${cy}`); // bomb cell already counted
   cleared.add(`${cx},${cy}`);
   if (cleared.size === 0) return;
-  const points = Math.round(cleared.size * 4 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  const points = Math.round(cleared.size * 4 * (MODES[currentMode].multiplier || 1) * nextClearMult * SCORE_SCALE);
   if (nextClearMult !== 1) nextClearMult = 1;
   cleared.forEach(k => {
     const [x, y] = k.split(',').map(Number);
@@ -7791,7 +7793,7 @@ function detonateColorBomb(gx, gy, piece) {
     if (grid[y][x] === target) cleared.push([x, y]);
   }
   if (cleared.length === 0) return;
-  const points = Math.round(cleared.length * 5 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  const points = Math.round(cleared.length * 5 * (MODES[currentMode].multiplier || 1) * nextClearMult * SCORE_SCALE);
   if (nextClearMult !== 1) nextClearMult = 1;
   for (const [x, y] of cleared) {
     const c = getCellEl(x, y);
