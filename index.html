@@ -495,9 +495,23 @@
     z-index: 2;
   }
   @keyframes clear {
-    0%   { transform: scale(1) rotate(0deg);    filter: brightness(1); }
-    25%  { transform: scale(1.22) rotate(2deg); filter: brightness(2.4) saturate(1.5); }
-    100% { transform: scale(0) rotate(10deg);   filter: brightness(0.4); opacity: 0; }
+    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1); }
+    12%  { transform: scale(1.42) rotate(-3deg); filter: brightness(3.4) saturate(1.8); box-shadow: 0 0 22px 6px rgba(255,255,255,0.9); }
+    30%  { transform: scale(1.12) rotate(2deg);  filter: brightness(1.9) saturate(1.4); }
+    100% { transform: scale(0.04) rotate(18deg); filter: brightness(0.3); opacity: 0; }
+  }
+
+  /* === BLOCK SHATTER SHARDS === */
+  .shard {
+    position: absolute;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 6;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      inset 0 -2px 0 rgba(0,0,0,0.3),
+      0 0 6px rgba(0,0,0,0.25);
+    will-change: transform, opacity;
   }
 
   /* === TRAY === */
@@ -589,6 +603,137 @@
     0%   { transform: translate(-50%, 0)    scale(0.5); opacity: 0; }
     20%  { transform: translate(-50%, -8px) scale(1.15); opacity: 1; }
     100% { transform: translate(-50%, -70px) scale(0.95); opacity: 0; }
+  }
+
+  /* === EXPLODY SCORE POP (Block-Blast style) === */
+  .score-pop {
+    position: absolute;
+    pointer-events: none;
+    z-index: 12;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    will-change: transform, opacity;
+    --pop-glow: rgba(255,184,77,0.6);
+  }
+  .score-pop .sp-amt {
+    display: block;
+    background: linear-gradient(135deg, #fff7d6, #ffd93b, #ff9f43);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5)) drop-shadow(0 0 18px var(--pop-glow));
+  }
+  .score-pop .sp-tag {
+    display: block;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    margin-top: 2px;
+    color: #fff;
+    text-shadow: 0 0 12px var(--pop-glow), 0 2px 4px rgba(0,0,0,0.6);
+  }
+  /* tiers scale size, color, and glow up with the clear */
+  .score-pop.t0 .sp-amt { font-size: 32px; }
+  .score-pop.t0 .sp-tag { font-size: 9px; }
+  .score-pop.t1 { --pop-glow: rgba(255,159,67,0.75); }
+  .score-pop.t1 .sp-amt { font-size: 40px; background-image: linear-gradient(135deg,#fff,#ffd93b,#ff9f43); }
+  .score-pop.t1 .sp-tag { font-size: 10px; }
+  .score-pop.t2 { --pop-glow: rgba(247,131,172,0.85); }
+  .score-pop.t2 .sp-amt { font-size: 50px; background-image: linear-gradient(135deg,#fff,#ffd93b,#ff5f5f); }
+  .score-pop.t2 .sp-tag { font-size: 11px; color:#ffd1e0; }
+  .score-pop.t3 { --pop-glow: rgba(255,99,99,0.95); }
+  .score-pop.t3 .sp-amt {
+    font-size: 64px;
+    background-image: linear-gradient(135deg,#fff,#ffd93b,#ff9f43,#ff5f5f,#f783ac);
+  }
+  .score-pop.t3 .sp-tag { font-size: 12px; color:#ffe08a; }
+  .score-pop.go {
+    animation: score-pop-anim 950ms cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  @keyframes score-pop-anim {
+    0%   { transform: translate(-50%, -50%) scale(0.3) rotate(-6deg); opacity: 0; }
+    18%  { transform: translate(-50%, -54%) scale(1.25) rotate(2deg); opacity: 1; }
+    32%  { transform: translate(-50%, -56%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -120%) scale(0.92); opacity: 0; }
+  }
+
+  /* === BIG COMBO POP === */
+  .combo-pop {
+    position: absolute;
+    left: 50%;
+    top: 26%;
+    z-index: 13;
+    pointer-events: none;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    will-change: transform, opacity;
+  }
+  .combo-pop .cp-x {
+    display: block;
+    font-size: 54px;
+    line-height: 1;
+    background: linear-gradient(135deg,#ffd93b,#ff5f5f,#f783ac);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 22px rgba(247,131,172,0.6));
+  }
+  .combo-pop .cp-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    color: #fff;
+    margin-top: 2px;
+    text-shadow: 0 0 14px rgba(247,131,172,0.7);
+  }
+  .combo-pop.go { animation: combo-pop-anim 850ms cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes combo-pop-anim {
+    0%   { transform: translate(-50%, -50%) scale(0.2) rotate(-10deg); opacity: 0; }
+    20%  { transform: translate(-50%, -50%) scale(1.3) rotate(4deg); opacity: 1; }
+    35%  { transform: translate(-50%, -50%) scale(1.05) rotate(0deg); opacity: 1; }
+    75%  { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+    100% { transform: translate(-50%, -90%) scale(0.85); opacity: 0; }
+  }
+
+  /* === SHOCKWAVE RING === */
+  .shockwave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(255,255,255,0.85);
+    will-change: transform, opacity;
+  }
+  .shockwave.go { animation: shockwave-anim 560ms cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes shockwave-anim {
+    0%   { width: 12px; height: 12px; opacity: 0.9; border-width: 4px; }
+    100% { width: 240px; height: 240px; opacity: 0; border-width: 0.5px; }
+  }
+
+  /* === GRID SHAKE (scales with clear size; on #grid so the board frame can
+        still run its box-shadow combo-flash at the same time) === */
+  .grid.shake-sm { animation: board-shake 240ms ease-in-out; }
+  .grid.shake-md { animation: board-shake 320ms ease-in-out; }
+  .grid.shake-lg { animation: board-shake 420ms ease-in-out; }
+  @keyframes board-shake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    15% { transform: translate(-4px, 2px) rotate(-0.5deg); }
+    30% { transform: translate(5px, -3px) rotate(0.5deg); }
+    45% { transform: translate(-5px, 3px) rotate(-0.6deg); }
+    60% { transform: translate(4px, -2px) rotate(0.4deg); }
+    75% { transform: translate(-3px, 2px) rotate(-0.3deg); }
+    90% { transform: translate(2px, -1px) rotate(0.2deg); }
   }
 
   /* === GAME OVER OVERLAY === */
@@ -6675,7 +6820,23 @@ function placePiece(source, gx, gy) {
     if (totalLines > stats.highestCombo) stats.highestCombo = totalLines;
     if (gained > stats.highestSingleClear) stats.highestSingleClear = gained;
 
-    showFloater(textForClear(totalLines, streak, gained));
+    // === BLOCK-BLAST JUICE: explody score pop, combo, shockwave, debris, shake ===
+    const tier = clearTier(totalLines, streak);
+    // Focal point = average board-px position of the cleared cells.
+    let fbx = 0, fby = 0, fn = 0;
+    toClear.forEach(k => {
+      const [x, y] = k.split(',').map(Number);
+      const p = cellToBoardXY(x, y);
+      fbx += p.x; fby += p.y; fn++;
+    });
+    fbx /= fn || 1; fby /= fn || 1;
+
+    const tag = tagForClear(totalLines, streak);
+    showScorePop(fbx, fby, gained, tier, tag);
+    spawnShockwave(fbx, fby);
+    burstClear([...toClear], tier);
+    shakeBoard(tier);
+    if (streak >= 2) showComboPop(streak);
 
     if (totalLines >= 2 || streak >= 2) {
       const board = document.getElementById('board');
@@ -6685,7 +6846,10 @@ function placePiece(source, gx, gy) {
       setTimeout(() => board.classList.remove('combo-flash'), 720);
     }
 
-    if (navigator.vibrate) navigator.vibrate([15, 30, 25]);
+    if (navigator.vibrate) {
+      const v = tier >= 3 ? [25,40,30,40,35] : tier >= 2 ? [20,35,30] : [15,30,25];
+      navigator.vibrate(v);
+    }
 
     setTimeout(() => {
       toClear.forEach(k => {
@@ -6773,12 +6937,14 @@ function afterMove() {
   checkAchievements();
 }
 
-function textForClear(lines, streak, gained) {
-  if (lines >= 4) return `MEGA +${gained}`;
-  if (lines === 3) return `TRIPLE +${gained}`;
-  if (lines === 2) return `DOUBLE +${gained}`;
-  if (streak >= 3) return `STREAK \u00d7${streak} +${gained}`;
-  return `+${gained}`;
+// Short label (no score) for the explody score pop.
+function tagForClear(lines, streak) {
+  if (lines >= 4) return 'MEGA';
+  if (lines === 3) return 'TRIPLE';
+  if (lines === 2) return 'DOUBLE';
+  if (streak >= 4) return 'UNREAL';
+  if (streak >= 3) return 'STREAK';
+  return 'CLEAR';
 }
 
 // === SCORE MILESTONES ===
@@ -6892,6 +7058,124 @@ function celebrate() {
       spawnSparksAt(x, y, c, 5);
     }, i * 35);
   }
+}
+
+// === BLOCK-BLAST JUICE ===
+// Map a grid cell to board-relative center pixels (handles gap/padding/zoom).
+function cellToBoardXY(x, y) {
+  const board = document.getElementById('board');
+  const cell = getCellEl(x, y);
+  if (!cell || !board) return { x: 0, y: 0 };
+  const cr = cell.getBoundingClientRect();
+  const br = board.getBoundingClientRect();
+  return { x: cr.left - br.left + cr.width / 2, y: cr.top - br.top + cr.height / 2 };
+}
+
+// Tier 0..3 from how big the clear is (lines + combo streak).
+function clearTier(lines, streak) {
+  if (lines >= 4 || streak >= 5) return 3;
+  if (lines === 3 || streak >= 3) return 2;
+  if (lines === 2 || streak >= 2) return 1;
+  return 0;
+}
+
+// Big bouncy "+score" pop at the clear focal point.
+function showScorePop(bx, by, amount, tier, tag) {
+  const board = document.getElementById('board');
+  const pop = document.createElement('div');
+  pop.className = 'score-pop t' + tier;
+  pop.style.left = bx + 'px';
+  pop.style.top = by + 'px';
+  pop.innerHTML = `<span class="sp-amt">+${amount}</span>` + (tag ? `<span class="sp-tag">${tag}</span>` : '');
+  board.appendChild(pop);
+  void pop.offsetWidth;
+  pop.classList.add('go');
+  setTimeout(() => pop.remove(), 1000);
+}
+
+// Big centered "xN COMBO" callout.
+function showComboPop(streak) {
+  const board = document.getElementById('board');
+  const old = board.querySelector('.combo-pop');
+  if (old) old.remove();
+  const pop = document.createElement('div');
+  pop.className = 'combo-pop';
+  pop.innerHTML = `<span class="cp-x">×${streak}</span><span class="cp-label">COMBO</span>`;
+  board.appendChild(pop);
+  void pop.offsetWidth;
+  pop.classList.add('go');
+  setTimeout(() => pop.remove(), 900);
+}
+
+// Expanding ring at the focal point.
+function spawnShockwave(bx, by) {
+  const board = document.getElementById('board');
+  const ring = document.createElement('div');
+  ring.className = 'shockwave';
+  ring.style.left = bx + 'px';
+  ring.style.top = by + 'px';
+  board.appendChild(ring);
+  void ring.offsetWidth;
+  ring.classList.add('go');
+  setTimeout(() => ring.remove(), 600);
+}
+
+// Shake the grid; intensity scales with clear size. Targets #grid (not #board)
+// so the board frame's combo-flash box-shadow can play simultaneously.
+function shakeBoard(tier) {
+  const g = document.getElementById('grid');
+  const cls = tier >= 3 ? 'shake-lg' : tier >= 2 ? 'shake-md' : 'shake-sm';
+  g.classList.remove('shake-sm', 'shake-md', 'shake-lg');
+  void g.offsetWidth;
+  g.classList.add(cls);
+  setTimeout(() => g.classList.remove(cls), 450);
+}
+
+// Shatter one block into flying colored shards (gravity arc + spin).
+function spawnShards(bx, by, colorKey, count) {
+  const board = document.getElementById('board');
+  const color = COLORS[colorKey] || COLORS.amber;
+  const cellPx = (typeof gridCellSize === 'function' ? gridCellSize() : 36);
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const speed = 46 + Math.random() * 60;
+    const dx = Math.cos(angle) * speed;
+    const peakY = Math.sin(angle) * speed - 14;       // initial outward/up
+    const fallY = peakY + 70 + Math.random() * 60;    // gravity pulls down
+    const rot = (Math.random() - 0.5) * 720;
+    const size = Math.max(6, cellPx * (0.22 + Math.random() * 0.16));
+
+    const shard = document.createElement('div');
+    shard.className = 'shard';
+    shard.style.left = bx + 'px';
+    shard.style.top = by + 'px';
+    shard.style.width = size + 'px';
+    shard.style.height = size + 'px';
+    shard.style.marginLeft = (-size / 2) + 'px';
+    shard.style.marginTop = (-size / 2) + 'px';
+    shard.style.background = color;
+    board.appendChild(shard);
+
+    const anim = shard.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1, offset: 0 },
+      { transform: `translate(${dx * 0.65}px, ${peakY}px) rotate(${rot * 0.5}deg) scale(0.95)`, opacity: 1, offset: 0.5 },
+      { transform: `translate(${dx}px, ${fallY}px) rotate(${rot}deg) scale(0.3)`, opacity: 0, offset: 1 },
+    ], { duration: 640 + Math.random() * 180, easing: 'cubic-bezier(.25,.6,.4,1)', fill: 'forwards' });
+    anim.onfinish = () => shard.remove();
+  }
+}
+
+// Extra debris burst at each cleared cell: shards + sparks, scaling with tier.
+function burstClear(cellKeys, tier) {
+  const sparks = tier >= 3 ? 6 : tier >= 2 ? 5 : tier >= 1 ? 4 : 3;
+  const shards = tier >= 3 ? 7 : tier >= 2 ? 6 : tier >= 1 ? 5 : 4;
+  cellKeys.forEach(k => {
+    const [x, y] = k.split(',').map(Number);
+    const color = grid[y][x] || 'amber';
+    const p = cellToBoardXY(x, y);
+    spawnShards(p.x, p.y, color, shards);
+    spawnSparksAt(p.x, p.y, color, sparks);
+  });
 }
 
 // === SCORE TICKER ===
