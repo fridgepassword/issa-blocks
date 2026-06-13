@@ -7331,12 +7331,27 @@ function flashBoardNeon(lines) {
 
 // Comic-book "POW!" starburst at the clear focal point. Word + size escalate
 // with the clear: single → POW!, double → BAM!, triple → BOOM!, quad+ → KAPOW!
-const COMIC_WORDS = { 1: 'POW!', 2: 'BAM!', 3: 'BOOM!', 4: 'KAPOW!' };
+// Pools of comic onomatopoeia, picked at random per clear for variety.
+// Bigger clears pull from punchier tiers; a wildcard "weird" pool can crash
+// any clear for surprise, and high streaks may shout a combo callout.
+const COMIC_WORDS = {
+  1: ['POW!', 'BAM!', 'ZAP!', 'BONK!', 'WHAP!', 'THWIP!', 'BOINK!', 'SPLAT!', 'ZONK!', 'WHACK!', 'BIFF!', 'SOCK!'],
+  2: ['BAM!', 'KABOOM!', 'WHAMMO!', 'SMASH!', 'KER-POW!', 'ZOWIE!', 'SOCKO!', 'WHOMP!', 'BLAMMO!', 'KAPOW!'],
+  3: ['BOOM!', 'KAPOW!', 'KABLAM!', 'YOWZA!', 'WALLOP!', 'KABLOOEY!', 'GADZOOKS!', 'KERSPLAT!', 'ZOUNDS!'],
+  4: ['KAPOW!', 'KABOOM!', 'MEGABLAST!', 'KERBLOOIE!', 'KABLAMMO!', 'GIGABLAST!', 'SKADOOSH!', 'BOOMSHAKA!'],
+};
+const COMIC_WEIRD = ['BAZINGA!', 'FLOOMP!', 'SPRONK!', 'WUMBO!', 'YEET!', 'GLORP!', 'ZORP!', 'FWOOSH!',
+  'BLORP!', 'NOM NOM!', 'SKRRT!', 'KABLOINK!', 'SPLOOSH!', 'BWOMP!', 'MEEP!', 'HONK!', 'ZA-ZOW!',
+  'FLUMP!', 'SQUONK!', 'BOOP!', 'OOMPF!', 'KAPLORT!'];
+const COMIC_COMBO = ['COMBO!', 'ON FIRE!', 'UNSTOPPABLE!', 'RAMPAGE!', 'BONKERS!'];
+function randOf(arr) { return arr[(Math.random() * arr.length) | 0]; }
 function comicPop(bx, by, lines, streak) {
   const board = document.getElementById('board');
   const n = Math.min(4, Math.max(1, lines));
-  let word = COMIC_WORDS[n];
-  if (n < 4 && streak >= 4) word = 'COMBO!';
+  let word;
+  if (streak >= 4 && Math.random() < 0.5) word = randOf(COMIC_COMBO);
+  else if (Math.random() < 0.2)           word = randOf(COMIC_WEIRD);
+  else                                    word = randOf(COMIC_WORDS[n]);
 
   // radial speed lines behind
   const sl = document.createElement('div');
@@ -7353,7 +7368,9 @@ function comicPop(bx, by, lines, streak) {
   burst.style.left = bx + 'px';
   burst.style.top = by + 'px';
   const size = 120 + n * 28;
-  const font = 34 + n * 8;
+  // Shrink the font for longer words so they stay inside the star (nowrap).
+  const fit = Math.min(1, 7 / word.length);
+  const font = Math.round((34 + n * 8) * fit);
   burst.style.setProperty('--burst-size', size + 'px');
   burst.style.setProperty('--burst-font', font + 'px');
   burst.innerHTML = `<div class="burst-star"></div><div class="burst-word">${word}</div>`;
