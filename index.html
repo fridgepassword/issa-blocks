@@ -26,10 +26,10 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0f;
-    --bg-2: #14141d;
-    --cell: #1f1f2c;
-    --cell-edge: rgba(255,255,255,0.04);
+    --bg: #181824;
+    --bg-2: #232333;
+    --cell: #313146;
+    --cell-edge: rgba(255,255,255,0.06);
     --text: #f5f5f7;
     --dim: #6c6c7a;
     --accent: #ffb84d;
@@ -494,11 +494,26 @@
     animation: clear 440ms cubic-bezier(.4, 0, .2, 1) backwards;
     z-index: 2;
   }
+  /* Quick bright flash then vanish — the block "launches" toward the player
+     via a .flyblock clone (below) rather than imploding in place. */
   @keyframes clear {
-    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1); }
-    12%  { transform: scale(1.42) rotate(-3deg); filter: brightness(3.4) saturate(1.8); box-shadow: 0 0 22px 6px rgba(255,255,255,0.9); }
-    30%  { transform: scale(1.12) rotate(2deg);  filter: brightness(1.9) saturate(1.4); }
-    100% { transform: scale(0.04) rotate(18deg); filter: brightness(0.3); opacity: 0; }
+    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1); opacity: 1; }
+    14%  { transform: scale(1.4) rotate(-3deg);  filter: brightness(3.6) saturate(1.9); box-shadow: 0 0 24px 7px rgba(255,255,255,0.95); opacity: 1; }
+    45%  { transform: scale(1.15);               filter: brightness(2); opacity: 0; }
+    100% { transform: scale(1.15);               opacity: 0; }
+  }
+
+  /* === FLYING BLOCK (rushes toward the player as it clears) === */
+  .flyblock {
+    position: absolute;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 7;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.45),
+      inset 0 -3px 0 rgba(0,0,0,0.3),
+      0 0 14px rgba(0,0,0,0.35);
+    will-change: transform, opacity, filter;
   }
 
   /* === BLOCK SHATTER SHARDS === */
@@ -7337,10 +7352,48 @@ function spawnShards(bx, by, colorKey, count) {
   }
 }
 
-// Extra debris burst at each cleared cell: shards + sparks, scaling with tier.
+// Each cleared block flies toward the player: a clone rushes outward from the
+// board center, scaling up with motion blur as it "comes at you", then fades.
+function flyBlocksToPlayer(cellKeys) {
+  const board = document.getElementById('board');
+  const br = board.getBoundingClientRect();
+  const cx = br.width / 2, cy = br.height / 2;
+  const cellPx = (typeof gridCellSize === 'function' ? gridCellSize() : 36);
+  cellKeys.forEach(k => {
+    const [x, y] = k.split(',').map(Number);
+    const color = COLORS[grid[y][x] || 'amber'] || COLORS.amber;
+    const p = cellToBoardXY(x, y);
+    const dx = p.x - cx, dy = p.y - cy;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const drift = 70 + Math.random() * 60;   // outward rush distance
+    const endScale = 3 + Math.random() * 1.8;
+
+    const fb = document.createElement('div');
+    fb.className = 'flyblock';
+    fb.style.left = p.x + 'px';
+    fb.style.top = p.y + 'px';
+    fb.style.width = cellPx + 'px';
+    fb.style.height = cellPx + 'px';
+    fb.style.marginLeft = (-cellPx / 2) + 'px';
+    fb.style.marginTop = (-cellPx / 2) + 'px';
+    fb.style.background = color;
+    board.appendChild(fb);
+
+    const anim = fb.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1, filter: 'blur(0px) brightness(1.4)', offset: 0 },
+      { transform: `translate(${ux * drift * 0.35}px, ${uy * drift * 0.35}px) scale(1.7)`, opacity: 1, filter: 'blur(0.5px) brightness(1.6)', offset: 0.4 },
+      { transform: `translate(${ux * drift}px, ${uy * drift}px) scale(${endScale})`, opacity: 0, filter: 'blur(7px) brightness(1.2)', offset: 1 },
+    ], { duration: 500 + Math.random() * 140, easing: 'cubic-bezier(.4,0,.85,.4)', fill: 'forwards' });
+    anim.onfinish = () => fb.remove();
+  });
+}
+
+// Extra debris burst at each cleared cell: flying blocks + shards + sparks.
 function burstClear(cellKeys, tier) {
   const sparks = tier >= 3 ? 8 : tier >= 2 ? 7 : tier >= 1 ? 6 : 5;
   const shards = tier >= 3 ? 10 : tier >= 2 ? 8 : tier >= 1 ? 7 : 6;
+  flyBlocksToPlayer(cellKeys);
   cellKeys.forEach(k => {
     const [x, y] = k.split(',').map(Number);
     const color = grid[y][x] || 'amber';
