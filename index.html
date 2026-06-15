@@ -128,8 +128,19 @@
   body[data-screen="flip"] .fruit-screen,
   body[data-screen="flip"] .line-screen,
   body[data-screen="flip"] .extras-screen,
-  body[data-screen="flip"] .adventure-screen { display: none; }
+  body[data-screen="flip"] .adventure-screen,
+  body[data-screen="flip"] .slide-screen { display: none; }
   body[data-screen="flip"] .flip-screen { display: flex; }
+  .slide-screen { display: none; }
+  body[data-screen="slide"] .title-screen,
+  body[data-screen="slide"] .game-screen,
+  body[data-screen="slide"] .custom-config,
+  body[data-screen="slide"] .fruit-screen,
+  body[data-screen="slide"] .line-screen,
+  body[data-screen="slide"] .extras-screen,
+  body[data-screen="slide"] .adventure-screen,
+  body[data-screen="slide"] .flip-screen { display: none; }
+  body[data-screen="slide"] .slide-screen { display: flex; }
   html.cc-scroll { overflow-y: auto !important; height: auto !important; }
 
   /* === TITLE SCREEN === */
@@ -3172,6 +3183,282 @@
     color: var(--easy);
     font-weight: 700;
   }
+  .line-info.lost {
+    color: #ff5f5f;
+    font-weight: 700;
+  }
+
+  /* Keyframes shared by BLOCK FLIP (originally defined in the now-deleted
+     JOURNEY styles — kept here so the flip stage animations still run). */
+  @keyframes jgrid-scroll {
+    from { background-position: 0 0; }
+    to   { background-position: -32px 0; }
+  }
+  @keyframes jpulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+  }
+  @keyframes jspike-pulse {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1px); }
+  }
+
+  /* === LINE mode picker (INFINITE / COMPETITIVE) === */
+  .line-mode-card {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 54px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: transform 100ms ease, border-color 160ms ease, background 160ms ease;
+  }
+  .line-mode-card:active { transform: scale(0.98); }
+  .lmc-icon {
+    width: 54px; height: 54px;
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-size: 30px;
+    font-weight: 800;
+  }
+  .lmc-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .lmc-desc {
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+  .lmc-best {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+  .line-mode-infinite .lmc-icon {
+    background: radial-gradient(circle at 35% 30%, rgba(77,208,225,0.35), rgba(77,208,225,0.08));
+    color: #4dd0e1;
+  }
+  .line-mode-infinite:hover {
+    border-color: rgba(77,208,225,0.45);
+    background: linear-gradient(180deg, rgba(77,208,225,0.10), rgba(77,208,225,0.02));
+  }
+  .line-mode-infinite .lmc-name { color: #4dd0e1; }
+  .line-mode-comp .lmc-icon {
+    background: radial-gradient(circle at 35% 30%, rgba(255,159,67,0.35), rgba(255,95,95,0.08));
+    color: #ff9f43;
+  }
+  .line-mode-comp:hover {
+    border-color: rgba(255,159,67,0.45);
+    background: linear-gradient(180deg, rgba(255,159,67,0.10), rgba(255,95,95,0.02));
+  }
+  .line-mode-comp .lmc-name { color: #ff9f43; }
+
+  .line-timer {
+    align-self: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    padding: 4px 16px;
+    border-radius: 999px;
+    background: rgba(255,184,77,0.12);
+    border: 1px solid rgba(255,184,77,0.3);
+  }
+  .line-timer.hidden { display: none; }
+  .line-timer.warn {
+    color: #ff5f5f;
+    background: rgba(255,95,95,0.14);
+    border-color: rgba(255,95,95,0.45);
+    animation: jpulse 0.6s ease-in-out infinite;
+  }
+
+  /* === SLIDE MODE (slide rows to clear them) === */
+  .mode-card[data-mode="slide"] .mode-name {
+    background: linear-gradient(135deg, #4dd0e1, #5c7cfa, #9775fa);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .mode-card[data-mode="slide"]:hover {
+    border-color: rgba(92,124,250,0.4);
+    background: linear-gradient(180deg, rgba(92,124,250,0.10), rgba(77,208,225,0.03));
+  }
+  .slide-screen {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    gap: 12px;
+    padding: 4px 4px 14px;
+    animation: screen-in 360ms cubic-bezier(.34, 1.3, .5, 1);
+  }
+  .slide-header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .slide-back {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding: 7px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .slide-title {
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #4dd0e1, #5c7cfa, #9775fa);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    animation: rainbow-shift 6s linear infinite;
+  }
+  .slide-score-wrap { text-align: right; }
+  .slide-score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+  }
+  .slide-score {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+  }
+  .slide-board-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 8 / 10;
+    background: linear-gradient(180deg, #122252 0%, #0a1636 100%);
+    border: 2px solid rgba(92,124,250,0.45);
+    border-radius: 16px;
+    box-shadow:
+      0 0 30px rgba(92,124,250,0.25),
+      inset 0 0 50px rgba(0,0,0,0.45);
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+  }
+  .slide-board {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  }
+  .slide-block {
+    position: absolute;
+    border-radius: 6px;
+    background-color: var(--bc);
+    background-image: linear-gradient(160deg, rgba(255,255,255,0.28), rgba(0,0,0,0.22));
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.35),
+      inset 0 -3px 0 rgba(0,0,0,0.28),
+      0 2px 6px rgba(0,0,0,0.35);
+    cursor: grab;
+    will-change: left, top;
+  }
+  .slide-block.dragging {
+    cursor: grabbing;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.55),
+      0 8px 16px rgba(0,0,0,0.5);
+    z-index: 5;
+    filter: brightness(1.12);
+  }
+  .slide-block.clearing { animation: slide-clear 200ms ease-out forwards; }
+  @keyframes slide-clear {
+    0%   { filter: brightness(1);   transform: scale(1); }
+    50%  { filter: brightness(2.2) saturate(1.4); }
+    100% { filter: brightness(2.6); transform: scale(1.08); opacity: 0; }
+  }
+  .slide-bar {
+    width: 100%;
+    max-width: 340px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .slide-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #4dd0e1, #5c7cfa);
+    transition: width 80ms linear;
+  }
+  .slide-bar-fill.danger { background: linear-gradient(90deg, #ff9f43, #ff5f5f); }
+  .slide-over {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,16,40,0.93);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+    text-align: center;
+  }
+  .slide-over.show { display: flex; animation: fade 280ms ease-out; }
+  .slide-over h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #4dd0e1, #5c7cfa);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .slide-over-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-bottom: 10px;
+  }
+  .slide-over-sub b { color: var(--accent); }
+  .slide-tips {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    padding: 0 8px;
+  }
 
   /* Mode card colors for new modes */
   .mode-card[data-mode="fruit"]:hover {
@@ -4475,15 +4762,15 @@
         <div class="mode-desc">Super super easy, for Alou.</div>
         <div class="mode-best">BEST<b id="best-alou">0</b></div>
       </button>
-      <button class="mode-card" data-mode="sprint" onclick="startGame('sprint')">
-        <div class="mode-name">SPRINT</div>
-        <div class="mode-desc">Clear 20 lines as fast as possible.</div>
-        <div class="mode-best">BEST<b id="best-sprint">—</b></div>
-      </button>
       <button class="mode-card" data-mode="hardcore" onclick="startGame('hardcore')">
         <div class="mode-name">HARDCORE</div>
         <div class="mode-desc">Brutal pieces. 1.5× score multiplier.</div>
         <div class="mode-best">BEST<b id="best-hardcore">0</b></div>
+      </button>
+      <button class="mode-card" data-mode="line" onclick="openLineLevels()">
+        <div class="mode-name">LINE</div>
+        <div class="mode-desc">Draw one path through every cell. Infinite or beat-the-clock.</div>
+        <div class="mode-best">LV<b id="best-line">0</b></div>
       </button>
       <button class="mode-card" data-mode="extras" onclick="openExtras()">
         <div class="mode-name">EXTRA MODES <span class="new-tag">NEW</span></div>
@@ -4529,10 +4816,10 @@
         <div class="mode-desc">Drop fruits. Same fruits merge into bigger ones. Don't overflow.</div>
         <div class="mode-best">BEST<b id="best-fruit">0</b></div>
       </button>
-      <button class="mode-card" data-mode="line" onclick="openLineLevels()">
-        <div class="mode-name">LINE</div>
-        <div class="mode-desc">Draw one path through every cell. No crossing, no shortcuts.</div>
-        <div class="mode-best">LVLS<b id="best-line">0</b></div>
+      <button class="mode-card" data-mode="sprint" onclick="startGame('sprint')">
+        <div class="mode-name">SPRINT</div>
+        <div class="mode-desc">Clear 20 lines as fast as possible.</div>
+        <div class="mode-best">BEST<b id="best-sprint">—</b></div>
       </button>
       <button class="mode-card" data-mode="timeattack" onclick="startGame('timeattack')">
         <div class="mode-name">TIME ATTACK</div>
@@ -4553,6 +4840,11 @@
         <div class="mode-name">BLOCK FLIP</div>
         <div class="mode-desc">Sausage-flip physics, but you're a block. Tap to tumble. Land on the fork.</div>
         <div class="mode-best">STG<b id="best-flip">0/3</b></div>
+      </button>
+      <button class="mode-card" data-mode="slide" onclick="startSlide()">
+        <div class="mode-name">SLIDE</div>
+        <div class="mode-desc">Slide rows of blocks to fill and clear them. Keep the rising stack off the top.</div>
+        <div class="mode-best">BEST<b id="best-slide">0</b></div>
       </button>
     </div>
   </div>
@@ -4588,6 +4880,34 @@
     </div>
     <div class="flip-tips" id="flip-tips">Tap LEFT = flip left · Tap RIGHT = flip right · 1 mid-air flip · Land on the fork.</div>
   </div>
+
+  <!-- ============================================ -->
+  <!-- SLIDE MODE (slide rows to clear them)         -->
+  <!-- ============================================ -->
+  <div class="slide-screen">
+    <div class="slide-header">
+      <button class="slide-back" type="button" onclick="exitSlide()">← MENU</button>
+      <div class="slide-title">SLIDE</div>
+      <div class="slide-score-wrap">
+        <div class="slide-score-label">SCORE</div>
+        <div class="slide-score" id="slide-score">0</div>
+      </div>
+    </div>
+    <div class="slide-board-wrap">
+      <div class="slide-board" id="slide-board"></div>
+      <div class="slide-over" id="slide-over">
+        <h2>STACK TOPPLED</h2>
+        <div class="slide-over-sub">Score <b id="slide-final">0</b> · Best <b id="slide-final-best">0</b></div>
+        <div class="btn-row">
+          <button class="btn secondary" type="button" onclick="exitSlide()">MENU</button>
+          <button class="btn" type="button" onclick="startSlide()">RETRY</button>
+        </div>
+      </div>
+    </div>
+    <div class="slide-bar"><div class="slide-bar-fill" id="slide-bar-fill"></div></div>
+    <div class="slide-tips">Slide blocks sideways to fill a row — full rows clear. Don't let the stack reach the top.</div>
+  </div>
+
   <!-- ============================================ -->
   <!-- ADVENTURE LEVEL SELECT                        -->
   <!-- ============================================ -->
@@ -4708,13 +5028,14 @@
     <div class="line-levels" id="line-levels"></div>
     <div class="line-play" id="line-play">
       <div class="line-header">
-        <button class="line-back" type="button" onclick="lineBackToLevels()">← LEVELS</button>
+        <button class="line-back" type="button" onclick="lineBackToLevels()">← MODES</button>
         <div class="line-title" id="line-title">LEVEL 1</div>
         <div class="line-actions">
           <button type="button" onclick="lineResetPath()" title="Reset path">↺</button>
           <button type="button" onclick="lineUndo()" title="Undo">↶</button>
         </div>
       </div>
+      <div class="line-timer hidden" id="line-timer">⏱ 0:00</div>
       <div class="line-board-wrap">
         <div class="line-board" id="line-board"></div>
       </div>
@@ -5877,6 +6198,10 @@ function refreshBestLabels() {
     try { b = parseInt(localStorage.getItem('issa-blocks-flip-v1') || '0', 10) || 0; } catch (e) {}
     flp.textContent = b + '/' + (typeof FLIP_STAGES !== 'undefined' ? FLIP_STAGES.length : 3);
   }
+  const sld = document.getElementById('best-slide');
+  if (sld) {
+    try { sld.textContent = parseInt(localStorage.getItem('issa-blocks-slide-v1') || '0', 10) || 0; } catch (e) { sld.textContent = 0; }
+  }
   const dailyEl = document.getElementById('best-daily');
   if (dailyEl) {
     const today = todayStr();
@@ -5889,11 +6214,11 @@ function refreshBestLabels() {
   }
   const lineEl = document.getElementById('best-line');
   if (lineEl) {
-    try {
-      const arr = JSON.parse(localStorage.getItem('issa-blocks-line-v1') || '[]');
-      const solved = Array.isArray(arr) ? arr.filter(Boolean).length : 0;
-      lineEl.textContent = solved + '/' + LINE_LEVELS.length;
-    } catch (e) { lineEl.textContent = '0/' + LINE_LEVELS.length; }
+    // Best LINE level reached — higher of Infinite and Competitive runs.
+    let inf = 0, comp = 0;
+    try { inf  = parseInt(localStorage.getItem('issa-blocks-line-v1-rnd')  || '0', 10) || 0; } catch (e) {}
+    try { comp = parseInt(localStorage.getItem('issa-blocks-line-v1-comp') || '0', 10) || 0; } catch (e) {}
+    lineEl.textContent = Math.max(inf, comp);
   }
 }
 function formatTime(seconds) {
@@ -6739,7 +7064,10 @@ function afterMove() {
     showGameOver(false);
     return;
   }
-  if (mode.timed && sprintLines >= mode.target && !sprintWon) {
+  // Target-completion win (SPRINT clears 20 lines). Time Attack has a null
+  // target, so guard on mode.target being a real number — otherwise
+  // `sprintLines >= null` reads as `>= 0` and wins on the first placement.
+  if (mode.timed && mode.target && sprintLines >= mode.target && !sprintWon) {
     sprintWon = true;
     stopSprintTimer();
     sprintFinalSeconds = (performance.now() - sprintStartMs) / 1000;
@@ -8756,193 +9084,455 @@ function detachFlipInput() {
 }
 
 // =================================================================
+// === SLIDE MODE (slide rows of blocks to clear them) =============
+// =================================================================
+// A rising stack of horizontal rectangle blocks on an 8-wide board.
+// Drag a block left/right within its row (walls + neighbours block it).
+// Fill a whole row across and it clears; rows above fall down. A timer
+// bar fills and, when full, shoves a fresh row in from the bottom and
+// pushes the stack up one. If the stack reaches the top → game over.
+
+const SLIDE = {
+  cols: 8,
+  rows: 10,
+  blocks: [],         // { id, row, col, w, color }
+  nextId: 1,
+  score: 0,
+  clears: 0,
+  best: 0,
+  active: false,
+  gameOver: false,
+  busy: false,        // true during a clear animation (pauses input + rise)
+  drag: null,
+  riseMs: 6500,
+  riseStart: 0,
+  riseRAF: 0,
+};
+const SLIDE_KEY = 'issa-blocks-slide-v1';
+const SLIDE_COLORS = ['#ff5f5f', '#ff9f43', '#ffd93b', '#51cf66', '#4dd0e1', '#5c7cfa', '#9775fa', '#f783ac'];
+
+function slideLoadBest() {
+  try { SLIDE.best = parseInt(localStorage.getItem(SLIDE_KEY) || '0', 10) || 0; } catch (e) { SLIDE.best = 0; }
+}
+function slideSaveBest() {
+  try { localStorage.setItem(SLIDE_KEY, String(SLIDE.best || 0)); } catch (e) {}
+}
+
+function slideCellW() {
+  const b = document.getElementById('slide-board');
+  return b && b.clientWidth ? b.clientWidth / SLIDE.cols : 40;
+}
+function slideCellH() {
+  const b = document.getElementById('slide-board');
+  return b && b.clientHeight ? b.clientHeight / SLIDE.rows : 40;
+}
+
+// Build one row of non-overlapping blocks with at least one gap.
+function slideMakeRowBlocks(rowIndex) {
+  const COLS = SLIDE.cols;
+  const blocks = [];
+  let c = 0;
+  while (c < COLS) {
+    const rem = COLS - c;
+    // Occasional gap (but don't lead with one so rows aren't too sparse).
+    if (blocks.length > 0 && Math.random() < 0.28) { c += 1; continue; }
+    const w = 1 + Math.floor(Math.random() * Math.min(4, rem));
+    blocks.push({ id: SLIDE.nextId++, row: rowIndex, col: c, w,
+                  color: SLIDE_COLORS[(Math.random() * SLIDE_COLORS.length) | 0] });
+    c += w;
+    if (Math.random() < 0.45) c += 1;   // gap after
+  }
+  // Guarantee at least one empty cell so the row can't be pre-completed.
+  let filled = blocks.reduce((s, b) => s + b.w, 0);
+  if (filled >= COLS && blocks.length) {
+    const last = blocks[blocks.length - 1];
+    if (last.w > 1) last.w -= 1; else blocks.pop();
+  }
+  // Guarantee at least one block.
+  if (!blocks.length) {
+    blocks.push({ id: SLIDE.nextId++, row: rowIndex, col: 0, w: 1 + ((Math.random() * 3) | 0),
+                  color: SLIDE_COLORS[(Math.random() * SLIDE_COLORS.length) | 0] });
+  }
+  return blocks;
+}
+
+// How far a block can slide left/right, bounded by walls + same-row neighbours.
+function slideBlockRange(block) {
+  let lo = 0, hi = SLIDE.cols - block.w;
+  for (const o of SLIDE.blocks) {
+    if (o === block || o.row !== block.row) continue;
+    if (o.col + o.w <= block.col) lo = Math.max(lo, o.col + o.w);
+    else if (o.col >= block.col + block.w) hi = Math.min(hi, o.col - block.w);
+  }
+  return { lo, hi };
+}
+
+function slidePositionBlock(el, b) {
+  const cw = slideCellW(), ch = slideCellH();
+  el.style.left   = (b.col * cw + 2) + 'px';
+  el.style.top    = (b.row * ch + 2) + 'px';
+  el.style.width  = (b.w * cw - 4) + 'px';
+  el.style.height = (ch - 4) + 'px';
+}
+
+function slideRender() {
+  const board = document.getElementById('slide-board');
+  if (!board) return;
+  // Keep the faint grid aligned to the real cell size.
+  board.style.backgroundSize = slideCellW() + 'px ' + slideCellH() + 'px';
+  board.innerHTML = '';
+  for (const b of SLIDE.blocks) {
+    const el = document.createElement('div');
+    el.className = 'slide-block';
+    el.dataset.id = b.id;
+    el.style.setProperty('--bc', b.color);
+    slidePositionBlock(el, b);
+    board.appendChild(el);
+  }
+}
+
+function slideUpdateScore() {
+  const s = document.getElementById('slide-score');
+  if (s) s.textContent = SLIDE.score;
+}
+
+function slideCheckClears() {
+  if (SLIDE.busy) return;
+  const COLS = SLIDE.cols;
+  const sumByRow = {};
+  for (const b of SLIDE.blocks) sumByRow[b.row] = (sumByRow[b.row] || 0) + b.w;
+  const fullRows = Object.keys(sumByRow).map(Number).filter(r => sumByRow[r] >= COLS);
+  if (!fullRows.length) return;
+  const cleared = new Set(fullRows);
+  SLIDE.busy = true;
+  // Flash the clearing blocks.
+  for (const el of document.querySelectorAll('.slide-block')) {
+    const b = SLIDE.blocks.find(x => x.id === +el.dataset.id);
+    if (b && cleared.has(b.row)) el.classList.add('clearing');
+  }
+  const k = fullRows.length;
+  SLIDE.score += k * k * 10;     // combo bonus for multi-row clears
+  SLIDE.clears += k;
+  if (SLIDE.score > SLIDE.best) { SLIDE.best = SLIDE.score; slideSaveBest(); }
+  slideUpdateScore();
+  if (typeof SFX !== 'undefined' && SFX.clearLine) SFX.clearLine();
+  if (k >= 2 && typeof SFX !== 'undefined' && SFX.combo) SFX.combo();
+  if (navigator.vibrate) navigator.vibrate(k > 1 ? [15, 30, 25] : 20);
+  setTimeout(() => {
+    // Remove cleared rows, then drop everything above into the gap.
+    SLIDE.blocks = SLIDE.blocks.filter(b => !cleared.has(b.row));
+    for (const b of SLIDE.blocks) {
+      let shift = 0;
+      for (const cr of fullRows) if (cr > b.row) shift++;
+      b.row += shift;
+    }
+    SLIDE.busy = false;
+    slideRender();
+  }, 200);
+}
+
+function slidePushUp() {
+  if (SLIDE.busy) return;
+  // Overflow if anything already sits in the top row.
+  if (SLIDE.blocks.some(b => b.row <= 0)) { slideGameOver(); return; }
+  for (const b of SLIDE.blocks) b.row -= 1;
+  SLIDE.blocks.push(...slideMakeRowBlocks(SLIDE.rows - 1));
+  SLIDE.riseMs = Math.max(3200, SLIDE.riseMs - 120);   // creep faster over time
+  slideRender();
+  if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+}
+
+function slideRiseTick() {
+  if (!SLIDE.active || SLIDE.gameOver) return;
+  const now = performance.now();
+  if (!SLIDE.busy) {
+    const frac = Math.min(1, (now - SLIDE.riseStart) / SLIDE.riseMs);
+    const bar = document.getElementById('slide-bar-fill');
+    if (bar) {
+      bar.style.width = (frac * 100) + '%';
+      bar.classList.toggle('danger', frac > 0.7);
+    }
+    if (frac >= 1) { slidePushUp(); SLIDE.riseStart = now; }
+  } else {
+    SLIDE.riseStart = now;   // hold progress while a clear animates
+  }
+  SLIDE.riseRAF = requestAnimationFrame(slideRiseTick);
+}
+
+function slideGameOver() {
+  SLIDE.gameOver = true;
+  SLIDE.active = false;
+  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
+  const f = document.getElementById('slide-final');
+  const fb = document.getElementById('slide-final-best');
+  if (f) f.textContent = SLIDE.score;
+  if (fb) fb.textContent = SLIDE.best;
+  document.getElementById('slide-over').classList.add('show');
+  if (typeof SFX !== 'undefined' && SFX.over) SFX.over();
+  if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
+}
+
+let _slideDown = null, _slideMove = null, _slideUp = null;
+function slideAttachInput() {
+  const board = document.getElementById('slide-board');
+  if (!board) return;
+  slideDetachInput();
+  _slideDown = (e) => {
+    if (!SLIDE.active || SLIDE.gameOver || SLIDE.busy) return;
+    const blockEl = e.target.closest('.slide-block');
+    if (!blockEl) return;
+    const block = SLIDE.blocks.find(b => b.id === +blockEl.dataset.id);
+    if (!block) return;
+    SLIDE.drag = { block, el: blockEl, startX: e.clientX, startCol: block.col, range: slideBlockRange(block) };
+    blockEl.classList.add('dragging');
+    try { board.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
+  };
+  _slideMove = (e) => {
+    if (!SLIDE.drag) return;
+    e.preventDefault();
+    const delta = Math.round((e.clientX - SLIDE.drag.startX) / slideCellW());
+    let nc = SLIDE.drag.startCol + delta;
+    nc = Math.max(SLIDE.drag.range.lo, Math.min(SLIDE.drag.range.hi, nc));
+    if (nc !== SLIDE.drag.block.col) {
+      SLIDE.drag.block.col = nc;
+      slidePositionBlock(SLIDE.drag.el, SLIDE.drag.block);
+    }
+  };
+  _slideUp = () => {
+    if (!SLIDE.drag) return;
+    SLIDE.drag.el.classList.remove('dragging');
+    SLIDE.drag = null;
+    slideCheckClears();
+  };
+  board.addEventListener('pointerdown', _slideDown);
+  board.addEventListener('pointermove', _slideMove, { passive: false });
+  document.addEventListener('pointerup', _slideUp);
+  document.addEventListener('pointercancel', _slideUp);
+}
+function slideDetachInput() {
+  const board = document.getElementById('slide-board');
+  if (board && _slideDown) {
+    board.removeEventListener('pointerdown', _slideDown);
+    board.removeEventListener('pointermove', _slideMove);
+  }
+  if (_slideUp) {
+    document.removeEventListener('pointerup', _slideUp);
+    document.removeEventListener('pointercancel', _slideUp);
+  }
+  _slideDown = _slideMove = _slideUp = null;
+}
+
+function startSlide() {
+  slideLoadBest();
+  document.body.dataset.screen = 'slide';
+  SLIDE.blocks = [];
+  SLIDE.nextId = 1;
+  SLIDE.score = 0;
+  SLIDE.clears = 0;
+  SLIDE.gameOver = false;
+  SLIDE.active = true;
+  SLIDE.busy = false;
+  SLIDE.drag = null;
+  SLIDE.riseMs = 6500;
+  // Seed three rows at the bottom.
+  for (let r = SLIDE.rows - 1; r >= SLIDE.rows - 3; r--) SLIDE.blocks.push(...slideMakeRowBlocks(r));
+  document.getElementById('slide-over').classList.remove('show');
+  const bar = document.getElementById('slide-bar-fill');
+  if (bar) { bar.style.width = '0%'; bar.classList.remove('danger'); }
+  slideUpdateScore();
+  // Render after layout settles so cell sizes are correct.
+  slideRender();
+  requestAnimationFrame(slideRender);
+  slideAttachInput();
+  SLIDE.riseStart = performance.now();
+  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
+  SLIDE.riseRAF = requestAnimationFrame(slideRiseTick);
+  if (typeof SFX !== 'undefined' && SFX.start) SFX.start();
+}
+
+function exitSlide() {
+  SLIDE.active = false;
+  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
+  slideDetachInput();
+  document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
+  refreshBestLabels();
+}
+
+// =================================================================
 // === LINE PUZZLE (HAMILTONIAN PATH) =============================
 // =================================================================
 
-// Level definitions. Every level here has been verified to actually have
-// at least one Hamiltonian path from the start cell. The old plus, ring,
-// and scattered-hole levels were mathematically impossible (they had >2
-// leaf cells or disconnected components) and have been removed. For
-// infinite procedurally-generated puzzles use the ENDLESS card.
-const LINE_LEVELS = [
-  // L1 — 4x4 full
-  { cols: 4, rows: 4, start: 0, cells: [
-    1,1,1,1,
-    1,1,1,1,
-    1,1,1,1,
-    1,1,1,1,
-  ]},
-  // L2 — 5x5 full
-  { cols: 5, rows: 5, start: 0, cells: [
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,1,
-  ]},
-  // L3 — 5x5 with one corner cut
-  { cols: 5, rows: 5, start: 0, cells: [
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,1,
-    1,1,1,1,0,
-  ]},
-  // L4 — 6x6 full
-  { cols: 6, rows: 6, start: 0, cells: [
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-  ]},
-  // L5 — 6x6 stairstep (a Hamiltonian path exists: snake the rows)
-  { cols: 6, rows: 6, start: 0, cells: [
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    1,1,1,1,1,1,
-    0,1,1,1,1,1,
-    0,0,1,1,1,1,
-    0,0,0,1,1,1,
-  ]},
-  // L6 — 7x7 full
-  { cols: 7, rows: 7, start: 0, cells: [
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,
-  ]},
-  // L7 — 8x8 full
-  { cols: 8, rows: 8, start: 0, cells: [
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,
-  ]},
-];
+// LINE is now purely endless: two flavours share one generator.
+//   INFINITE    — untilted relaxed run, get as far as you can.
+//   COMPETITIVE — same puzzles, but each one is on a countdown. Solve it
+//                 in time to advance; run ends when the clock hits zero.
+// Every puzzle is a FULL grid (no holes). The user noted that open/empty
+// squares make a board EASIER (fewer cells to wind around), so the densest
+// possible board — a completely filled grid — is the hardest. We grow the
+// grid 4×4 → 8×8 as the level climbs.
 
 const LINE_KEY = 'issa-blocks-line-v1';
 const LINE = {
-  levelIdx: 0,
   level: null,
-  path: [],           // array of cell indices visited
+  path: [],            // array of cell indices visited
   dragging: false,
-  solved: [],         // bool per level
   won: false,
+  randomActive: false,
+  randomLevel: 0,      // 0-based index of the puzzle currently shown
+  randomBest: 0,       // best level count reached in INFINITE
+  competitive: false,
+  compBest: 0,         // best level count reached in COMPETITIVE
+  levelEndMs: 0,
+  timerRAF: null,
 };
 
-function lineLoadSolved() {
-  try {
-    const raw = localStorage.getItem(LINE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      if (Array.isArray(p)) LINE.solved = p;
+function lineLoadBests() {
+  try { LINE.randomBest = parseInt(localStorage.getItem(LINE_KEY + '-rnd')  || '0', 10) || 0; } catch (e) { LINE.randomBest = 0; }
+  try { LINE.compBest   = parseInt(localStorage.getItem(LINE_KEY + '-comp') || '0', 10) || 0; } catch (e) { LINE.compBest = 0; }
+}
+function lineSaveRandomBest() { try { localStorage.setItem(LINE_KEY + '-rnd',  String(LINE.randomBest || 0)); } catch (e) {} }
+function lineSaveCompBest()   { try { localStorage.setItem(LINE_KEY + '-comp', String(LINE.compBest   || 0)); } catch (e) {} }
+
+// === FULL-GRID HAMILTONIAN GENERATOR (backbite) ===
+// Start from a snake path (guaranteed Hamiltonian) and randomize it with
+// "backbite" moves. Each move reverses the tail segment after a cell that
+// is a grid-neighbour of the current endpoint — this always yields another
+// valid Hamiltonian path while reshaping it and wandering the endpoints
+// around the board. Robust (never fails) and fast for grids up to 8×8.
+function generateFullHamiltonian(rows, cols) {
+  const n = rows * cols;
+  let path = [];
+  for (let r = 0; r < rows; r++) {
+    if (r % 2 === 0) { for (let c = 0; c < cols; c++) path.push(r * cols + c); }
+    else             { for (let c = cols - 1; c >= 0; c--) path.push(r * cols + c); }
+  }
+  const pos = new Array(n);
+  const iters = n * 16;
+  for (let it = 0; it < iters; it++) {
+    // Operate on either endpoint by sometimes flipping the whole path.
+    if (Math.random() < 0.5) path.reverse();
+    for (let k = 0; k < n; k++) pos[path[k]] = k;
+    const tail = path[n - 1];
+    const tr = (tail / cols) | 0, tc = tail % cols;
+    const neigh = [];
+    if (tr > 0)        neigh.push(tail - cols);
+    if (tr < rows - 1) neigh.push(tail + cols);
+    if (tc > 0)        neigh.push(tail - 1);
+    if (tc < cols - 1) neigh.push(tail + 1);
+    const cands = [];
+    for (const w of neigh) {
+      const i = pos[w];
+      if (i === n - 2) continue;   // already the path-neighbour — no-op
+      cands.push(i);
     }
-  } catch (e) {}
-  while (LINE.solved.length < LINE_LEVELS.length) LINE.solved.push(false);
-  // Also load best-random-level reached
-  try { LINE.randomBest = parseInt(localStorage.getItem(LINE_KEY + '-rnd') || '0', 10) || 0; } catch (e) { LINE.randomBest = 0; }
-}
-function lineSaveSolved() {
-  try { localStorage.setItem(LINE_KEY, JSON.stringify(LINE.solved)); } catch (e) {}
-}
-function lineSaveRandomBest() {
-  try { localStorage.setItem(LINE_KEY + '-rnd', String(LINE.randomBest || 0)); } catch (e) {}
+    if (!cands.length) continue;
+    const i = cands[(Math.random() * cands.length) | 0];
+    // Reverse the segment after index i in place.
+    let lo = i + 1, hi = n - 1;
+    while (lo < hi) { const t = path[lo]; path[lo] = path[hi]; path[hi] = t; lo++; hi--; }
+  }
+  return path;   // cell indices in visiting order — a full Hamiltonian path
 }
 
-// === RANDOM ENDLESS LINE PUZZLES ===
-// Generate a guaranteed-solvable puzzle by performing a randomized DFS that
-// finds a Hamiltonian path of `targetLen` cells on a `rows`x`cols` grid.
-// We then use ONLY the cells visited by the path as the puzzle's mask, with
-// the path's first cell as the start. Solvability is built into the data.
-function _dfsHam(path, visited, target, rows, cols, budget) {
-  if (path.length >= target) return true;
-  if (budget.count-- <= 0) return false;
-  const last = path[path.length - 1];
-  const r = last[0], c = last[1];
-  // Shuffle the four neighbor directions for variety
-  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-  for (let i = dirs.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = dirs[i]; dirs[i] = dirs[j]; dirs[j] = tmp;
-  }
-  for (const d of dirs) {
-    const nr = r + d[0], nc = c + d[1];
-    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
-    const key = nr * cols + nc;
-    if (visited.has(key)) continue;
-    visited.add(key);
-    path.push([nr, nc]);
-    if (_dfsHam(path, visited, target, rows, cols, budget)) return true;
-    path.pop();
-    visited.delete(key);
-  }
-  return false;
-}
-function generateHamiltonianPath(rows, cols, targetLen) {
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const sr = Math.floor(Math.random() * rows);
-    const sc = Math.floor(Math.random() * cols);
-    const visited = new Set([sr * cols + sc]);
-    const path = [[sr, sc]];
-    const budget = { count: 12000 };
-    if (_dfsHam(path, visited, targetLen, rows, cols, budget)) return path;
-  }
-  return null;
-}
-
-// Difficulty curve for endless random puzzles
+// Grid size by level. Denser/bigger = harder. All grids are completely full.
 function lineRandomDifficulty(level) {
-  if (level < 2)  return { rows: 4, cols: 4, target: 12 + level };          // 12, 13
-  if (level < 5)  return { rows: 5, cols: 5, target: 18 + (level - 2) * 2 }; // 18, 20, 22
-  if (level < 9)  return { rows: 6, cols: 6, target: 26 + (level - 5) * 2 }; // 26, 28, 30, 32
-  if (level < 14) return { rows: 7, cols: 7, target: 36 + (level - 9) * 3 }; // 36, 39, 42, 45, 48
-  return { rows: 8, cols: 8, target: Math.min(64, 50 + (level - 14) * 2) };
+  let size;
+  if (level < 2)      size = 4;
+  else if (level < 4) size = 5;
+  else if (level < 7) size = 6;
+  else if (level < 10) size = 7;
+  else                size = 8;
+  return { rows: size, cols: size };
 }
 
-function startRandomLine() {
-  lineLoadSolved();
+// Seconds allowed per puzzle in COMPETITIVE — scales with cell count.
+function lineCompetitiveSeconds(total) {
+  return Math.max(22, Math.min(140, Math.round(total * 1.5) + 8));
+}
+
+function startRandomLine(competitive) {
+  lineLoadBests();
+  LINE.competitive = !!competitive;
   LINE.randomActive = true;
   LINE.randomLevel = 0;
   nextRandomLine();
 }
 function nextRandomLine() {
   const diff = lineRandomDifficulty(LINE.randomLevel);
-  let path = generateHamiltonianPath(diff.rows, diff.cols, diff.target);
-  // Fallback: shrink target if it failed (shouldn't with these settings on full grids, but just in case)
-  let tries = 0;
-  while (!path && diff.target > 6 && tries < 4) {
-    diff.target -= 2;
-    path = generateHamiltonianPath(diff.rows, diff.cols, diff.target);
-    tries++;
-  }
-  if (!path) { exitLineMode(); return; }
-  // Build the cells mask from the path's coordinates
-  const cells = Array(diff.rows * diff.cols).fill(0);
-  for (const rc of path) cells[rc[0] * diff.cols + rc[1]] = 1;
-  const startIdx = path[0][0] * diff.cols + path[0][1];
+  const total = diff.rows * diff.cols;
+  const order = generateFullHamiltonian(diff.rows, diff.cols);
+  const cells = Array(total).fill(1);    // full grid — zero holes, densest = hardest
+  const startIdx = order[0];
   LINE.level = { cols: diff.cols, rows: diff.rows, start: startIdx, cells, isRandom: true };
   LINE.path = [startIdx];
   LINE.won = false;
+  LINE.timedOut = false;
   const lineScreen = document.querySelector('.line-screen');
   lineScreen.classList.remove('show-levels');
   lineScreen.classList.add('show-play');
-  document.getElementById('line-title').textContent = `ENDLESS · LV ${LINE.randomLevel + 1}`;
+  const modeName = LINE.competitive ? 'TIMED' : 'ENDLESS';
+  document.getElementById('line-title').textContent = `${modeName} · LV ${LINE.randomLevel + 1}`;
   const info = document.getElementById('line-info');
-  info.classList.remove('win');
-  info.textContent = `${diff.cols}×${diff.rows} grid · ${path.length} cells · BEST LV ${LINE.randomBest || 0}`;
+  info.classList.remove('win', 'lost');
+  const best = LINE.competitive ? (LINE.compBest || 0) : (LINE.randomBest || 0);
+  info.textContent = `${diff.cols}×${diff.rows} · fill every cell · BEST LV ${best}`;
   renderLineBoard();
+  if (LINE.competitive) {
+    lineStartLevelTimer(lineCompetitiveSeconds(total));
+  } else {
+    lineHideTimer();
+  }
 }
 function exitRandomLine() {
   LINE.randomActive = false;
+  lineStopTimer();
+}
+
+// === COMPETITIVE COUNTDOWN ===
+function lineStartLevelTimer(seconds) {
+  lineStopTimer();
+  LINE.levelEndMs = performance.now() + seconds * 1000;
+  const tEl = document.getElementById('line-timer');
+  if (tEl) tEl.classList.remove('hidden');
+  const tick = () => {
+    if (!LINE.competitive || !LINE.randomActive) return;
+    const remaining = Math.max(0, (LINE.levelEndMs - performance.now()) / 1000);
+    const el = document.getElementById('line-timer');
+    if (el) {
+      el.textContent = '⏱ ' + formatTime(remaining);
+      el.classList.toggle('warn', remaining <= 10);
+    }
+    if (remaining <= 0) { lineCompetitiveTimeout(); return; }
+    if (!LINE.won) LINE.timerRAF = requestAnimationFrame(tick);
+  };
+  LINE.timerRAF = requestAnimationFrame(tick);
+}
+function lineStopTimer() {
+  if (LINE.timerRAF) { cancelAnimationFrame(LINE.timerRAF); LINE.timerRAF = null; }
+}
+function lineHideTimer() {
+  lineStopTimer();
+  const tEl = document.getElementById('line-timer');
+  if (tEl) tEl.classList.add('hidden');
+}
+function lineCompetitiveTimeout() {
+  lineStopTimer();
+  LINE.won = true;   // freeze input
+  LINE.timedOut = true;
+  // Score = levels CLEARED so far (the current level wasn't finished).
+  if (LINE.randomLevel > (LINE.compBest || 0)) {
+    LINE.compBest = LINE.randomLevel;
+    lineSaveCompBest();
+  }
+  const info = document.getElementById('line-info');
+  info.classList.remove('win');
+  info.classList.add('lost');
+  info.textContent = `⏱ TIME'S UP — cleared ${LINE.randomLevel} level${LINE.randomLevel === 1 ? '' : 's'}. Tap ↺ to retry.`;
+  const tEl = document.getElementById('line-timer');
+  if (tEl) { tEl.textContent = '⏱ 0:00'; tEl.classList.add('warn'); }
+  if (typeof SFX !== 'undefined' && SFX.over) SFX.over();
+  if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
 }
 
 // === EXTRAS SCREEN ===
@@ -9001,7 +9591,9 @@ function startAdventureLevel(idx) {
 }
 
 function openLineLevels() {
-  lineLoadSolved();
+  _enteredFromExtras = false;   // LINE lives on the main menu now
+  lineLoadBests();
+  exitRandomLine();
   document.body.dataset.screen = 'line';
   const lineScreen = document.querySelector('.line-screen');
   lineScreen.classList.remove('show-play');
@@ -9015,66 +9607,42 @@ function renderLineLevels() {
   // Header
   const head = document.createElement('div');
   head.className = 'line-levels-head';
-  head.innerHTML = '<button class="lvl-back" onclick="exitLineMode()" type="button">← MENU</button><h2>LINE PUZZLES</h2><span style="width:60px"></span>';
+  head.innerHTML = '<button class="lvl-back" onclick="exitLineMode()" type="button">← MENU</button><h2>LINE</h2><span style="width:60px"></span>';
   wrap.appendChild(head);
 
-  // ENDLESS / RANDOM card (always first)
-  const rndBest = LINE.randomBest || 0;
-  const rnd = document.createElement('button');
-  rnd.type = 'button';
-  rnd.className = 'line-level-card line-random-card';
-  rnd.innerHTML = `
-    <div class="lc-num" style="font-size:14px; letter-spacing:0.15em">∞</div>
-    <div class="lc-mini lc-mini-rand"></div>
-    <div class="lc-tag">${rndBest > 0 ? 'BEST LV ' + rndBest : 'ENDLESS'}</div>
+  // INFINITE — relaxed endless run
+  const inf = document.createElement('button');
+  inf.type = 'button';
+  inf.className = 'line-mode-card line-mode-infinite';
+  inf.innerHTML = `
+    <div class="lmc-icon">∞</div>
+    <div class="lmc-text">
+      <div class="lmc-name">INFINITE</div>
+      <div class="lmc-desc">Endless puzzles, each board denser than the last. Go as far as you can.</div>
+    </div>
+    <div class="lmc-best">${(LINE.randomBest || 0) > 0 ? 'BEST LV ' + LINE.randomBest : 'NEW'}</div>
   `;
-  rnd.onclick = () => startRandomLine();
-  wrap.appendChild(rnd);
+  inf.onclick = () => startRandomLine(false);
+  wrap.appendChild(inf);
 
-  // Level cards
-  LINE_LEVELS.forEach((lvl, i) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'line-level-card' + (LINE.solved[i] ? ' solved' : '');
-    const num = document.createElement('div'); num.className = 'lc-num'; num.textContent = (i + 1);
-    const mini = document.createElement('div');
-    mini.className = 'lc-mini';
-    mini.style.gridTemplateColumns = `repeat(${lvl.cols}, 1fr)`;
-    mini.style.gridTemplateRows    = `repeat(${lvl.rows}, 1fr)`;
-    for (const v of lvl.cells) {
-      const d = document.createElement('div');
-      if (!v) d.className = 'off';
-      mini.appendChild(d);
-    }
-    const tag = document.createElement('div'); tag.className = 'lc-tag';
-    tag.textContent = LINE.solved[i] ? '✓ SOLVED' : `${lvl.cols}×${lvl.rows}`;
-    card.appendChild(num);
-    card.appendChild(mini);
-    card.appendChild(tag);
-    card.onclick = () => startLineLevel(i);
-    wrap.appendChild(card);
-  });
-}
-
-function startLineLevel(idx) {
-  LINE.randomActive = false;
-  LINE.levelIdx = idx;
-  LINE.level = LINE_LEVELS[idx];
-  LINE.path = [LINE.level.start];
-  LINE.dragging = false;
-  LINE.won = false;
-  const lineScreen = document.querySelector('.line-screen');
-  lineScreen.classList.remove('show-levels');
-  lineScreen.classList.add('show-play');
-  document.getElementById('line-title').textContent = `LEVEL ${idx + 1}`;
-  const info = document.getElementById('line-info');
-  info.classList.remove('win');
-  info.textContent = 'Drag from the green cell. Visit every cell exactly once.';
-  renderLineBoard();
+  // COMPETITIVE — timed endless run
+  const comp = document.createElement('button');
+  comp.type = 'button';
+  comp.className = 'line-mode-card line-mode-comp';
+  comp.innerHTML = `
+    <div class="lmc-icon">⏱</div>
+    <div class="lmc-text">
+      <div class="lmc-name">COMPETITIVE</div>
+      <div class="lmc-desc">Beat the clock on every puzzle. Solve in time to advance — how far you get is your score.</div>
+    </div>
+    <div class="lmc-best">${(LINE.compBest || 0) > 0 ? 'BEST LV ' + LINE.compBest : 'NEW'}</div>
+  `;
+  comp.onclick = () => startRandomLine(true);
+  wrap.appendChild(comp);
 }
 
 function lineBackToLevels() {
-  LINE.randomActive = false;
+  exitRandomLine();
   const lineScreen = document.querySelector('.line-screen');
   lineScreen.classList.remove('show-play');
   lineScreen.classList.add('show-levels');
@@ -9082,6 +9650,7 @@ function lineBackToLevels() {
 }
 
 function exitLineMode() {
+  exitRandomLine();
   document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
   refreshBestLabels();
 }
@@ -9202,23 +9771,25 @@ function handleLinePointer(idx) {
   if (LINE.path.length === onCount) {
     LINE.won = true;
     const info = document.getElementById('line-info');
+    info.classList.remove('lost');
     info.classList.add('win');
-    if (lvl.isRandom) {
-      // Endless mode: advance to the next (harder) random puzzle
-      LINE.randomLevel = (LINE.randomLevel || 0) + 1;
+    // Both flavours advance to the next (denser) puzzle.
+    LINE.randomLevel = (LINE.randomLevel || 0) + 1;
+    if (LINE.competitive) {
+      lineStopTimer();   // freeze the clock during the transition
+      if (LINE.randomLevel > (LINE.compBest || 0)) {
+        LINE.compBest = LINE.randomLevel;
+        lineSaveCompBest();
+      }
+    } else {
       if (LINE.randomLevel > (LINE.randomBest || 0)) {
         LINE.randomBest = LINE.randomLevel;
         lineSaveRandomBest();
       }
-      info.textContent = `✓ LEVEL ${LINE.randomLevel} CLEARED!  Next…`;
-      if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
-      setTimeout(() => { if (LINE.randomActive) nextRandomLine(); }, 1300);
-    } else {
-      LINE.solved[LINE.levelIdx] = true;
-      lineSaveSolved();
-      info.textContent = '✓ SOLVED!  Tap LEVELS for the next one.';
-      if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
     }
+    info.textContent = `✓ LEVEL ${LINE.randomLevel} CLEARED!  Next…`;
+    if (typeof SFX !== 'undefined' && SFX.win) SFX.win();
+    setTimeout(() => { if (LINE.randomActive) nextRandomLine(); }, 1100);
   }
   renderLineBoard();
 }
@@ -9231,18 +9802,19 @@ function areAdjacent(aIdx, bIdx, cols) {
 
 function lineResetPath() {
   if (!LINE.level) return;
+  // After a Competitive time-out, ↺ restarts the whole run from level 1.
+  if (LINE.competitive && LINE.timedOut) { startRandomLine(true); return; }
   LINE.path = [LINE.level.start];
   LINE.won = false;
-  document.getElementById('line-info').classList.remove('win');
-  document.getElementById('line-info').textContent = 'Drag from the green cell. Visit every cell exactly once.';
+  document.getElementById('line-info').classList.remove('win', 'lost');
+  document.getElementById('line-info').textContent = 'Drag from the green cell. Fill every cell exactly once.';
   renderLineBoard();
 }
 function lineUndo() {
-  if (!LINE.level || LINE.path.length <= 1) return;
+  if (!LINE.level || LINE.path.length <= 1 || LINE.timedOut) return;
   LINE.path.pop();
   LINE.won = false;
-  document.getElementById('line-info').classList.remove('win');
-  document.getElementById('line-info').textContent = 'Drag from the green cell. Visit every cell exactly once.';
+  document.getElementById('line-info').classList.remove('win', 'lost');
   renderLineBoard();
 }
 
