@@ -20,16 +20,16 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0f;
-    --bg-2: #14141d;
-    --cell: #1f1f2c;
-    --cell-edge: rgba(255,255,255,0.04);
+    --bg: #181824;
+    --bg-2: #232333;
+    --cell: #313146;
+    --cell-edge: rgba(255,255,255,0.06);
     --text: #f5f5f7;
     --dim: #6c6c7a;
     --accent: #ffb84d;
@@ -39,6 +39,35 @@
     --danger: #ff5f5f;
     --gap: 3px;
   }
+
+  /* === LIGHT MODE === */
+  body.theme-light {
+    --bg: #eef0f6;
+    --bg-2: #ffffff;
+    --cell: #d9dce8;
+    --cell-edge: rgba(0,0,0,0.07);
+    --text: #1c1c28;
+    --dim: #8a8a98;
+    --accent: #f08a24;
+  }
+  body.theme-light {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(240,138,36,0.10), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.08), transparent 60%),
+      var(--bg);
+  }
+  /* Fix white-on-white UI chrome that relied on a dark backdrop */
+  body.theme-light .setting-switch { background: rgba(0,0,0,0.16); }
+  body.theme-light .setting-switch::after { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  body.theme-light .setting-link { background: rgba(0,0,0,0.035); border-color: rgba(0,0,0,0.08); }
+  body.theme-light .panel-card { border-color: rgba(0,0,0,0.10); box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
+  body.theme-light .panel-head { border-bottom-color: rgba(0,0,0,0.08); }
+  /* Full-screen overlays use a fixed dark backdrop; in light mode their
+     --text content would go dark-on-dark, so give them a light frosted backdrop */
+  body.theme-light .overlay,
+  body.theme-light .fruit-game-over,
+  body.theme-light .mp-modal { background: rgba(238,240,246,0.92); }
+  body.theme-light .btn.secondary { border-color: rgba(0,0,0,0.22); }
 
   html, body {
     /* Allow vertical scroll everywhere — the title screen (5 mode cards),
@@ -505,10 +534,39 @@
     animation: clear 440ms cubic-bezier(.4, 0, .2, 1) backwards;
     z-index: 2;
   }
+  /* Quick bright flash then vanish — the block "launches" toward the player
+     via a .flyblock clone (below) rather than imploding in place. */
   @keyframes clear {
-    0%   { transform: scale(1) rotate(0deg);    filter: brightness(1); }
-    25%  { transform: scale(1.22) rotate(2deg); filter: brightness(2.4) saturate(1.5); }
-    100% { transform: scale(0) rotate(10deg);   filter: brightness(0.4); opacity: 0; }
+    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1); opacity: 1; }
+    14%  { transform: scale(1.4) rotate(-3deg);  filter: brightness(3.6) saturate(1.9); box-shadow: 0 0 24px 7px rgba(255,255,255,0.95); opacity: 1; }
+    45%  { transform: scale(1.15);               filter: brightness(2); opacity: 0; }
+    100% { transform: scale(1.15);               opacity: 0; }
+  }
+
+  /* === FLYING BLOCK (rushes toward the player as it clears) === */
+  .flyblock {
+    position: absolute;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 7;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.45),
+      inset 0 -3px 0 rgba(0,0,0,0.3),
+      0 0 14px rgba(0,0,0,0.35);
+    will-change: transform, opacity, filter;
+  }
+
+  /* === BLOCK SHATTER SHARDS === */
+  .shard {
+    position: absolute;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 6;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.4),
+      inset 0 -2px 0 rgba(0,0,0,0.3),
+      0 0 6px rgba(0,0,0,0.25);
+    will-change: transform, opacity;
   }
 
   /* === TRAY === */
@@ -600,6 +658,253 @@
     0%   { transform: translate(-50%, 0)    scale(0.5); opacity: 0; }
     20%  { transform: translate(-50%, -8px) scale(1.15); opacity: 1; }
     100% { transform: translate(-50%, -70px) scale(0.95); opacity: 0; }
+  }
+
+  /* === EXPLODY SCORE POP (Block-Blast style) === */
+  .score-pop {
+    position: absolute;
+    pointer-events: none;
+    z-index: 12;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    will-change: transform, opacity;
+    --pop-glow: rgba(255,184,77,0.6);
+  }
+  .score-pop .sp-amt {
+    display: block;
+    background: linear-gradient(135deg, #fff7d6, #ffd93b, #ff9f43);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5)) drop-shadow(0 0 18px var(--pop-glow));
+  }
+  .score-pop .sp-tag {
+    display: block;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    margin-top: 2px;
+    color: #fff;
+    text-shadow: 0 0 12px var(--pop-glow), 0 2px 4px rgba(0,0,0,0.6);
+  }
+  /* tiers scale size, color, and glow up with the clear */
+  .score-pop.t0 .sp-amt { font-size: 32px; }
+  .score-pop.t0 .sp-tag { font-size: 9px; }
+  .score-pop.t1 { --pop-glow: rgba(255,159,67,0.75); }
+  .score-pop.t1 .sp-amt { font-size: 40px; background-image: linear-gradient(135deg,#fff,#ffd93b,#ff9f43); }
+  .score-pop.t1 .sp-tag { font-size: 10px; }
+  .score-pop.t2 { --pop-glow: rgba(247,131,172,0.85); }
+  .score-pop.t2 .sp-amt { font-size: 50px; background-image: linear-gradient(135deg,#fff,#ffd93b,#ff5f5f); }
+  .score-pop.t2 .sp-tag { font-size: 11px; color:#ffd1e0; }
+  .score-pop.t3 { --pop-glow: rgba(255,99,99,0.95); }
+  .score-pop.t3 .sp-amt {
+    font-size: 64px;
+    background-image: linear-gradient(135deg,#fff,#ffd93b,#ff9f43,#ff5f5f,#f783ac);
+  }
+  .score-pop.t3 .sp-tag { font-size: 12px; color:#ffe08a; }
+  .score-pop.go {
+    animation: score-pop-anim 950ms cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  @keyframes score-pop-anim {
+    0%   { transform: translate(-50%, -50%) scale(0.3) rotate(-6deg); opacity: 0; }
+    18%  { transform: translate(-50%, -54%) scale(1.25) rotate(2deg); opacity: 1; }
+    32%  { transform: translate(-50%, -56%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -120%) scale(0.92); opacity: 0; }
+  }
+
+  /* === BIG COMBO POP === */
+  .combo-pop {
+    position: absolute;
+    left: 50%;
+    top: 26%;
+    z-index: 13;
+    pointer-events: none;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    will-change: transform, opacity;
+  }
+  .combo-pop .cp-x {
+    display: block;
+    font-size: 54px;
+    line-height: 1;
+    background: linear-gradient(135deg,#ffd93b,#ff5f5f,#f783ac);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,0.5)) drop-shadow(0 0 22px rgba(247,131,172,0.6));
+  }
+  .combo-pop .cp-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    color: #fff;
+    margin-top: 2px;
+    text-shadow: 0 0 14px rgba(247,131,172,0.7);
+  }
+  .combo-pop.go { animation: combo-pop-anim 850ms cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes combo-pop-anim {
+    0%   { transform: translate(-50%, -50%) scale(0.2) rotate(-10deg); opacity: 0; }
+    20%  { transform: translate(-50%, -50%) scale(1.3) rotate(4deg); opacity: 1; }
+    35%  { transform: translate(-50%, -50%) scale(1.05) rotate(0deg); opacity: 1; }
+    75%  { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+    100% { transform: translate(-50%, -90%) scale(0.85); opacity: 0; }
+  }
+
+  /* === SHOCKWAVE RING === */
+  .shockwave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(255,255,255,0.85);
+    will-change: transform, opacity;
+  }
+  .shockwave.go { animation: shockwave-anim 560ms cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes shockwave-anim {
+    0%   { width: 12px; height: 12px; opacity: 0.9; border-width: 4px; }
+    100% { width: 240px; height: 240px; opacity: 0; border-width: 0.5px; }
+  }
+
+  /* === GRID SHAKE (scales with clear size; on #grid so the board frame can
+        still run its box-shadow combo-flash at the same time) === */
+  .grid.shake-sm { animation: board-shake 240ms ease-in-out; }
+  .grid.shake-md { animation: board-shake 320ms ease-in-out; }
+  .grid.shake-lg { animation: board-shake 420ms ease-in-out; }
+  @keyframes board-shake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    15% { transform: translate(-4px, 2px) rotate(-0.5deg); }
+    30% { transform: translate(5px, -3px) rotate(0.5deg); }
+    45% { transform: translate(-5px, 3px) rotate(-0.6deg); }
+    60% { transform: translate(4px, -2px) rotate(0.4deg); }
+    75% { transform: translate(-3px, 2px) rotate(-0.3deg); }
+    90% { transform: translate(2px, -1px) rotate(0.2deg); }
+  }
+  /* bigger clears shake harder */
+  .grid.shake-xl { animation: board-shake-xl 480ms ease-in-out; }
+  @keyframes board-shake-xl {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    12% { transform: translate(-9px, 5px) rotate(-1.1deg); }
+    26% { transform: translate(10px, -7px) rotate(1.2deg); }
+    40% { transform: translate(-11px, 6px) rotate(-1.3deg); }
+    55% { transform: translate(9px, -5px) rotate(1deg); }
+    70% { transform: translate(-7px, 4px) rotate(-0.7deg); }
+    85% { transform: translate(4px, -2px) rotate(0.4deg); }
+  }
+
+  /* === NEON BORDER FLASH (own element so it stacks with combo-flash + shake) === */
+  .board-neon {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 8;
+    border: 3px solid var(--neon, #4dd0e1);
+    opacity: 0;
+    box-shadow:
+      0 0 12px 2px var(--neon, #4dd0e1),
+      0 0 28px 6px var(--neon, #4dd0e1),
+      inset 0 0 18px 2px var(--neon, #4dd0e1);
+  }
+  .board-neon.flash { animation: neon-flash var(--neon-dur, 620ms) cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes neon-flash {
+    0%   { opacity: 0; border-width: 2px; }
+    12%  { opacity: 1; border-width: var(--neon-bw, 4px); }
+    55%  { opacity: 0.85; }
+    100% { opacity: 0; border-width: 2px; }
+  }
+  /* intensity tiers: brighter, thicker, multi-color as lines stack up */
+  .board-neon.n1 { --neon: #4dd0e1; --neon-bw: 4px; }
+  .board-neon.n2 { --neon: #51cf66; --neon-bw: 5px; }
+  .board-neon.n3 { --neon: #ff9f43; --neon-bw: 7px; }
+  .board-neon.n4 {
+    --neon-bw: 9px;
+    border-color: #fff;
+    animation: neon-flash-mega var(--neon-dur, 760ms) cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes neon-flash-mega {
+    0%   { opacity: 0; border-width: 3px; box-shadow: 0 0 14px 3px #ffd93b, inset 0 0 20px 3px #ffd93b; }
+    10%  { opacity: 1; border-width: 10px; border-color: #fff; box-shadow: 0 0 26px 8px #ffd93b, 0 0 50px 14px #ff5f5f, inset 0 0 30px 6px #ff9f43; }
+    35%  { opacity: 1; border-color: #ffd93b; box-shadow: 0 0 30px 10px #ff5f5f, 0 0 60px 18px #f783ac, inset 0 0 30px 6px #ff5f5f; }
+    60%  { opacity: 0.9; border-color: #f783ac; box-shadow: 0 0 26px 8px #f783ac, 0 0 50px 14px #5c7cfa, inset 0 0 26px 5px #f783ac; }
+    100% { opacity: 0; border-width: 3px; box-shadow: 0 0 10px 2px #5c7cfa, inset 0 0 14px 2px #5c7cfa; }
+  }
+
+  /* === COMIC-BOOK POW BURST === */
+  .comic-burst {
+    position: absolute;
+    z-index: 14;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    will-change: transform, opacity;
+  }
+  .comic-burst.go { animation: comic-anim 720ms cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes comic-anim {
+    0%   { transform: translate(-50%,-50%) scale(0.1) rotate(-25deg); opacity: 0; }
+    18%  { transform: translate(-50%,-50%) scale(1.35) rotate(6deg); opacity: 1; }
+    34%  { transform: translate(-50%,-50%) scale(0.95) rotate(-3deg); opacity: 1; }
+    50%  { transform: translate(-50%,-50%) scale(1.05) rotate(1deg); opacity: 1; }
+    72%  { transform: translate(-50%,-50%) scale(1.0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(1.25) rotate(0deg); opacity: 0; }
+  }
+  .comic-burst .burst-star {
+    grid-area: 1 / 1;
+    width: var(--burst-size, 150px);
+    height: var(--burst-size, 150px);
+    background: radial-gradient(circle at 50% 42%, #fffef0 0%, #ffe14d 34%, #ff9f43 70%, #ff7a1a 100%);
+    clip-path: polygon(50% 0%, 61% 22%, 84% 12%, 78% 37%, 100% 38%, 82% 55%, 96% 76%, 70% 71%, 68% 96%, 50% 79%, 32% 96%, 30% 71%, 4% 76%, 18% 55%, 0% 38%, 22% 37%, 16% 12%, 39% 22%);
+    filter:
+      drop-shadow(3px 3px 0 #1a1a22) drop-shadow(-3px -3px 0 #1a1a22)
+      drop-shadow(3px -3px 0 #1a1a22) drop-shadow(-3px 3px 0 #1a1a22)
+      drop-shadow(0 0 16px rgba(255,200,80,0.7));
+  }
+  .comic-burst .burst-word {
+    grid-area: 1 / 1;
+    font-family: 'Bangers', 'Bricolage Grotesque', cursive;
+    font-size: var(--burst-font, 40px);
+    letter-spacing: 0.02em;
+    color: #ff3b3b;
+    -webkit-text-stroke: 2px #1a1a22;
+    text-shadow: 3px 3px 0 #1a1a22, 0 0 10px rgba(255,255,255,0.5);
+    transform: rotate(-7deg);
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .comic-burst.big .burst-word { color: #ffd93b; }
+
+  /* comic radial speed-lines that shoot out behind the burst */
+  .speedlines {
+    position: absolute;
+    z-index: 9;
+    pointer-events: none;
+    width: 8px; height: 8px;
+    transform: translate(-50%, -50%);
+    background:
+      repeating-conic-gradient(from 0deg,
+        rgba(255,255,255,0.85) 0deg 3deg,
+        transparent 3deg 18deg);
+    border-radius: 50%;
+    opacity: 0;
+    -webkit-mask: radial-gradient(circle, transparent 28%, #000 42%, #000 58%, transparent 72%);
+            mask: radial-gradient(circle, transparent 28%, #000 42%, #000 58%, transparent 72%);
+  }
+  .speedlines.go { animation: speedlines-anim 460ms ease-out forwards; }
+  @keyframes speedlines-anim {
+    0%   { width: 20px; height: 20px; opacity: 0; }
+    25%  { opacity: 0.9; }
+    100% { width: 300px; height: 300px; opacity: 0; }
   }
 
   /* === GAME OVER OVERLAY === */
@@ -1950,6 +2255,40 @@
     0%   { background-position: 0%   0%;   }
     50%  { background-position: 250% 100%; }
     100% { background-position: 0%   0%;   }
+  }
+
+  /* === DEFAULT SKIN: Block Blast-style glossy 3D cubes === */
+  body.skin-default .cell.filled,
+  body.skin-default .pcell:not(.empty) {
+    position: relative;
+    border-radius: 22%;
+    background: var(--c, var(--accent));
+    box-shadow:
+      inset 0 3px 1px rgba(255,255,255,0.55),
+      inset 3px 0 2px rgba(255,255,255,0.22),
+      inset 0 -5px 3px rgba(0,0,0,0.34),
+      inset -3px 0 3px rgba(0,0,0,0.22),
+      0 3px 4px rgba(0,0,0,0.30);
+    overflow: hidden;
+  }
+  /* Curved glossy sheen + specular glint across the top-left face.
+     Only ::before is used so special pieces' ::after icons (💣⚡🌈★) stay intact. */
+  body.skin-default .cell.filled::before,
+  body.skin-default .pcell:not(.empty)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 36% 24% at 22% 18%,
+        rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(158deg,
+        rgba(255,255,255,0.50) 0%,
+        rgba(255,255,255,0.22) 20%,
+        rgba(255,255,255,0.04) 40%,
+        rgba(0,0,0,0) 58%,
+        rgba(0,0,0,0.16) 100%);
   }
 
   /* Skin picker (in settings modal) */
@@ -4283,6 +4622,7 @@
     border-radius: 12px;
   }
   .tut-step .tut-icon {
+    grid-row: 1 / span 2;
     font-size: 24px;
     line-height: 1;
     width: 36px;
@@ -4291,6 +4631,8 @@
     place-items: center;
   }
   .tut-step h3 {
+    grid-column: 2;
+    min-width: 0;
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 800;
     font-size: 14px;
@@ -4299,10 +4641,13 @@
     line-height: 1.15;
   }
   .tut-step p {
+    grid-column: 2;
+    min-width: 0;
     font-size: 12px;
     color: var(--dim);
     margin-top: 4px;
     line-height: 1.4;
+    overflow-wrap: break-word;
   }
 
   /* === ACHIEVEMENT POPUP === */
@@ -4687,6 +5032,96 @@
 </style>
 </head>
 <body data-screen="title" data-mode="classic">
+
+  <!-- ============================================ -->
+  <!-- FRIDGEPASSWORD PUBLISHER SPLASH (auto-dismiss) -->
+  <!-- ============================================ -->
+  <div id="fp-splash" aria-hidden="true">
+    <style>
+      #fp-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;overflow:hidden;
+        font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;
+        background:radial-gradient(120% 80% at 50% 22%,#1b2a4a 0%,#0b1020 45%,#05060a 100%);
+        opacity:1;transition:opacity .6s ease;}
+      #fp-splash.fp-hide{opacity:0;pointer-events:none;}
+      #fp-splash .fp-blob{position:absolute;border-radius:50%;filter:blur(80px);}
+      #fp-splash .fp-b1{width:46vmin;height:46vmin;background:#39d0ff;top:-10vmin;left:-10vmin;opacity:.5;}
+      #fp-splash .fp-b2{width:42vmin;height:42vmin;background:#7c5cff;bottom:-8vmin;right:-8vmin;opacity:.45;}
+      #fp-splash .fp-b3{width:34vmin;height:34vmin;background:#16f5c7;bottom:18vmin;left:-8vmin;opacity:.3;}
+      #fp-splash .fp-mark{position:relative;z-index:3;width:26vmin;height:34vmin;border-radius:3.4vmin;
+        background:linear-gradient(160deg,#eef6ff 0%,#c4dcf0 100%);
+        box-shadow:0 3vmin 6vmin rgba(0,0,0,.55),inset 0 .3vmin 0 rgba(255,255,255,.9),
+          inset 0 -2.2vmin 4.5vmin rgba(80,120,170,.35);
+        border:.22vmin solid rgba(255,255,255,.6);
+        animation:fp-pop .7s cubic-bezier(.2,1.3,.4,1) both;}
+      #fp-splash .fp-mark::after{content:"";position:absolute;left:2.4vmin;right:2.4vmin;top:13.4vmin;
+        height:.45vmin;background:rgba(120,150,185,.45);border-radius:.45vmin;}
+      #fp-splash .fp-handle{position:absolute;right:2.1vmin;width:1vmin;border-radius:.6vmin;
+        background:linear-gradient(#9fb8d4,#6f8db0);}
+      #fp-splash .fp-h1{top:5vmin;height:6.8vmin;}
+      #fp-splash .fp-h2{top:16.2vmin;height:10vmin;}
+      #fp-splash .fp-lock{position:absolute;z-index:4;left:50%;top:21vmin;transform:translateX(-50%);
+        width:10vmin;height:10vmin;border-radius:50%;
+        background:radial-gradient(circle at 50% 38%,#2a3550,#10182b);
+        border:.45vmin solid #39d0ff;box-shadow:0 0 2.8vmin #39d0ff,inset 0 0 1.8vmin rgba(57,208,255,.6);
+        display:flex;align-items:center;justify-content:center;}
+      #fp-splash .fp-dots{display:flex;gap:1vmin;}
+      #fp-splash .fp-dots span{width:1.3vmin;height:1.3vmin;border-radius:50%;
+        background:#39d0ff;box-shadow:0 0 1vmin #39d0ff;animation:fp-blink 1.1s ease-in-out infinite;}
+      #fp-splash .fp-dots span:nth-child(2){animation-delay:.18s;}
+      #fp-splash .fp-dots span:nth-child(3){animation-delay:.36s;}
+      #fp-splash .fp-word{position:relative;z-index:3;margin-top:5vmin;text-align:center;
+        animation:fp-fade .8s ease .25s both;}
+      #fp-splash .fp-word h1{font-size:7.4vmin;font-weight:800;letter-spacing:-.2vmin;line-height:1;color:#fff;
+        text-shadow:0 .3vmin 0 rgba(0,0,0,.25),0 0 3.5vmin rgba(57,208,255,.55);}
+      #fp-splash .fp-word h1 .fp-pw{color:#39d0ff;text-shadow:0 0 2.8vmin rgba(57,208,255,.9);}
+      #fp-splash .fp-tag{margin-top:1.6vmin;font-size:3.1vmin;letter-spacing:1vmin;text-transform:uppercase;
+        color:#9fb6d4;font-weight:600;}
+      #fp-splash .fp-loader{position:absolute;bottom:9vmin;z-index:3;width:54vmin;max-width:80%;
+        text-align:center;animation:fp-fade .8s ease .4s both;}
+      #fp-splash .fp-bar{width:100%;height:1.6vmin;border-radius:1.2vmin;background:rgba(255,255,255,.08);
+        overflow:hidden;border:.15vmin solid rgba(255,255,255,.12);}
+      #fp-splash .fp-bar i{display:block;height:100%;width:0;border-radius:1.2vmin;
+        background:linear-gradient(90deg,#16f5c7,#39d0ff,#7c5cff);box-shadow:0 0 2vmin #39d0ff;
+        animation:fp-load 2.4s ease-in-out .3s forwards;}
+      #fp-splash .fp-loading{margin-top:1.8vmin;font-size:2.1vmin;letter-spacing:.4vmin;color:#8ea6c6;}
+      #fp-splash .fp-gh{position:absolute;bottom:3.4vmin;z-index:3;color:#6a7fa3;font-size:2.5vmin;
+        letter-spacing:.2vmin;animation:fp-fade .8s ease .5s both;}
+      @keyframes fp-load{from{width:0;}to{width:100%;}}
+      @keyframes fp-pop{from{opacity:0;transform:scale(.6) translateY(4vmin);}to{opacity:1;transform:none;}}
+      @keyframes fp-fade{from{opacity:0;transform:translateY(2vmin);}to{opacity:1;transform:none;}}
+      @keyframes fp-blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+      @media (prefers-reduced-motion:reduce){
+        #fp-splash .fp-mark,#fp-splash .fp-word,#fp-splash .fp-dots span{animation:none;}}
+    </style>
+    <div class="fp-blob fp-b1"></div>
+    <div class="fp-blob fp-b2"></div>
+    <div class="fp-blob fp-b3"></div>
+    <div class="fp-mark">
+      <div class="fp-handle fp-h1"></div>
+      <div class="fp-handle fp-h2"></div>
+      <div class="fp-lock"><div class="fp-dots"><span></span><span></span><span></span></div></div>
+    </div>
+    <div class="fp-word">
+      <h1>fridge<span class="fp-pw">password</span></h1>
+      <div class="fp-tag">games</div>
+    </div>
+    <div class="fp-loader">
+      <div class="fp-bar"><i></i></div>
+      <div class="fp-loading">LOADING…</div>
+    </div>
+    <div class="fp-gh">github.com/fridgepassword</div>
+    <script>
+      (function(){
+        var s=document.getElementById('fp-splash');
+        if(!s)return;
+        var done=false;
+        function hide(){if(done)return;done=true;s.classList.add('fp-hide');
+          setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);},650);}
+        setTimeout(hide,3000);
+      })();
+    </script>
+  </div>
 
   <!-- ============================================ -->
   <!-- MONETIZATION UPDATE v1.1 — TOP-LEVEL FLOATING -->
@@ -5207,6 +5642,14 @@
           <div class="setting-name">🔍 Big buttons</div>
           <div class="setting-switch"></div>
         </div>
+        <div class="setting-row" data-toggle="lightmode">
+          <div class="setting-name">☀️ Light mode</div>
+          <div class="setting-switch"></div>
+        </div>
+        <div class="setting-row" data-toggle="comicwords">
+          <div class="setting-name">💥 Comic words on clear</div>
+          <div class="setting-switch"></div>
+        </div>
         <!-- These two only appear after the user has entered the
              corresponding secret code at least once -->
         <div class="setting-row hidden" id="row-unicorn" data-toggle="unicorn">
@@ -5711,6 +6154,8 @@ let holds = [];           // pieces in stash slots (or null)
 let maxHoldSlots = 0;     // earned 1 per line cleared, capped
 const HOLD_SLOT_CAP = 8;
 let score = 0, streak = 0;
+// Scales every point gain up so scores feel chunkier / more rewarding.
+const SCORE_SCALE = 10;
 let drag = null;
 
 // Multiplayer (hot-seat) state
@@ -6115,6 +6560,26 @@ function setBigButtons(on) {
 }
 function applyBigButtons() {
   document.body.classList.toggle('big-buttons', bigButtons);
+}
+
+// === LIGHT MODE SETTING ===
+let lightMode = false;
+try { lightMode = localStorage.getItem('issa-blocks-light') === '1'; } catch (e) {}
+function setLightMode(on) {
+  lightMode = on;
+  try { localStorage.setItem('issa-blocks-light', on ? '1' : '0'); } catch (e) {}
+  document.body.classList.toggle('theme-light', on);
+}
+function applyLightMode() {
+  document.body.classList.toggle('theme-light', lightMode);
+}
+
+// === COMIC WORDS SETTING (onomatopoeia burst on line clear) ===
+let comicWords = true;
+try { comicWords = localStorage.getItem('issa-blocks-comicwords') !== '0'; } catch (e) {}
+function setComicWords(on) {
+  comicWords = on;
+  try { localStorage.setItem('issa-blocks-comicwords', on ? '1' : '0'); } catch (e) {}
 }
 // Wrap navigator.vibrate so toggle works without rewriting every call
 const _origVibrate = navigator.vibrate && navigator.vibrate.bind(navigator);
@@ -6883,7 +7348,7 @@ function placePiece(source, gx, gy) {
   clearPieceFrom(source);
   SFX.place();
 
-  const placementScore = Math.round(piece.cells.length * mode.multiplier);
+  const placementScore = Math.round(piece.cells.length * mode.multiplier * SCORE_SCALE);
   score += placementScore;
   // === STATS ===
   stats.piecesPlaced += 1;
@@ -6976,7 +7441,7 @@ function placePiece(source, gx, gy) {
     let gained = totalLines * 10;
     if (totalLines >= 2) gained += (totalLines - 1) * 10;
     if (streak > 1) gained += streak * 5;
-    gained = Math.round(gained * mode.multiplier * nextClearMult);
+    gained = Math.round(gained * mode.multiplier * nextClearMult * SCORE_SCALE);
     score += gained;
     if (nextClearMult !== 1) nextClearMult = 1;     // multiplier piece's effect consumed
     // === STATS: track lines, streak, biggest single clear, combo ===
@@ -6986,7 +7451,27 @@ function placePiece(source, gx, gy) {
     if (totalLines > stats.highestCombo) stats.highestCombo = totalLines;
     if (gained > stats.highestSingleClear) stats.highestSingleClear = gained;
 
-    showFloater(textForClear(totalLines, streak, gained));
+    // === BLOCK-BLAST JUICE: explody score pop, combo, shockwave, debris, shake ===
+    const tier = clearTier(totalLines, streak);
+    // Focal point = average board-px position of the cleared cells.
+    let fbx = 0, fby = 0, fn = 0;
+    toClear.forEach(k => {
+      const [x, y] = k.split(',').map(Number);
+      const p = cellToBoardXY(x, y);
+      fbx += p.x; fby += p.y; fn++;
+    });
+    fbx /= fn || 1; fby /= fn || 1;
+
+    const tag = tagForClear(totalLines, streak);
+    showScorePop(fbx, fby, gained, tier, tag);
+    flashBoardNeon(totalLines);
+    comicPop(fbx, fby, totalLines, streak);
+    spawnShockwave(fbx, fby);
+    // Bigger clears throw a second, larger ring for extra boom.
+    if (totalLines >= 2) setTimeout(() => spawnShockwave(fbx, fby), 90);
+    burstClear([...toClear], tier);
+    shakeBoard(tier, totalLines);
+    if (streak >= 2) showComboPop(streak);
 
     if (totalLines >= 2 || streak >= 2) {
       const board = document.getElementById('board');
@@ -6996,7 +7481,10 @@ function placePiece(source, gx, gy) {
       setTimeout(() => board.classList.remove('combo-flash'), 720);
     }
 
-    if (navigator.vibrate) navigator.vibrate([15, 30, 25]);
+    if (navigator.vibrate) {
+      const v = tier >= 3 ? [25,40,30,40,35] : tier >= 2 ? [20,35,30] : [15,30,25];
+      navigator.vibrate(v);
+    }
 
     setTimeout(() => {
       toClear.forEach(k => {
@@ -7087,12 +7575,14 @@ function afterMove() {
   checkAchievements();
 }
 
-function textForClear(lines, streak, gained) {
-  if (lines >= 4) return `MEGA +${gained}`;
-  if (lines === 3) return `TRIPLE +${gained}`;
-  if (lines === 2) return `DOUBLE +${gained}`;
-  if (streak >= 3) return `STREAK \u00d7${streak} +${gained}`;
-  return `+${gained}`;
+// Short label (no score) for the explody score pop.
+function tagForClear(lines, streak) {
+  if (lines >= 4) return 'MEGA';
+  if (lines === 3) return 'TRIPLE';
+  if (lines === 2) return 'DOUBLE';
+  if (streak >= 4) return 'UNREAL';
+  if (streak >= 3) return 'STREAK';
+  return 'CLEAR';
 }
 
 // === SCORE MILESTONES ===
@@ -7206,6 +7696,232 @@ function celebrate() {
       spawnSparksAt(x, y, c, 5);
     }, i * 35);
   }
+}
+
+// === BLOCK-BLAST JUICE ===
+// Map a grid cell to board-relative center pixels (handles gap/padding/zoom).
+function cellToBoardXY(x, y) {
+  const board = document.getElementById('board');
+  const cell = getCellEl(x, y);
+  if (!cell || !board) return { x: 0, y: 0 };
+  const cr = cell.getBoundingClientRect();
+  const br = board.getBoundingClientRect();
+  return { x: cr.left - br.left + cr.width / 2, y: cr.top - br.top + cr.height / 2 };
+}
+
+// Tier 0..3 from how big the clear is (lines + combo streak).
+function clearTier(lines, streak) {
+  if (lines >= 4 || streak >= 5) return 3;
+  if (lines === 3 || streak >= 3) return 2;
+  if (lines === 2 || streak >= 2) return 1;
+  return 0;
+}
+
+// Big bouncy "+score" pop at the clear focal point.
+function showScorePop(bx, by, amount, tier, tag) {
+  const board = document.getElementById('board');
+  const pop = document.createElement('div');
+  pop.className = 'score-pop t' + tier;
+  pop.style.left = bx + 'px';
+  pop.style.top = by + 'px';
+  pop.innerHTML = `<span class="sp-amt">+${amount}</span>` + (tag ? `<span class="sp-tag">${tag}</span>` : '');
+  board.appendChild(pop);
+  void pop.offsetWidth;
+  pop.classList.add('go');
+  setTimeout(() => pop.remove(), 1000);
+}
+
+// Big centered "xN COMBO" callout.
+function showComboPop(streak) {
+  const board = document.getElementById('board');
+  const old = board.querySelector('.combo-pop');
+  if (old) old.remove();
+  const pop = document.createElement('div');
+  pop.className = 'combo-pop';
+  pop.innerHTML = `<span class="cp-x">×${streak}</span><span class="cp-label">COMBO</span>`;
+  board.appendChild(pop);
+  void pop.offsetWidth;
+  pop.classList.add('go');
+  setTimeout(() => pop.remove(), 900);
+}
+
+// Expanding ring at the focal point.
+function spawnShockwave(bx, by) {
+  const board = document.getElementById('board');
+  const ring = document.createElement('div');
+  ring.className = 'shockwave';
+  ring.style.left = bx + 'px';
+  ring.style.top = by + 'px';
+  board.appendChild(ring);
+  void ring.offsetWidth;
+  ring.classList.add('go');
+  setTimeout(() => ring.remove(), 600);
+}
+
+// Shake the grid; intensity scales with clear size. Targets #grid (not #board)
+// so the board frame's combo-flash box-shadow can play simultaneously.
+function shakeBoard(tier, lines) {
+  const g = document.getElementById('grid');
+  const cls = (lines >= 3 || tier >= 4) ? 'shake-xl'
+            : tier >= 3 ? 'shake-lg' : tier >= 2 ? 'shake-md' : 'shake-sm';
+  g.classList.remove('shake-sm', 'shake-md', 'shake-lg', 'shake-xl');
+  void g.offsetWidth;
+  g.classList.add(cls);
+  setTimeout(() => g.classList.remove(cls), 500);
+}
+
+// Neon border flash on the board frame. Intensity (color/thickness/glow) scales
+// with how many lines cleared at once. Uses its own overlay element so it stacks
+// with the combo-flash box-shadow and the grid shake.
+function flashBoardNeon(lines) {
+  const board = document.getElementById('board');
+  const ring = document.createElement('div');
+  const n = Math.min(4, Math.max(1, lines));
+  ring.className = 'board-neon n' + n;
+  ring.style.setProperty('--neon-dur', (560 + n * 70) + 'ms');
+  board.appendChild(ring);
+  void ring.offsetWidth;
+  ring.classList.add('flash');
+  setTimeout(() => ring.remove(), 900);
+}
+
+// Comic-book "POW!" starburst at the clear focal point. Word + size escalate
+// with the clear: single → POW!, double → BAM!, triple → BOOM!, quad+ → KAPOW!
+// Pools of comic onomatopoeia, picked at random per clear for variety.
+// Bigger clears pull from punchier tiers; a wildcard "weird" pool can crash
+// any clear for surprise, and high streaks may shout a combo callout.
+const COMIC_WORDS = {
+  1: ['POW!', 'BAM!', 'ZAP!', 'BONK!', 'WHAP!', 'THWIP!', 'BOINK!', 'SPLAT!', 'ZONK!', 'WHACK!', 'BIFF!', 'SOCK!'],
+  2: ['BAM!', 'KABOOM!', 'WHAMMO!', 'SMASH!', 'KER-POW!', 'ZOWIE!', 'SOCKO!', 'WHOMP!', 'BLAMMO!', 'KAPOW!'],
+  3: ['BOOM!', 'KAPOW!', 'KABLAM!', 'YOWZA!', 'WALLOP!', 'KABLOOEY!', 'GADZOOKS!', 'KERSPLAT!', 'ZOUNDS!'],
+  4: ['KAPOW!', 'KABOOM!', 'MEGABLAST!', 'KERBLOOIE!', 'KABLAMMO!', 'GIGABLAST!', 'SKADOOSH!', 'BOOMSHAKA!'],
+};
+const COMIC_WEIRD = ['BAZINGA!', 'FLOOMP!', 'SPRONK!', 'WUMBO!', 'YEET!', 'GLORP!', 'ZORP!', 'FWOOSH!',
+  'BLORP!', 'NOM NOM!', 'SKRRT!', 'KABLOINK!', 'SPLOOSH!', 'BWOMP!', 'MEEP!', 'HONK!', 'ZA-ZOW!',
+  'FLUMP!', 'SQUONK!', 'BOOP!', 'OOMPF!', 'KAPLORT!'];
+const COMIC_COMBO = ['COMBO!', 'ON FIRE!', 'UNSTOPPABLE!', 'RAMPAGE!', 'BONKERS!'];
+function randOf(arr) { return arr[(Math.random() * arr.length) | 0]; }
+function comicPop(bx, by, lines, streak) {
+  if (!comicWords) return;
+  const board = document.getElementById('board');
+  const n = Math.min(4, Math.max(1, lines));
+  let word;
+  if (streak >= 4 && Math.random() < 0.5) word = randOf(COMIC_COMBO);
+  else if (Math.random() < 0.2)           word = randOf(COMIC_WEIRD);
+  else                                    word = randOf(COMIC_WORDS[n]);
+
+  // radial speed lines behind
+  const sl = document.createElement('div');
+  sl.className = 'speedlines';
+  sl.style.left = bx + 'px';
+  sl.style.top = by + 'px';
+  board.appendChild(sl);
+  void sl.offsetWidth;
+  sl.classList.add('go');
+  setTimeout(() => sl.remove(), 480);
+
+  const burst = document.createElement('div');
+  burst.className = 'comic-burst' + (n >= 3 ? ' big' : '');
+  burst.style.left = bx + 'px';
+  burst.style.top = by + 'px';
+  const size = 120 + n * 28;
+  // Shrink the font for longer words so they stay inside the star (nowrap).
+  const fit = Math.min(1, 7 / word.length);
+  const font = Math.round((34 + n * 8) * fit);
+  burst.style.setProperty('--burst-size', size + 'px');
+  burst.style.setProperty('--burst-font', font + 'px');
+  burst.innerHTML = `<div class="burst-star"></div><div class="burst-word">${word}</div>`;
+  board.appendChild(burst);
+  void burst.offsetWidth;
+  burst.classList.add('go');
+  setTimeout(() => burst.remove(), 760);
+}
+
+// Shatter one block into flying colored shards (gravity arc + spin).
+function spawnShards(bx, by, colorKey, count) {
+  const board = document.getElementById('board');
+  const color = COLORS[colorKey] || COLORS.amber;
+  const cellPx = (typeof gridCellSize === 'function' ? gridCellSize() : 36);
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.9;
+    const speed = 64 + Math.random() * 96;            // launch harder/farther
+    const dx = Math.cos(angle) * speed;
+    const peakY = Math.sin(angle) * speed - 20;       // initial outward/up
+    const fallY = peakY + 90 + Math.random() * 80;    // gravity pulls down
+    const rot = (Math.random() - 0.5) * 1000;
+    // mostly small shards with the occasional big chunk for a chunkier blast
+    const chunk = Math.random() < 0.25 ? (0.34 + Math.random() * 0.18) : (0.2 + Math.random() * 0.16);
+    const size = Math.max(6, cellPx * chunk);
+
+    const shard = document.createElement('div');
+    shard.className = 'shard';
+    shard.style.left = bx + 'px';
+    shard.style.top = by + 'px';
+    shard.style.width = size + 'px';
+    shard.style.height = size + 'px';
+    shard.style.marginLeft = (-size / 2) + 'px';
+    shard.style.marginTop = (-size / 2) + 'px';
+    shard.style.background = color;
+    board.appendChild(shard);
+
+    const anim = shard.animate([
+      { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1, offset: 0 },
+      { transform: `translate(${dx * 0.65}px, ${peakY}px) rotate(${rot * 0.5}deg) scale(0.95)`, opacity: 1, offset: 0.5 },
+      { transform: `translate(${dx}px, ${fallY}px) rotate(${rot}deg) scale(0.3)`, opacity: 0, offset: 1 },
+    ], { duration: 640 + Math.random() * 180, easing: 'cubic-bezier(.25,.6,.4,1)', fill: 'forwards' });
+    anim.onfinish = () => shard.remove();
+  }
+}
+
+// Each cleared block flies toward the player: a clone rushes outward from the
+// board center, scaling up with motion blur as it "comes at you", then fades.
+function flyBlocksToPlayer(cellKeys) {
+  const board = document.getElementById('board');
+  const br = board.getBoundingClientRect();
+  const cx = br.width / 2, cy = br.height / 2;
+  const cellPx = (typeof gridCellSize === 'function' ? gridCellSize() : 36);
+  cellKeys.forEach(k => {
+    const [x, y] = k.split(',').map(Number);
+    const color = COLORS[grid[y][x] || 'amber'] || COLORS.amber;
+    const p = cellToBoardXY(x, y);
+    const dx = p.x - cx, dy = p.y - cy;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const drift = 70 + Math.random() * 60;   // outward rush distance
+    const endScale = 3 + Math.random() * 1.8;
+
+    const fb = document.createElement('div');
+    fb.className = 'flyblock';
+    fb.style.left = p.x + 'px';
+    fb.style.top = p.y + 'px';
+    fb.style.width = cellPx + 'px';
+    fb.style.height = cellPx + 'px';
+    fb.style.marginLeft = (-cellPx / 2) + 'px';
+    fb.style.marginTop = (-cellPx / 2) + 'px';
+    fb.style.background = color;
+    board.appendChild(fb);
+
+    const anim = fb.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1, filter: 'blur(0px) brightness(1.4)', offset: 0 },
+      { transform: `translate(${ux * drift * 0.35}px, ${uy * drift * 0.35}px) scale(1.7)`, opacity: 1, filter: 'blur(0.5px) brightness(1.6)', offset: 0.4 },
+      { transform: `translate(${ux * drift}px, ${uy * drift}px) scale(${endScale})`, opacity: 0, filter: 'blur(7px) brightness(1.2)', offset: 1 },
+    ], { duration: 500 + Math.random() * 140, easing: 'cubic-bezier(.4,0,.85,.4)', fill: 'forwards' });
+    anim.onfinish = () => fb.remove();
+  });
+}
+
+// Extra debris burst at each cleared cell: flying blocks + shards + sparks.
+function burstClear(cellKeys, tier) {
+  const sparks = tier >= 3 ? 8 : tier >= 2 ? 7 : tier >= 1 ? 6 : 5;
+  const shards = tier >= 3 ? 10 : tier >= 2 ? 8 : tier >= 1 ? 7 : 6;
+  flyBlocksToPlayer(cellKeys);
+  cellKeys.forEach(k => {
+    const [x, y] = k.split(',').map(Number);
+    const color = grid[y][x] || 'amber';
+    const p = cellToBoardXY(x, y);
+    spawnShards(p.x, p.y, color, shards);
+    spawnSparksAt(p.x, p.y, color, sparks);
+  });
 }
 
 // === SCORE TICKER ===
@@ -7428,7 +8144,7 @@ function detonateAt(gx, gy, piece) {
   }
   // Score the explosion (3 pts per cell, multiplied by mode)
   const mode = MODES[currentMode];
-  const gained = Math.round(cleared.length * 3 * (mode.multiplier || 1));
+  const gained = Math.round(cleared.length * 3 * (mode.multiplier || 1) * SCORE_SCALE);
   score += gained;
   setScoreDisplay('score', score);
   showFloater(`💥 BOOM +${gained}`);
@@ -7513,7 +8229,7 @@ function detonateLightning(gx, gy, piece) {
   cleared.delete(`${cx},${cy}`); // bomb cell already counted
   cleared.add(`${cx},${cy}`);
   if (cleared.size === 0) return;
-  const points = Math.round(cleared.size * 4 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  const points = Math.round(cleared.size * 4 * (MODES[currentMode].multiplier || 1) * nextClearMult * SCORE_SCALE);
   if (nextClearMult !== 1) nextClearMult = 1;
   cleared.forEach(k => {
     const [x, y] = k.split(',').map(Number);
@@ -7551,7 +8267,7 @@ function detonateColorBomb(gx, gy, piece) {
     if (grid[y][x] === target) cleared.push([x, y]);
   }
   if (cleared.length === 0) return;
-  const points = Math.round(cleared.length * 5 * (MODES[currentMode].multiplier || 1) * nextClearMult);
+  const points = Math.round(cleared.length * 5 * (MODES[currentMode].multiplier || 1) * nextClearMult * SCORE_SCALE);
   if (nextClearMult !== 1) nextClearMult = 1;
   for (const [x, y] of cleared) {
     const c = getCellEl(x, y);
@@ -9947,6 +10663,7 @@ window.addEventListener('load', () => {
   loadCustomConfig();
   applySkin();
   applyBigButtons();
+  applyLightMode();
   applyUnicornMode();
   applyGodMode();
   refreshBestLabels();
@@ -10149,6 +10866,8 @@ window.addEventListener('load', () => {
       else if (key === 'music') active = !Music.muted;
       else if (key === 'vibration')  active = vibrationEnabled;
       else if (key === 'bigbuttons') active = bigButtons;
+      else if (key === 'lightmode')  active = lightMode;
+      else if (key === 'comicwords') active = comicWords;
       else if (key === 'unicorn')    active = unicornMode;
       else if (key === 'god')        active = godMode;
       row.classList.toggle('active', active);
@@ -10174,6 +10893,8 @@ window.addEventListener('load', () => {
       else if (key === 'music') Music.setMuted(!Music.muted);
       else if (key === 'vibration')  setVibration(!vibrationEnabled);
       else if (key === 'bigbuttons') setBigButtons(!bigButtons);
+      else if (key === 'lightmode')  setLightMode(!lightMode);
+      else if (key === 'comicwords') setComicWords(!comicWords);
       else if (key === 'unicorn')    setUnicornMode(!unicornMode);
       else if (key === 'god')        setGodMode(!godMode);
       syncSettingsToggles();
@@ -10184,7 +10905,7 @@ window.addEventListener('load', () => {
   document.getElementById('reset-data').addEventListener('click', () => {
     if (!confirm("Reset everything? All bests, stats, achievements, and custom configs will be erased. This can't be undone.")) return;
     try {
-      ['issa-blocks-v1','issa-blocks-stats-v1','issa-blocks-mz-v1','issa-blocks-custom-v1','issa-blocks-sfx-muted','issa-blocks-music-muted','issa-blocks-vibe']
+      ['issa-blocks-v1','issa-blocks-stats-v1','issa-blocks-mz-v1','issa-blocks-custom-v1','issa-blocks-sfx-muted','issa-blocks-music-muted','issa-blocks-vibe','issa-blocks-comicwords']
         .forEach(k => localStorage.removeItem(k));
     } catch(e) {}
     location.reload();
