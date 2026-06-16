@@ -3386,6 +3386,8 @@
       0 2px 6px rgba(0,0,0,0.35);
     cursor: grab;
     will-change: left, top;
+    /* `top` animates so blocks visibly fall when gravity drops them */
+    transition: top 0.16s cubic-bezier(.3, .55, .4, 1), left 0.08s ease-out;
   }
   .slide-block.dragging {
     cursor: grabbing;
@@ -3394,6 +3396,7 @@
       0 8px 16px rgba(0,0,0,0.5);
     z-index: 5;
     filter: brightness(1.12);
+    transition: none;   /* keep dragging 1:1 with the finger */
   }
   .slide-block.clearing { animation: slide-clear 200ms ease-out forwards; }
   @keyframes slide-clear {
@@ -4905,7 +4908,7 @@
       </div>
     </div>
     <div class="slide-bar"><div class="slide-bar-fill" id="slide-bar-fill"></div></div>
-    <div class="slide-tips">Slide blocks sideways to fill a row — full rows clear. Don't let the stack reach the top.</div>
+    <div class="slide-tips">Slide blocks sideways — they fall and stack. Fill a whole row to clear it. Don't reach the top.</div>
   </div>
 
   <!-- ============================================ -->
@@ -9175,19 +9178,27 @@ function slidePositionBlock(el, b) {
   el.style.height = (ch - 4) + 'px';
 }
 
+// Reconcile the DOM with SLIDE.blocks by id (instead of rebuilding) so the
+// CSS `top` transition animates blocks falling under gravity.
 function slideRender() {
   const board = document.getElementById('slide-board');
   if (!board) return;
-  // Keep the faint grid aligned to the real cell size.
   board.style.backgroundSize = slideCellW() + 'px ' + slideCellH() + 'px';
-  board.innerHTML = '';
+  const seen = new Set();
   for (const b of SLIDE.blocks) {
-    const el = document.createElement('div');
-    el.className = 'slide-block';
-    el.dataset.id = b.id;
-    el.style.setProperty('--bc', b.color);
+    seen.add(b.id);
+    let el = board.querySelector('.slide-block[data-id="' + b.id + '"]');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'slide-block';
+      el.dataset.id = b.id;
+      el.style.setProperty('--bc', b.color);
+      board.appendChild(el);
+    }
     slidePositionBlock(el, b);
-    board.appendChild(el);
+  }
+  for (const el of [...board.querySelectorAll('.slide-block')]) {
+    if (!seen.has(+el.dataset.id)) el.remove();
   }
 }
 
@@ -9196,21 +9207,57 @@ function slideUpdateScore() {
   if (s) s.textContent = SLIDE.score;
 }
 
-function slideCheckClears() {
+// Is (row,col) covered by some block other than ignoreId?
+function slideCellOccupied(row, col, ignoreId) {
+  for (const b of SLIDE.blocks) {
+    if (b.id === ignoreId) continue;
+    if (b.row === row && col >= b.col && col < b.col + b.w) return true;
+  }
+  return false;
+}
+
+// Drop every block as far down as it can go. Horizontal bars fall only when
+// ALL cells directly beneath their span are clear. Repeats until stable.
+function slideApplyGravity() {
+  let moved = true;
+  let guard = 0;
+  while (moved && guard++ < 500) {
+    moved = false;
+    // Settle bottom-most blocks first.
+    const order = SLIDE.blocks.slice().sort((a, b) => b.row - a.row);
+    for (const blk of order) {
+      if (blk.row >= SLIDE.rows - 1) continue;
+      let canFall = true;
+      for (let c = blk.col; c < blk.col + blk.w; c++) {
+        if (slideCellOccupied(blk.row + 1, c, blk.id)) { canFall = false; break; }
+      }
+      if (canFall) { blk.row += 1; moved = true; }
+    }
+  }
+}
+
+function slideFullRows() {
+  const cnt = {};
+  for (const b of SLIDE.blocks) cnt[b.row] = (cnt[b.row] || 0) + b.w;
+  return Object.keys(cnt).map(Number).filter(r => cnt[r] >= SLIDE.cols);
+}
+
+// Settle gravity, then clear any full rows (with a flash + combo scoring),
+// then settle again and chain. Wrapped in SLIDE.busy so input/spawns wait.
+function slideResolve() {
   if (SLIDE.busy) return;
-  const COLS = SLIDE.cols;
-  const sumByRow = {};
-  for (const b of SLIDE.blocks) sumByRow[b.row] = (sumByRow[b.row] || 0) + b.w;
-  const fullRows = Object.keys(sumByRow).map(Number).filter(r => sumByRow[r] >= COLS);
-  if (!fullRows.length) return;
-  const cleared = new Set(fullRows);
+  slideApplyGravity();
+  const full = slideFullRows();
+  if (!full.length) { slideRender(); return; }
   SLIDE.busy = true;
-  // Flash the clearing blocks.
-  for (const el of document.querySelectorAll('.slide-block')) {
+  slideRender();
+  const cleared = new Set(full);
+  const board = document.getElementById('slide-board');
+  for (const el of board.querySelectorAll('.slide-block')) {
     const b = SLIDE.blocks.find(x => x.id === +el.dataset.id);
     if (b && cleared.has(b.row)) el.classList.add('clearing');
   }
-  const k = fullRows.length;
+  const k = full.length;
   SLIDE.score += k * k * 10;     // combo bonus for multi-row clears
   SLIDE.clears += k;
   if (SLIDE.score > SLIDE.best) { SLIDE.best = SLIDE.score; slideSaveBest(); }
@@ -9219,27 +9266,26 @@ function slideCheckClears() {
   if (k >= 2 && typeof SFX !== 'undefined' && SFX.combo) SFX.combo();
   if (navigator.vibrate) navigator.vibrate(k > 1 ? [15, 30, 25] : 20);
   setTimeout(() => {
-    // Remove cleared rows, then drop everything above into the gap.
     SLIDE.blocks = SLIDE.blocks.filter(b => !cleared.has(b.row));
-    for (const b of SLIDE.blocks) {
-      let shift = 0;
-      for (const cr of fullRows) if (cr > b.row) shift++;
-      b.row += shift;
-    }
     SLIDE.busy = false;
-    slideRender();
-  }, 200);
+    slideResolve();   // re-settle + chain any cascade clears
+  }, 220);
 }
 
-function slidePushUp() {
+// A fresh row drops in from the very top; gravity pulls it onto the stack.
+function slideSpawnRow() {
   if (SLIDE.busy) return;
-  // Overflow if anything already sits in the top row.
-  if (SLIDE.blocks.some(b => b.row <= 0)) { slideGameOver(); return; }
-  for (const b of SLIDE.blocks) b.row -= 1;
-  SLIDE.blocks.push(...slideMakeRowBlocks(SLIDE.rows - 1));
-  SLIDE.riseMs = Math.max(3200, SLIDE.riseMs - 120);   // creep faster over time
-  slideRender();
+  const newBlocks = slideMakeRowBlocks(0);
+  // If the top row is already blocked where the new blocks land → game over.
+  for (const nb of newBlocks) {
+    for (let c = nb.col; c < nb.col + nb.w; c++) {
+      if (slideCellOccupied(0, c, nb.id)) { slideGameOver(); return; }
+    }
+  }
+  SLIDE.blocks.push(...newBlocks);
+  SLIDE.riseMs = Math.max(3200, SLIDE.riseMs - 110);   // spawn a touch faster over time
   if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+  slideResolve();
 }
 
 function slideRiseTick() {
@@ -9252,7 +9298,7 @@ function slideRiseTick() {
       bar.style.width = (frac * 100) + '%';
       bar.classList.toggle('danger', frac > 0.7);
     }
-    if (frac >= 1) { slidePushUp(); SLIDE.riseStart = now; }
+    if (frac >= 1) { slideSpawnRow(); SLIDE.riseStart = now; }
   } else {
     SLIDE.riseStart = now;   // hold progress while a clear animates
   }
@@ -9303,7 +9349,7 @@ function slideAttachInput() {
     if (!SLIDE.drag) return;
     SLIDE.drag.el.classList.remove('dragging');
     SLIDE.drag = null;
-    slideCheckClears();
+    slideResolve();   // gravity may drop the block (and others), then clear
   };
   board.addEventListener('pointerdown', _slideDown);
   board.addEventListener('pointermove', _slideMove, { passive: false });
@@ -9335,8 +9381,9 @@ function startSlide() {
   SLIDE.busy = false;
   SLIDE.drag = null;
   SLIDE.riseMs = 6500;
-  // Seed three rows at the bottom.
-  for (let r = SLIDE.rows - 1; r >= SLIDE.rows - 3; r--) SLIDE.blocks.push(...slideMakeRowBlocks(r));
+  // Seed four rows at the top, then let gravity pack them onto the floor.
+  for (let r = 0; r < 4; r++) SLIDE.blocks.push(...slideMakeRowBlocks(r));
+  slideApplyGravity();
   document.getElementById('slide-over').classList.remove('show');
   const bar = document.getElementById('slide-bar-fill');
   if (bar) { bar.style.width = '0%'; bar.classList.remove('danger'); }
@@ -9367,10 +9414,10 @@ function exitSlide() {
 //   INFINITE    — untilted relaxed run, get as far as you can.
 //   COMPETITIVE — same puzzles, but each one is on a countdown. Solve it
 //                 in time to advance; run ends when the clock hits zero.
-// Every puzzle is a FULL grid (no holes). The user noted that open/empty
-// squares make a board EASIER (fewer cells to wind around), so the densest
-// possible board — a completely filled grid — is the hardest. We grow the
-// grid 4×4 → 8×8 as the level climbs.
+// Puzzles are irregular shapes — a mostly-full grid with scattered holes
+// carved out so they're never plain rectangles. Grids grow 4×4 → 8×8 and
+// gain more holes with the level. Every shape is generated from a real
+// path, so it's always solvable.
 
 const LINE_KEY = 'issa-blocks-line-v1';
 const LINE = {
@@ -9435,7 +9482,70 @@ function generateFullHamiltonian(rows, cols) {
   return path;   // cell indices in visiting order — a full Hamiltonian path
 }
 
-// Grid size by level. Denser/bigger = harder. All grids are completely full.
+// === SCATTERED-HOLE GENERATOR (randomized DFS walk) ===
+// A self-avoiding walk of `target` cells. The cells it visits become the
+// puzzle mask; the cells it skips become holes. Because the mask is exactly
+// one connected walk, it always has a Hamiltonian path (the walk itself),
+// so it's guaranteed solvable. Holes scatter naturally for irregular shapes.
+function _dfsWalk(path, visited, target, rows, cols, budget) {
+  if (path.length >= target) return true;
+  if (budget.count-- <= 0) return false;
+  const last = path[path.length - 1];
+  const r = last[0], c = last[1];
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  for (let i = dirs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = dirs[i]; dirs[i] = dirs[j]; dirs[j] = t;
+  }
+  for (const d of dirs) {
+    const nr = r + d[0], nc = c + d[1];
+    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+    const key = nr * cols + nc;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    path.push([nr, nc]);
+    if (_dfsWalk(path, visited, target, rows, cols, budget)) return true;
+    path.pop();
+    visited.delete(key);
+  }
+  return false;
+}
+function generateWalk(rows, cols, target) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const sr = Math.floor(Math.random() * rows);
+    const sc = Math.floor(Math.random() * cols);
+    const visited = new Set([sr * cols + sc]);
+    const path = [[sr, sc]];
+    if (_dfsWalk(path, visited, target, rows, cols, { count: 14000 })) return path;
+  }
+  return null;
+}
+
+// Build a solvable puzzle with `holes` empty cells. Prefer scattered holes
+// (DFS walk); fall back to trimming a full backbite path if the walk can't
+// hit the target — both are guaranteed solvable.
+function generateLinePuzzle(rows, cols, holes) {
+  const total = rows * cols;
+  const target = Math.max(4, total - holes);
+  let path = generateWalk(rows, cols, target);
+  let shrink = 0;
+  while (!path && shrink < 8) { shrink++; path = generateWalk(rows, cols, Math.max(4, target - shrink)); }
+  if (path) {
+    const cells = Array(total).fill(0);
+    for (const rc of path) cells[rc[0] * cols + rc[1]] = 1;
+    return { cells, start: path[0][0] * cols + path[0][1] };
+  }
+  // Fallback: keep a prefix of a full Hamiltonian path (carves a connected bite).
+  const order = generateFullHamiltonian(rows, cols);
+  const keep = Math.max(4, total - holes);
+  const cells = Array(total).fill(0);
+  for (let i = 0; i < keep; i++) cells[order[i]] = 1;
+  return { cells, start: order[0] };
+}
+
+// Grid size + hole count by level. Bigger grids + irregular holes = harder
+// and more interesting than plain squares. Holes stay moderate so boards
+// remain substantial (not trivially short).
 function lineRandomDifficulty(level) {
   let size;
   if (level < 2)      size = 4;
@@ -9443,7 +9553,10 @@ function lineRandomDifficulty(level) {
   else if (level < 7) size = 6;
   else if (level < 10) size = 7;
   else                size = 8;
-  return { rows: size, cols: size };
+  const total = size * size;
+  let holes = Math.round(total * (0.14 + Math.min(0.08, level * 0.008))) + ((Math.random() * 2) | 0);
+  holes = Math.max(2, Math.min(holes, Math.floor(total * 0.26)));
+  return { rows: size, cols: size, holes };
 }
 
 // Seconds allowed per puzzle in COMPETITIVE — scales with cell count.
@@ -9460,10 +9573,10 @@ function startRandomLine(competitive) {
 }
 function nextRandomLine() {
   const diff = lineRandomDifficulty(LINE.randomLevel);
-  const total = diff.rows * diff.cols;
-  const order = generateFullHamiltonian(diff.rows, diff.cols);
-  const cells = Array(total).fill(1);    // full grid — zero holes, densest = hardest
-  const startIdx = order[0];
+  const puz = generateLinePuzzle(diff.rows, diff.cols, diff.holes);
+  const cells = puz.cells;
+  const startIdx = puz.start;
+  const cellCount = cells.reduce((s, v) => s + v, 0);
   LINE.level = { cols: diff.cols, rows: diff.rows, start: startIdx, cells, isRandom: true };
   LINE.path = [startIdx];
   LINE.won = false;
@@ -9476,10 +9589,10 @@ function nextRandomLine() {
   const info = document.getElementById('line-info');
   info.classList.remove('win', 'lost');
   const best = LINE.competitive ? (LINE.compBest || 0) : (LINE.randomBest || 0);
-  info.textContent = `${diff.cols}×${diff.rows} · fill every cell · BEST LV ${best}`;
+  info.textContent = `${diff.cols}×${diff.rows} · ${cellCount} cells · BEST LV ${best}`;
   renderLineBoard();
   if (LINE.competitive) {
-    lineStartLevelTimer(lineCompetitiveSeconds(total));
+    lineStartLevelTimer(lineCompetitiveSeconds(cellCount));
   } else {
     lineHideTimer();
   }
