@@ -3404,22 +3404,6 @@
     50%  { filter: brightness(2.2) saturate(1.4); }
     100% { filter: brightness(2.6); transform: scale(1.08); opacity: 0; }
   }
-  .slide-bar {
-    width: 100%;
-    max-width: 340px;
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.08);
-    overflow: hidden;
-  }
-  .slide-bar-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #4dd0e1, #5c7cfa);
-    transition: width 80ms linear;
-  }
-  .slide-bar-fill.danger { background: linear-gradient(90deg, #ff9f43, #ff5f5f); }
   .slide-over {
     position: absolute;
     inset: 0;
@@ -4907,8 +4891,7 @@
         </div>
       </div>
     </div>
-    <div class="slide-bar"><div class="slide-bar-fill" id="slide-bar-fill"></div></div>
-    <div class="slide-tips">Slide blocks sideways — they fall and stack. Fill a whole row to clear it. Don't reach the top.</div>
+    <div class="slide-tips">Slide a block to move — each move drops a new row in. They fall and stack; fill a whole row to clear it.</div>
   </div>
 
   <!-- ============================================ -->
@@ -9105,11 +9088,8 @@ const SLIDE = {
   best: 0,
   active: false,
   gameOver: false,
-  busy: false,        // true during a clear animation (pauses input + rise)
+  busy: false,        // true during a clear animation (pauses input + spawns)
   drag: null,
-  riseMs: 6500,
-  riseStart: 0,
-  riseRAF: 0,
 };
 const SLIDE_KEY = 'issa-blocks-slide-v1';
 const SLIDE_COLORS = ['#ff5f5f', '#ff9f43', '#ffd93b', '#51cf66', '#4dd0e1', '#5c7cfa', '#9775fa', '#f783ac'];
@@ -9244,11 +9224,12 @@ function slideFullRows() {
 
 // Settle gravity, then clear any full rows (with a flash + combo scoring),
 // then settle again and chain. Wrapped in SLIDE.busy so input/spawns wait.
-function slideResolve() {
+// onDone (optional) fires once the whole cascade has finished settling.
+function slideResolve(onDone) {
   if (SLIDE.busy) return;
   slideApplyGravity();
   const full = slideFullRows();
-  if (!full.length) { slideRender(); return; }
+  if (!full.length) { slideRender(); if (onDone) onDone(); return; }
   SLIDE.busy = true;
   slideRender();
   const cleared = new Set(full);
@@ -9268,47 +9249,28 @@ function slideResolve() {
   setTimeout(() => {
     SLIDE.blocks = SLIDE.blocks.filter(b => !cleared.has(b.row));
     SLIDE.busy = false;
-    slideResolve();   // re-settle + chain any cascade clears
+    slideResolve(onDone);   // re-settle + chain any cascade clears
   }, 220);
 }
 
 // A fresh row drops in from the very top; gravity pulls it onto the stack.
+// Called once per player move (no timer). If the top is blocked → game over.
 function slideSpawnRow() {
-  if (SLIDE.busy) return;
+  if (SLIDE.busy || !SLIDE.active || SLIDE.gameOver) return;
   const newBlocks = slideMakeRowBlocks(0);
-  // If the top row is already blocked where the new blocks land → game over.
   for (const nb of newBlocks) {
     for (let c = nb.col; c < nb.col + nb.w; c++) {
       if (slideCellOccupied(0, c, nb.id)) { slideGameOver(); return; }
     }
   }
   SLIDE.blocks.push(...newBlocks);
-  SLIDE.riseMs = Math.max(3200, SLIDE.riseMs - 110);   // spawn a touch faster over time
   if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
   slideResolve();
-}
-
-function slideRiseTick() {
-  if (!SLIDE.active || SLIDE.gameOver) return;
-  const now = performance.now();
-  if (!SLIDE.busy) {
-    const frac = Math.min(1, (now - SLIDE.riseStart) / SLIDE.riseMs);
-    const bar = document.getElementById('slide-bar-fill');
-    if (bar) {
-      bar.style.width = (frac * 100) + '%';
-      bar.classList.toggle('danger', frac > 0.7);
-    }
-    if (frac >= 1) { slideSpawnRow(); SLIDE.riseStart = now; }
-  } else {
-    SLIDE.riseStart = now;   // hold progress while a clear animates
-  }
-  SLIDE.riseRAF = requestAnimationFrame(slideRiseTick);
 }
 
 function slideGameOver() {
   SLIDE.gameOver = true;
   SLIDE.active = false;
-  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
   const f = document.getElementById('slide-final');
   const fb = document.getElementById('slide-final-best');
   if (f) f.textContent = SLIDE.score;
@@ -9347,9 +9309,16 @@ function slideAttachInput() {
   };
   _slideUp = () => {
     if (!SLIDE.drag) return;
+    const moved = SLIDE.drag.block.col !== SLIDE.drag.startCol;
     SLIDE.drag.el.classList.remove('dragging');
     SLIDE.drag = null;
-    slideResolve();   // gravity may drop the block (and others), then clear
+    // Resolve the player's slide first (clear any rows they completed), THEN
+    // — only if it was an actual move — drop a fresh row in as the cost of it.
+    if (moved) {
+      slideResolve(() => slideSpawnRow());
+    } else {
+      slideResolve();
+    }
   };
   board.addEventListener('pointerdown', _slideDown);
   board.addEventListener('pointermove', _slideMove, { passive: false });
@@ -9380,27 +9349,20 @@ function startSlide() {
   SLIDE.active = true;
   SLIDE.busy = false;
   SLIDE.drag = null;
-  SLIDE.riseMs = 6500;
   // Seed four rows at the top, then let gravity pack them onto the floor.
   for (let r = 0; r < 4; r++) SLIDE.blocks.push(...slideMakeRowBlocks(r));
   slideApplyGravity();
   document.getElementById('slide-over').classList.remove('show');
-  const bar = document.getElementById('slide-bar-fill');
-  if (bar) { bar.style.width = '0%'; bar.classList.remove('danger'); }
   slideUpdateScore();
   // Render after layout settles so cell sizes are correct.
   slideRender();
   requestAnimationFrame(slideRender);
   slideAttachInput();
-  SLIDE.riseStart = performance.now();
-  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
-  SLIDE.riseRAF = requestAnimationFrame(slideRiseTick);
   if (typeof SFX !== 'undefined' && SFX.start) SFX.start();
 }
 
 function exitSlide() {
   SLIDE.active = false;
-  if (SLIDE.riseRAF) cancelAnimationFrame(SLIDE.riseRAF);
   slideDetachInput();
   document.body.dataset.screen = _enteredFromExtras ? 'extras' : 'title';
   refreshBestLabels();
