@@ -47,27 +47,123 @@
     --cell: #d9dce8;
     --cell-edge: rgba(0,0,0,0.07);
     --text: #1c1c28;
-    --dim: #8a8a98;
-    --accent: #f08a24;
-  }
-  body.theme-light {
-    background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(240,138,36,0.10), transparent 60%),
-      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.08), transparent 60%),
-      var(--bg);
+    --dim: #6a6a7a;
+    --accent: #e07a10;
   }
   /* Fix white-on-white UI chrome that relied on a dark backdrop */
   body.theme-light .setting-switch { background: rgba(0,0,0,0.16); }
   body.theme-light .setting-switch::after { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-  body.theme-light .setting-link { background: rgba(0,0,0,0.035); border-color: rgba(0,0,0,0.08); }
-  body.theme-light .panel-card { border-color: rgba(0,0,0,0.10); box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
-  body.theme-light .panel-head { border-bottom-color: rgba(0,0,0,0.08); }
+  body.theme-light .setting-link { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
+  body.theme-light .setting-row { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
+  body.theme-light .panel-card { border-color: rgba(0,0,0,0.12); box-shadow: 0 20px 60px rgba(0,0,0,0.20); }
+  body.theme-light .panel-head { border-bottom-color: rgba(0,0,0,0.10); }
+  /* Mode cards + generic translucent-white surfaces read as invisible boxes on
+     a light page — give them a faint dark fill and a real border. */
+  body.theme-light .mode-card,
+  body.theme-light .line-mode-card,
+  body.theme-light .adv-level-card,
+  body.theme-light .skin-card,
+  body.theme-light .bg-card,
+  body.theme-light .cc-section,
+  body.theme-light .hold-slot,
+  body.theme-light .tray .slot {
+    background: rgba(0,0,0,0.045);
+    border-color: rgba(0,0,0,0.14);
+  }
+  body.theme-light .mode-desc,
+  body.theme-light .line-info { color: #57576a; }
   /* Full-screen overlays use a fixed dark backdrop; in light mode their
      --text content would go dark-on-dark, so give them a light frosted backdrop */
   body.theme-light .overlay,
   body.theme-light .fruit-game-over,
-  body.theme-light .mp-modal { background: rgba(238,240,246,0.92); }
-  body.theme-light .btn.secondary { border-color: rgba(0,0,0,0.22); }
+  body.theme-light .slide-over,
+  body.theme-light .flip-overlay,
+  body.theme-light .mp-modal { background: rgba(238,240,246,0.93); }
+  body.theme-light .btn.secondary { border-color: rgba(0,0,0,0.22); color: var(--text); }
+
+  /* === PAGE BACKGROUNDS (theme backdrops) === */
+  body[data-bg="classic-black"] { background: var(--bg); }
+  body[data-bg="classic-light"] {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(224,122,16,0.10), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 100%, rgba(92,124,250,0.08), transparent 60%),
+      var(--bg);
+  }
+  body[data-bg="sunset"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(255,95,95,0.30), transparent 60%),
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(151,117,250,0.32), transparent 60%),
+      linear-gradient(180deg, #2a0f2e, #140610);
+  }
+  body[data-bg="ocean"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(77,208,225,0.28), transparent 60%),
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(92,124,250,0.24), transparent 60%),
+      linear-gradient(180deg, #042538, #06101a);
+  }
+  body[data-bg="aurora"] {
+    background:
+      radial-gradient(ellipse 70% 50% at 28% 8%, rgba(81,207,102,0.30), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 72% 16%, rgba(77,208,225,0.26), transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 100%, rgba(151,117,250,0.28), transparent 60%),
+      linear-gradient(180deg, #071322, #05070f);
+  }
+  body[data-bg="grape"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(151,117,250,0.34), transparent 60%),
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(247,131,172,0.28), transparent 60%),
+      linear-gradient(180deg, #1e0f38, #0c0618);
+  }
+  body[data-bg="ember"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(255,159,67,0.34), transparent 55%),
+      radial-gradient(ellipse 95% 55% at 50% 0%, rgba(255,95,95,0.24), transparent 55%),
+      linear-gradient(180deg, #2a0a06, #140503);
+  }
+  body[data-bg="forest"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(81,207,102,0.26), transparent 60%),
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(77,208,225,0.18), transparent 60%),
+      linear-gradient(180deg, #0a2417, #05120c);
+  }
+  body[data-bg="galaxy-bg"] {
+    background:
+      radial-gradient(circle at 20% 18%, rgba(151,117,250,0.32), transparent 42%),
+      radial-gradient(circle at 82% 28%, rgba(77,208,225,0.24), transparent 42%),
+      radial-gradient(circle at 50% 92%, rgba(247,131,172,0.26), transparent 46%),
+      linear-gradient(180deg, #0b0a20, #050510);
+  }
+  body[data-bg="rainbow-bg"] {
+    background: linear-gradient(135deg, #ff5f5f, #ff9f43, #ffd93b, #51cf66, #4dd0e1, #5c7cfa, #9775fa, #f783ac);
+    background-size: 300% 300%;
+    animation: rainbow-bg-shift 16s ease infinite;
+  }
+  @keyframes rainbow-bg-shift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  body[data-bg="mint"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(81,207,102,0.24), transparent 60%),
+      linear-gradient(180deg, #e6f7ec, #eef7f0);
+  }
+  body[data-bg="bubblegum"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(247,131,172,0.30), transparent 60%),
+      radial-gradient(ellipse 95% 60% at 50% 100%, rgba(151,117,250,0.22), transparent 60%),
+      linear-gradient(180deg, #fdeef6, #f4eefb);
+  }
+  body[data-bg="peach"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(255,159,67,0.28), transparent 60%),
+      linear-gradient(180deg, #fdeee2, #fbf3ea);
+  }
+  body[data-bg="sky"] {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% 0%, rgba(77,208,225,0.28), transparent 60%),
+      linear-gradient(180deg, #e6f3fb, #eef4fb);
+  }
 
   html, body {
     /* Allow vertical scroll everywhere — the title screen (5 mode cards),
@@ -499,6 +595,61 @@
     background: color-mix(in srgb, var(--danger) 25%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 50%, transparent);
   }
+  /* Row/column that WILL clear if the held piece is dropped here. */
+  .cell.will-clear {
+    box-shadow:
+      inset 0 0 0 2px rgba(255,255,255,0.85),
+      0 0 10px 2px rgba(255,255,255,0.45);
+    animation: wc-pulse 0.6s ease-in-out infinite;
+    z-index: 1;
+  }
+  @keyframes wc-pulse {
+    0%, 100% { filter: brightness(1.15); }
+    50%      { filter: brightness(1.6); }
+  }
+  /* On a hot streak (≥4) the guaranteed-clear line glows rainbow. */
+  .cell.will-clear-rainbow {
+    box-shadow:
+      inset 0 0 0 2px rgba(255,255,255,0.95),
+      0 0 16px 3px rgba(255,255,255,0.55);
+    animation: wc-rainbow 0.9s linear infinite;
+    z-index: 1;
+  }
+  @keyframes wc-rainbow {
+    0%   { filter: hue-rotate(0deg)   brightness(1.45) saturate(1.6); }
+    50%  { filter: hue-rotate(180deg) brightness(1.75) saturate(1.6); }
+    100% { filter: hue-rotate(360deg) brightness(1.45) saturate(1.6); }
+  }
+
+  /* Big transient "N STREAK" flash across the screen. */
+  .streak-flash {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    z-index: 200;
+    font-family: 'Bangers', 'Bricolage Grotesque', cursive;
+    font-size: clamp(44px, 15vw, 84px);
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow:
+      0 2px 0 rgba(0,0,0,0.35),
+      0 0 24px rgba(255,255,255,0.5);
+    animation: streak-flash 900ms cubic-bezier(.2, .8, .3, 1) forwards;
+  }
+  .streak-flash b {
+    color: var(--accent);
+    font-size: 1.35em;
+    margin-right: 0.12em;
+    -webkit-text-stroke: 2px rgba(0,0,0,0.25);
+  }
+  @keyframes streak-flash {
+    0%   { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+    22%  { opacity: 1; transform: scale(1.12) rotate(-4deg); }
+    68%  { opacity: 1; transform: scale(1) rotate(-4deg); }
+    100% { opacity: 0; transform: scale(1.35) rotate(-4deg); }
+  }
 
   .cell.placing {
     animation: place 300ms cubic-bezier(.34, 1.5, .5, 1) backwards;
@@ -531,16 +682,16 @@
   }
 
   .cell.clearing {
-    animation: clear 440ms cubic-bezier(.4, 0, .2, 1) backwards;
+    animation: clear 360ms cubic-bezier(.3, .5, .3, 1) backwards;
     z-index: 2;
   }
-  /* Quick bright flash then vanish — the block "launches" toward the player
-     via a .flyblock clone (below) rather than imploding in place. */
+  /* Bright flash, then a continuous implosion to nothing — no dead "hold"
+     frame, so the clear flows straight into the refill instead of freezing.
+     The .flyblock clone still launches toward the player on top of this. */
   @keyframes clear {
-    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1); opacity: 1; }
-    14%  { transform: scale(1.4) rotate(-3deg);  filter: brightness(3.6) saturate(1.9); box-shadow: 0 0 24px 7px rgba(255,255,255,0.95); opacity: 1; }
-    45%  { transform: scale(1.15);               filter: brightness(2); opacity: 0; }
-    100% { transform: scale(1.15);               opacity: 0; }
+    0%   { transform: scale(1) rotate(0deg);     filter: brightness(1);   opacity: 1; }
+    16%  { transform: scale(1.36) rotate(-3deg); filter: brightness(3.4) saturate(1.9); box-shadow: 0 0 22px 6px rgba(255,255,255,0.92); opacity: 1; }
+    100% { transform: scale(0.12) rotate(3deg);  filter: brightness(1.6); opacity: 0; box-shadow: 0 0 0 0 transparent; }
   }
 
   /* === FLYING BLOCK (rushes toward the player as it clears) === */
@@ -2292,6 +2443,44 @@
   }
 
   /* Skin picker (in settings modal) */
+  .bg-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+  .bg-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 4px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 120ms ease;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .bg-card.active {
+    border-color: rgba(255,184,77,0.5);
+    background: rgba(255,184,77,0.08);
+    color: var(--accent);
+  }
+  .bg-card:active { transform: scale(0.95); }
+  .bg-swatch {
+    width: 100%;
+    height: 30px;
+    border-radius: 7px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), inset 0 -4px 8px rgba(0,0,0,0.2);
+  }
+
   .skin-picker {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -5168,7 +5357,7 @@
   <!-- TITLE SCREEN -->
   <div class="title-screen">
     <div class="hero">
-      <div class="logo-grid"><div></div><div></div><div></div><div></div></div>
+      <div class="logo-grid" id="logo-grid"><div></div><div></div><div></div><div></div></div>
       <div class="wordmark">ISSA<span>·</span>BLOCKS</div>
       <div class="tagline">An 8×8 block puzzle</div>
     </div>
@@ -5642,10 +5831,6 @@
           <div class="setting-name">🔍 Big buttons</div>
           <div class="setting-switch"></div>
         </div>
-        <div class="setting-row" data-toggle="lightmode">
-          <div class="setting-name">☀️ Light mode</div>
-          <div class="setting-switch"></div>
-        </div>
         <div class="setting-row" data-toggle="comicwords">
           <div class="setting-name">💥 Comic words on clear</div>
           <div class="setting-switch"></div>
@@ -5661,6 +5846,8 @@
           <div class="setting-switch"></div>
         </div>
 
+        <div class="setting-section-title" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.3em;color:var(--dim);margin-top:10px;margin-bottom:-2px">BACKGROUND</div>
+        <div class="bg-picker" id="bg-picker"></div>
         <div class="setting-section-title" style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.3em;color:var(--dim);margin-top:10px;margin-bottom:-2px">BLOCK SKIN</div>
         <div class="skin-picker" id="skin-picker"></div>
         <div class="setting-link" data-open="stats-modal">📊 View statistics</div>
@@ -6261,6 +6448,29 @@ function saveBests() {
   catch (e) {}
 }
 
+// One-time migration: scoring was scaled up ×SCORE_SCALE, so bump pre-scale
+// high scores to match. Only score-based modes (the ones the multiplier
+// applies to) are touched — SPRINT is a time, ADVENTURE is levels, and
+// FRUIT/LINE/SLIDE/FLIP keep their own separate scoring. Runs once, guarded
+// by a version flag so it can never double-apply.
+const SCORE_MIGRATION_KEY = 'issa-blocks-scoremig-v1';
+function migrateScoresToScale() {
+  try { if (localStorage.getItem(SCORE_MIGRATION_KEY) === '1') return; } catch (e) { return; }
+  const scaleKeys = ['classic', 'alou', 'hardcore', 'custom', 'timeattack', 'moves'];
+  let changed = false;
+  for (const k of scaleKeys) {
+    if (typeof bests[k] === 'number' && bests[k] > 0) { bests[k] *= SCORE_SCALE; changed = true; }
+  }
+  timeAttackBest = bests.timeattack || 0;
+  movesModeBest  = bests.moves || 0;
+  if (stats && stats.daily && typeof stats.daily.best === 'number' && stats.daily.best > 0) {
+    stats.daily.best *= SCORE_SCALE;
+    changed = true;
+  }
+  if (changed) { saveBests(); saveStats(); }
+  try { localStorage.setItem(SCORE_MIGRATION_KEY, '1'); } catch (e) {}
+}
+
 // === LIFETIME STATS ===
 const STATS_KEY = 'issa-blocks-stats-v1';
 const stats = {
@@ -6562,17 +6772,96 @@ function applyBigButtons() {
   document.body.classList.toggle('big-buttons', bigButtons);
 }
 
-// === LIGHT MODE SETTING ===
-let lightMode = false;
-try { lightMode = localStorage.getItem('issa-blocks-light') === '1'; } catch (e) {}
-function setLightMode(on) {
-  lightMode = on;
-  try { localStorage.setItem('issa-blocks-light', on ? '1' : '0'); } catch (e) {}
-  document.body.classList.toggle('theme-light', on);
+// === TITLE LOGO TOY ===
+// Tapping the little 4-square logo on the title screen nudges it; every few
+// taps it does a full spin and swaps to a new color palette. Pure fun.
+function initTitleLogoToy() {
+  const logo = document.getElementById('logo-grid');
+  if (!logo || logo._toyReady) return;
+  logo._toyReady = true;
+  const squares = [...logo.children];
+  const PALETTES = [
+    ['#ffb84d', '#5c7cfa', '#51cf66', '#f783ac'],
+    ['#ff5f5f', '#ffd93b', '#4dd0e1', '#9775fa'],
+    ['#51cf66', '#f783ac', '#ff9f43', '#5c7cfa'],
+    ['#4dd0e1', '#9775fa', '#ffd93b', '#ff5f5f'],
+    ['#f783ac', '#51cf66', '#5c7cfa', '#ff9f43'],
+    ['#ff9f43', '#4dd0e1', '#f783ac', '#51cf66'],
+  ];
+  let taps = 0, palIdx = 0;
+  logo.style.cursor = 'pointer';
+  logo.style.touchAction = 'manipulation';
+  logo.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    taps++;
+    if (typeof SFX !== 'undefined' && SFX.pickup) SFX.pickup();
+    if (taps % 5 === 0) {
+      // Big spin + fresh palette
+      palIdx = (palIdx + 1) % PALETTES.length;
+      squares.forEach((sq, i) => { sq.style.background = PALETTES[palIdx][i]; });
+      logo.animate([
+        { transform: 'rotate(0deg) scale(1)' },
+        { transform: 'rotate(200deg) scale(1.18)' },
+        { transform: 'rotate(360deg) scale(1)' },
+      ], { duration: 560, easing: 'cubic-bezier(.34, 1.4, .5, 1)' });
+      if (navigator.vibrate) navigator.vibrate([10, 20, 15]);
+    } else {
+      // Little nudge + a subtle color shuffle so every tap does *something*
+      const dx = (Math.random() - 0.5) * 12, rot = (Math.random() - 0.5) * 18;
+      logo.animate([
+        { transform: 'translate(0,0) rotate(0deg)' },
+        { transform: `translate(${dx}px, -5px) rotate(${rot}deg)` },
+        { transform: 'translate(0,0) rotate(0deg)' },
+      ], { duration: 280, easing: 'cubic-bezier(.34, 1.5, .5, 1)' });
+      const cur = PALETTES[palIdx];
+      squares.forEach((sq, i) => { sq.style.background = cur[(i + taps) % 4]; });
+      if (navigator.vibrate) navigator.vibrate(8);
+    }
+  });
 }
-function applyLightMode() {
-  document.body.classList.toggle('theme-light', lightMode);
+
+// === BACKGROUNDS / THEMES ===
+// Each theme is a full-page backdrop. `kind:'light'` themes also flip the UI
+// to the light variable scheme (via the theme-light class); dark themes keep
+// the default dark UI. "Classic Black" / "Classic Light" are the originals.
+const THEMES = [
+  { id: 'classic-black', name: 'Classic Black', kind: 'dark'  },
+  { id: 'classic-light', name: 'Classic Light', kind: 'light' },
+  { id: 'sunset',        name: 'Sunset',        kind: 'dark'  },
+  { id: 'ocean',         name: 'Ocean',         kind: 'dark'  },
+  { id: 'aurora',        name: 'Aurora',        kind: 'dark'  },
+  { id: 'grape',         name: 'Grape',         kind: 'dark'  },
+  { id: 'ember',         name: 'Ember',         kind: 'dark'  },
+  { id: 'forest',        name: 'Forest',        kind: 'dark'  },
+  { id: 'galaxy-bg',     name: 'Galaxy',        kind: 'dark'  },
+  { id: 'rainbow-bg',    name: 'Rainbow',       kind: 'dark'  },
+  { id: 'mint',          name: 'Mint',          kind: 'light' },
+  { id: 'bubblegum',     name: 'Bubblegum',     kind: 'light' },
+  { id: 'peach',         name: 'Peach',         kind: 'light' },
+  { id: 'sky',           name: 'Sky',           kind: 'light' },
+];
+let activeBg = 'classic-black';
+let lightMode = false;   // kept for compatibility with existing toggle sync
+try {
+  const saved = localStorage.getItem('issa-blocks-bg-v1');
+  if (saved && THEMES.some(t => t.id === saved)) activeBg = saved;
+  else if (localStorage.getItem('issa-blocks-light') === '1') activeBg = 'classic-light'; // legacy migrate
+} catch (e) {}
+function themeById(id) { return THEMES.find(t => t.id === id) || THEMES[0]; }
+function setBackground(id) {
+  activeBg = themeById(id).id;
+  try { localStorage.setItem('issa-blocks-bg-v1', activeBg); } catch (e) {}
+  applyBackground();
 }
+function applyBackground() {
+  const t = themeById(activeBg);
+  document.body.dataset.bg = t.id;
+  document.body.classList.toggle('theme-light', t.kind === 'light');
+  lightMode = (t.kind === 'light');
+}
+// Back-compat shims (older code / the removed toggle used these names).
+function setLightMode(on) { setBackground(on ? 'classic-light' : 'classic-black'); }
+function applyLightMode() { applyBackground(); }
 
 // === COMIC WORDS SETTING (onomatopoeia burst on line clear) ===
 let comicWords = true;
@@ -7144,10 +7433,25 @@ function paintHoldHover() {
 }
 function onDragMove(e) { e.preventDefault(); moveDragTo(e.clientX, e.clientY); }
 
+// Which rows/cols would be completely filled if `piece` were dropped at gx,gy.
+function predictFullLines(piece, gx, gy) {
+  const add = new Set();
+  for (const [dx, dy] of piece.cells) {
+    const x = gx + dx, y = gy + dy;
+    if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return { rows: [], cols: [] };
+    add.add(y * SIZE + x);
+  }
+  const at = (x, y) => !!grid[y][x] || add.has(y * SIZE + x);
+  const rows = [], cols = [];
+  for (let y = 0; y < SIZE; y++) { let f = true; for (let x = 0; x < SIZE; x++) if (!at(x, y)) { f = false; break; } if (f) rows.push(y); }
+  for (let x = 0; x < SIZE; x++) { let f = true; for (let y = 0; y < SIZE; y++) if (!at(x, y)) { f = false; break; } if (f) cols.push(x); }
+  return { rows, cols };
+}
+
 function paintPreview() {
   const cells = document.getElementById('grid').children;
   for (let i = 0; i < cells.length; i++) {
-    cells[i].classList.remove('preview', 'preview-bad');
+    cells[i].classList.remove('preview', 'preview-bad', 'will-clear', 'will-clear-rainbow');
     if (!grid[Math.floor(i / SIZE)][i % SIZE]) cells[i].style.removeProperty('--c');
   }
   if (!drag || !drag.placement || !drag.placement.overGrid) return;
@@ -7163,6 +7467,28 @@ function paintPreview() {
     cell.classList.add(ok ? 'preview' : 'preview-bad');
     cell.style.setProperty('--c', COLORS[drag.piece.color]);
   }
+
+  // Highlight any row/column that dropping here would clear. On a hot streak
+  // (STREAK_RAINBOW_AT+) the highlight glows rainbow instead of white.
+  if (ok) {
+    const { rows, cols } = predictFullLines(drag.piece, gx, gy);
+    const cls = streak >= STREAK_RAINBOW_AT ? 'will-clear-rainbow' : 'will-clear';
+    for (const y of rows) for (let x = 0; x < SIZE; x++) getCellEl(x, y).classList.add(cls);
+    for (const x of cols) for (let y = 0; y < SIZE; y++) getCellEl(x, y).classList.add(cls);
+  }
+}
+
+// Streak threshold at which the guaranteed-clear preview turns rainbow.
+const STREAK_RAINBOW_AT = 4;
+
+// Big transient "N STREAK" flash across the screen.
+function showStreakFlash(n) {
+  const el = document.createElement('div');
+  el.className = 'streak-flash';
+  el.innerHTML = '<b>' + n + '</b>STREAK';
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 1200);
 }
 
 function onDragEnd(e) {
@@ -7405,6 +7731,7 @@ function placePiece(source, gx, gy) {
     streak += 1;
     sprintLines += totalLines;
     updateComboBadge();
+    if (streak >= 3) showStreakFlash(streak);   // big on-screen "N STREAK"
 
     // Award one hold slot per cleared line (capped)
     const newSlots = Math.min(HOLD_SLOT_CAP, maxHoldSlots + totalLines) - maxHoldSlots;
@@ -7432,7 +7759,7 @@ function placePiece(source, gx, gy) {
       const [x, y] = k.split(',').map(Number);
       const cell = getCellEl(x, y);
       const dist = Math.hypot(x - focalX, y - focalY);
-      const delay = Math.round(dist * 32);
+      const delay = Math.round(dist * 18);   // tighter wave so the clear flows
       if (delay > maxDelay) maxDelay = delay;
       cell.style.animationDelay = delay + 'ms';
       cell.classList.add('clearing');
@@ -7493,7 +7820,7 @@ function placePiece(source, gx, gy) {
       });
       paintGrid();
       afterMove();
-    }, 420 + maxDelay);
+    }, 300 + maxDelay);
   } else {
     // Combo persistence (custom mode): keep streak alive across no-clear moves
     if (!(currentMode === 'custom' && customConfig.features.comboPersist)) {
@@ -9938,35 +10265,64 @@ function slideFullRows() {
   return Object.keys(cnt).map(Number).filter(r => cnt[r] >= SLIDE.cols);
 }
 
-// Settle gravity, then clear any full rows (with a flash + combo scoring),
-// then settle again and chain. Wrapped in SLIDE.busy so input/spawns wait.
+// Settle gravity (as a staggered CASCADE — lower blocks land first, the ones
+// above follow), then clear any full rows once everything has come to rest,
+// then re-settle and chain. Wrapped in SLIDE.busy so input/spawns wait.
 // onDone (optional) fires once the whole cascade has finished settling.
 function slideResolve(onDone) {
   if (SLIDE.busy) return;
+  SLIDE.busy = true;   // hold input/spawns for the whole cascade
+  // Remember where each block was so we can tell which ones fall.
+  const before = {};
+  for (const b of SLIDE.blocks) before[b.id] = b.row;
   slideApplyGravity();
-  const full = slideFullRows();
-  if (!full.length) { slideRender(); if (onDone) onDone(); return; }
-  SLIDE.busy = true;
   slideRender();
-  const cleared = new Set(full);
-  const board = document.getElementById('slide-board');
-  for (const el of board.querySelectorAll('.slide-block')) {
-    const b = SLIDE.blocks.find(x => x.id === +el.dataset.id);
-    if (b && cleared.has(b.row)) el.classList.add('clearing');
+
+  // Stagger the fall: a block landing near the floor drops immediately, blocks
+  // stacked above it wait their turn, so it reads as "one after another".
+  let settleMs = 120;
+  for (const b of SLIDE.blocks) {
+    const el = document.querySelector('.slide-block[data-id="' + b.id + '"]');
+    if (!el) continue;
+    if (b.row > (before[b.id] != null ? before[b.id] : b.row)) {
+      const d = (SLIDE.rows - 1 - b.row) * 45;   // deeper lands sooner
+      el.style.transitionDelay = d + 'ms';
+      settleMs = Math.max(settleMs, d + 170);
+    } else {
+      el.style.transitionDelay = '';
+    }
   }
-  const k = full.length;
-  SLIDE.score += k * k * 10;     // combo bonus for multi-row clears
-  SLIDE.clears += k;
-  if (SLIDE.score > SLIDE.best) { SLIDE.best = SLIDE.score; slideSaveBest(); }
-  slideUpdateScore();
-  if (typeof SFX !== 'undefined' && SFX.clearLine) SFX.clearLine();
-  if (k >= 2 && typeof SFX !== 'undefined' && SFX.combo) SFX.combo();
-  if (navigator.vibrate) navigator.vibrate(k > 1 ? [15, 30, 25] : 20);
+  settleMs = Math.min(settleMs, 520);
+
+  // Once the cascade has come to rest, clear delays and handle any full rows.
   setTimeout(() => {
-    SLIDE.blocks = SLIDE.blocks.filter(b => !cleared.has(b.row));
-    SLIDE.busy = false;
-    slideResolve(onDone);   // re-settle + chain any cascade clears
-  }, 220);
+    for (const el of document.querySelectorAll('.slide-block')) el.style.transitionDelay = '';
+    const full = slideFullRows();
+    if (!full.length) {
+      SLIDE.busy = false;
+      if (onDone) onDone();
+      return;
+    }
+    const cleared = new Set(full);
+    const board = document.getElementById('slide-board');
+    if (board) for (const el of board.querySelectorAll('.slide-block')) {
+      const b = SLIDE.blocks.find(x => x.id === +el.dataset.id);
+      if (b && cleared.has(b.row)) el.classList.add('clearing');
+    }
+    const k = full.length;
+    SLIDE.score += k * k * 10;     // combo bonus for multi-row clears
+    SLIDE.clears += k;
+    if (SLIDE.score > SLIDE.best) { SLIDE.best = SLIDE.score; slideSaveBest(); }
+    slideUpdateScore();
+    if (typeof SFX !== 'undefined' && SFX.clearLine) SFX.clearLine();
+    if (k >= 2 && typeof SFX !== 'undefined' && SFX.combo) SFX.combo();
+    if (navigator.vibrate) navigator.vibrate(k > 1 ? [15, 30, 25] : 20);
+    setTimeout(() => {
+      SLIDE.blocks = SLIDE.blocks.filter(b => !cleared.has(b.row));
+      SLIDE.busy = false;
+      slideResolve(onDone);   // re-settle + chain any cascade clears
+    }, 240);
+  }, Math.min(settleMs, 340));
 }
 
 // A fresh row drops in from the very top; gravity pulls it onto the stack.
@@ -10660,13 +11016,15 @@ function exitDaily() {
 window.addEventListener('load', () => {
   loadBests();
   loadStats();
+  migrateScoresToScale();   // bump pre-×10 high scores once
   loadCustomConfig();
   applySkin();
   applyBigButtons();
-  applyLightMode();
+  applyBackground();
   applyUnicornMode();
   applyGodMode();
   refreshBestLabels();
+  initTitleLogoToy();
   showScreen('title');
 
   // Sound toggle wiring
@@ -10716,9 +11074,52 @@ window.addEventListener('load', () => {
   document.getElementById('settings-btn').addEventListener('click', () => {
     dismissHint('settings');
     syncSettingsToggles();
+    renderBgPicker();
     renderSkinPicker();
     openPanel('settings-modal');
   });
+
+  // Background picker
+  const BG_SWATCH = {
+    'classic-black': 'linear-gradient(180deg,#2c2c3e,#14141c)',
+    'classic-light': 'linear-gradient(180deg,#ffffff,#dfe2ec)',
+    'sunset':        'linear-gradient(150deg,#ff5f5f,#9775fa)',
+    'ocean':         'linear-gradient(150deg,#4dd0e1,#042538)',
+    'aurora':        'linear-gradient(150deg,#51cf66,#4dd0e1 55%,#9775fa)',
+    'grape':         'linear-gradient(150deg,#9775fa,#f783ac)',
+    'ember':         'linear-gradient(150deg,#ffd93b,#ff5f5f 60%,#2a0a06)',
+    'forest':        'linear-gradient(150deg,#51cf66,#05120c)',
+    'galaxy-bg':     'linear-gradient(150deg,#9775fa,#4dd0e1 55%,#0b0a20)',
+    'rainbow-bg':    'linear-gradient(135deg,#ff5f5f,#ffd93b,#51cf66,#4dd0e1,#9775fa,#f783ac)',
+    'mint':          'linear-gradient(150deg,#8fe6a8,#e6f7ec)',
+    'bubblegum':     'linear-gradient(150deg,#f783ac,#c9b8fb)',
+    'peach':         'linear-gradient(150deg,#ffc38f,#fbf3ea)',
+    'sky':           'linear-gradient(150deg,#8fd2f0,#e6f3fb)',
+  };
+  function renderBgPicker() {
+    const wrap = document.getElementById('bg-picker');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (const t of THEMES) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'bg-card' + (t.id === activeBg ? ' active' : '');
+      card.dataset.bg = t.id;
+      const sw = document.createElement('div');
+      sw.className = 'bg-swatch';
+      sw.style.background = BG_SWATCH[t.id] || '#222';
+      if (t.id === 'rainbow-bg') {
+        sw.style.backgroundSize = '250% 250%';
+        sw.style.animation = 'rainbow-bg-shift 6s ease infinite';
+      }
+      const lbl = document.createElement('div');
+      lbl.textContent = t.name.toUpperCase();
+      card.appendChild(sw);
+      card.appendChild(lbl);
+      card.onclick = () => { setBackground(t.id); renderBgPicker(); };
+      wrap.appendChild(card);
+    }
+  }
 
   // Skin picker
   function renderSkinPicker() {
@@ -10905,7 +11306,7 @@ window.addEventListener('load', () => {
   document.getElementById('reset-data').addEventListener('click', () => {
     if (!confirm("Reset everything? All bests, stats, achievements, and custom configs will be erased. This can't be undone.")) return;
     try {
-      ['issa-blocks-v1','issa-blocks-stats-v1','issa-blocks-mz-v1','issa-blocks-custom-v1','issa-blocks-sfx-muted','issa-blocks-music-muted','issa-blocks-vibe','issa-blocks-comicwords']
+      ['issa-blocks-v1','issa-blocks-stats-v1','issa-blocks-mz-v1','issa-blocks-custom-v1','issa-blocks-sfx-muted','issa-blocks-music-muted','issa-blocks-vibe','issa-blocks-comicwords','issa-blocks-bg-v1','issa-blocks-light','issa-blocks-scoremig-v1']
         .forEach(k => localStorage.removeItem(k));
     } catch(e) {}
     location.reload();
