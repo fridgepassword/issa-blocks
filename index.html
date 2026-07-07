@@ -82,6 +82,18 @@
   body.theme-light .btn.secondary { border-color: rgba(0,0,0,0.22); color: var(--text); }
 
   /* === PAGE BACKGROUNDS (theme backdrops) === */
+  /* DEFAULT — a vibrant Block Blast-style royal blue with cyan + purple
+     glow, plus a navy board so the play area pops on the blue backdrop. */
+  body[data-bg="default"] {
+    --bg-2: #1e2650;
+    --cell: #2c3768;
+    --cell-edge: rgba(255,255,255,0.09);
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(96,140,255,0.55), transparent 62%),
+      radial-gradient(circle at 13% 20%, rgba(77,208,225,0.28), transparent 46%),
+      radial-gradient(circle at 87% 80%, rgba(151,117,250,0.42), transparent 52%),
+      linear-gradient(160deg, #3a54dd 0%, #2f39ac 44%, #292a80 100%);
+  }
   body[data-bg="classic-black"] { background: var(--bg); }
   body[data-bg="classic-light"] {
     background:
@@ -6825,6 +6837,7 @@ function initTitleLogoToy() {
 // to the light variable scheme (via the theme-light class); dark themes keep
 // the default dark UI. "Classic Black" / "Classic Light" are the originals.
 const THEMES = [
+  { id: 'default',       name: 'Default',       kind: 'dark'  },
   { id: 'classic-black', name: 'Classic Black', kind: 'dark'  },
   { id: 'classic-light', name: 'Classic Light', kind: 'light' },
   { id: 'sunset',        name: 'Sunset',        kind: 'dark'  },
@@ -6840,7 +6853,7 @@ const THEMES = [
   { id: 'peach',         name: 'Peach',         kind: 'light' },
   { id: 'sky',           name: 'Sky',           kind: 'light' },
 ];
-let activeBg = 'classic-black';
+let activeBg = 'default';
 let lightMode = false;   // kept for compatibility with existing toggle sync
 try {
   const saved = localStorage.getItem('issa-blocks-bg-v1');
@@ -11081,6 +11094,7 @@ window.addEventListener('load', () => {
 
   // Background picker
   const BG_SWATCH = {
+    'default':       'linear-gradient(150deg,#5d87ff,#3a54dd 55%,#292a80)',
     'classic-black': 'linear-gradient(180deg,#2c2c3e,#14141c)',
     'classic-light': 'linear-gradient(180deg,#ffffff,#dfe2ec)',
     'sunset':        'linear-gradient(150deg,#ff5f5f,#9775fa)',
