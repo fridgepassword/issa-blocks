@@ -2449,38 +2449,43 @@
      Extruded look: a vertical bright-top → base → dark-bottom gradient plus a
      crisp top highlight and bottom shadow, so each block reads as a raised,
      glossy candy tile like the reference. */
+  /* Outer layer = the beveled frame. A conic-gradient paints four faces —
+     lightest on top, light on the left, dark on the right, darkest at the
+     bottom — meeting in diagonal seams at the (rounded) corners, exactly like
+     the reference tiles. */
   body.skin-default .cell.filled,
   body.skin-default .pcell:not(.empty) {
     position: relative;
-    border-radius: 22%;
-    background:
-      linear-gradient(180deg,
-        color-mix(in srgb, var(--c, var(--accent)) 80%, #ffffff) 0%,
-        var(--c, var(--accent)) 44%,
-        color-mix(in srgb, var(--c, var(--accent)) 86%, #000000) 100%);
-    box-shadow:
-      inset 0 2px 0 rgba(255,255,255,0.6),          /* bright top edge */
-      inset 0 -5px 2px rgba(0,0,0,0.28),            /* dark bottom lip (3D depth) */
-      inset 0 0 0 1px rgba(0,0,0,0.10),             /* crisp inner edge */
-      0 3px 4px rgba(0,0,0,0.32);                   /* drop shadow */
+    border-radius: 30%;
+    background: conic-gradient(from 45deg at 50% 50%,
+      color-mix(in srgb, var(--c, var(--accent)) 82%, #000000) 0deg 90deg,    /* right face  */
+      color-mix(in srgb, var(--c, var(--accent)) 63%, #000000) 90deg 180deg,  /* bottom face */
+      color-mix(in srgb, var(--c, var(--accent)) 80%, #ffffff) 180deg 270deg, /* left face   */
+      color-mix(in srgb, var(--c, var(--accent)) 60%, #ffffff) 270deg 360deg  /* top face    */
+    );
+    box-shadow: 0 3px 4px rgba(0,0,0,0.30);
     overflow: hidden;
   }
-  /* Glossy top sheen + specular glint — the signature Block Blast shine.
-     Only ::before is used so special pieces' ::after icons (💣⚡🌈★) stay intact. */
+  /* ::before = the raised inner face: the flat colour with a glossy top sheen,
+     inset so the beveled frame shows around it. Special pieces' ::after icons
+     (💣⚡🌈★) still sit on top. */
   body.skin-default .cell.filled::before,
   body.skin-default .pcell:not(.empty)::before {
     content: '';
     position: absolute;
-    inset: 0;
-    border-radius: inherit;
+    inset: 13%;
+    border-radius: 26%;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 58% 40% at 50% 13%,
-        rgba(255,255,255,0.58) 0%, rgba(255,255,255,0) 66%),
+      radial-gradient(ellipse 62% 42% at 50% 16%,
+        rgba(255,255,255,0.52) 0%, rgba(255,255,255,0) 66%),
       linear-gradient(180deg,
-        rgba(255,255,255,0.46) 0%,
-        rgba(255,255,255,0.12) 25%,
-        rgba(255,255,255,0) 46%);
+        color-mix(in srgb, var(--c, var(--accent)) 82%, #ffffff) 0%,
+        var(--c, var(--accent)) 56%,
+        color-mix(in srgb, var(--c, var(--accent)) 90%, #000000) 100%);
+    box-shadow:
+      inset 0 1.5px 1px rgba(255,255,255,0.55),
+      inset 0 -2px 3px rgba(0,0,0,0.16);
   }
 
   /* Skin picker (in settings modal) */
