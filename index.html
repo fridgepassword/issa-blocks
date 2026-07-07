@@ -94,6 +94,17 @@
       radial-gradient(circle at 87% 80%, rgba(151,117,250,0.42), transparent 52%),
       linear-gradient(160deg, #3a54dd 0%, #2f39ac 44%, #292a80 100%);
   }
+  /* Cards read as crisp navy panels on the vibrant blue (Block Blast look). */
+  body[data-bg="default"] .mode-card,
+  body[data-bg="default"] .line-mode-card,
+  body[data-bg="default"] .adv-level-card,
+  body[data-bg="default"] .cc-section,
+  body[data-bg="default"] .panel-card {
+    background: linear-gradient(180deg, rgba(19,26,64,0.62), rgba(13,18,48,0.5));
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 6px 18px -8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  body[data-bg="default"] .mode-card:active { transform: scale(0.98); }
   body[data-bg="classic-black"] { background: var(--bg); }
   body[data-bg="classic-light"] {
     background:
@@ -2420,21 +2431,29 @@
     100% { background-position: 0%   0%;   }
   }
 
-  /* === DEFAULT SKIN: Block Blast-style glossy 3D cubes === */
+  /* === DEFAULT SKIN: Block Blast-style glossy 3D tiles ===
+     Extruded look: a vertical bright-top → base → dark-bottom gradient plus a
+     crisp top highlight and bottom shadow, so each block reads as a raised,
+     glossy candy tile like the reference. */
   body.skin-default .cell.filled,
   body.skin-default .pcell:not(.empty) {
     position: relative;
-    border-radius: 22%;
-    background: var(--c, var(--accent));
+    border-radius: 20%;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--c, var(--accent)) 74%, #ffffff) 0%,
+        var(--c, var(--accent)) 46%,
+        color-mix(in srgb, var(--c, var(--accent)) 80%, #000000) 100%);
     box-shadow:
-      inset 0 3px 1px rgba(255,255,255,0.55),
-      inset 3px 0 2px rgba(255,255,255,0.22),
-      inset 0 -5px 3px rgba(0,0,0,0.34),
-      inset -3px 0 3px rgba(0,0,0,0.22),
-      0 3px 4px rgba(0,0,0,0.30);
+      inset 0 2px 1px rgba(255,255,255,0.72),
+      inset 2px 0 2px rgba(255,255,255,0.28),
+      inset 0 -5px 4px rgba(0,0,0,0.32),
+      inset -2px 0 3px rgba(0,0,0,0.20),
+      inset 0 0 0 1px rgba(0,0,0,0.10),
+      0 3px 5px rgba(0,0,0,0.30);
     overflow: hidden;
   }
-  /* Curved glossy sheen + specular glint across the top-left face.
+  /* Glossy sheen + specular glint across the top face.
      Only ::before is used so special pieces' ::after icons (💣⚡🌈★) stay intact. */
   body.skin-default .cell.filled::before,
   body.skin-default .pcell:not(.empty)::before {
@@ -2444,14 +2463,13 @@
     border-radius: inherit;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 36% 24% at 22% 18%,
-        rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(158deg,
-        rgba(255,255,255,0.50) 0%,
-        rgba(255,255,255,0.22) 20%,
-        rgba(255,255,255,0.04) 40%,
-        rgba(0,0,0,0) 58%,
-        rgba(0,0,0,0.16) 100%);
+      radial-gradient(ellipse 42% 28% at 30% 20%,
+        rgba(255,255,255,0.80) 0%, rgba(255,255,255,0) 62%),
+      linear-gradient(180deg,
+        rgba(255,255,255,0.32) 0%,
+        rgba(255,255,255,0.06) 30%,
+        rgba(255,255,255,0) 46%,
+        rgba(0,0,0,0.10) 100%);
   }
 
   /* Skin picker (in settings modal) */
